@@ -1,0 +1,31 @@
+{
+  "rules": {
+    "siteData": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    
+    "contactSubmissions": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$submissionId": {
+        ".write": "!data.exists() && newData.exists()"
+      }
+    },
+    
+    "adminPasswordHash": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "activityLog": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
