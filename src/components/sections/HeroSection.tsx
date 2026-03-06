@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectProjects, selectHomeHero } from '@/store';
@@ -168,32 +167,6 @@ function StatusLine() {
         </div>
       </div>
     </motion.div>
-  );
-}
-
-function AdminLink() {
-  const router = useRouter();
-  const [clickCount, setClickCount] = useState(0);
-
-  useEffect(() => {
-    if (clickCount >= 3) {
-      router.push('/admin');
-      setClickCount(0);
-    }
-    if (clickCount > 0) {
-      const timeout = setTimeout(() => setClickCount(0), 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [clickCount, router]);
-
-  return (
-    <button
-      onClick={() => setClickCount((c) => c + 1)}
-      className="absolute bottom-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center text-slate-300/30 dark:text-slate-700/30 hover:text-slate-400/50 dark:hover:text-slate-600/50 transition-colors cursor-default"
-      aria-label="Settings"
-    >
-      <span className="material-symbols-outlined text-[16px]">settings</span>
-    </button>
   );
 }
 
@@ -365,8 +338,6 @@ export function HeroSection() {
           </div>
         </motion.div>
       </div>
-
-      <AdminLink />
 
       {/* Copyright */}
       <div className="absolute bottom-3 left-0 right-0 text-center text-[10px] sm:text-xs text-slate-400/60 dark:text-slate-600/60 z-10">

@@ -130,6 +130,14 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin"
+              className="flex items-center justify-center w-8 h-8 rounded-full text-slate-400/50 dark:text-slate-600/50 hover:text-slate-500 dark:hover:text-slate-500 hover:bg-gray-100 dark:hover:bg-[#282e39]/50 transition-all"
+              aria-label="Admin"
+            >
+              <span className="material-symbols-outlined text-[18px]">settings</span>
+            </Link>
+
             <motion.button
               onClick={toggleLanguage}
               className="relative w-16 h-8 rounded-full bg-gray-200 dark:bg-[#282e39] transition-colors cursor-pointer"
