@@ -86,15 +86,12 @@ export function Navbar() {
   };
 
   return (
-    <motion.header
+    <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isHome
           ? 'glass md:bg-transparent md:backdrop-blur-none border-b border-gray-200/80 dark:border-[#282e39]/80 md:border-transparent'
           : 'glass border-b border-gray-200/80 dark:border-[#282e39]/80'
       }`}
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 sm:h-20 md:h-16">
@@ -269,6 +266,6 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </header>
   );
 }

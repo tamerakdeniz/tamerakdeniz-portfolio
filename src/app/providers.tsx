@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { I18nextProvider } from 'react-i18next';
 import i18n, { detectBrowserLanguage } from '@/lib/i18n';
 import { useFirebaseSync } from '@/hooks/useFirebase';
@@ -12,9 +13,14 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
   useFirebaseSync();
   useThemeInit();
 
+  const pathname = usePathname();
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
   const hydrated = useRef(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     if (!hydrated.current) {
