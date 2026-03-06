@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NextRequest, NextResponse } from 'next/server';
+
+export const maxDuration = 60;
 
 const SYSTEM_PROMPT = `You are Tamer Akdeniz's portfolio assistant. Answer ONLY about Tamer — skills, projects, experience, education.
 

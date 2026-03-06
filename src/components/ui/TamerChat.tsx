@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -191,13 +191,18 @@ export function TamerChat() {
     try {
       const history = messages.map((m) => ({ role: m.role, text: m.text }));
 
+      // Remove Base64 strings from siteData to prevent FUNCTION_PAYLOAD_TOO_LARGE error on Vercel
+      const sanitizedSiteData = siteData 
+        ? JSON.parse(JSON.stringify(siteData, (k, v) => (typeof v === 'string' && v.length > 5000 ? undefined : v)))
+        : null;
+
       let data: { reply?: string; error?: string } | null = null;
       const MAX_RETRIES = 2;
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text.trim(), history, siteData, language }),
+          body: JSON.stringify({ message: text.trim(), history, siteData: sanitizedSiteData, language }),
         });
         data = await res.json();
 
@@ -236,7 +241,8 @@ export function TamerChat() {
           },
         ]);
       }
-    } catch {
+    } catch (error) {
+      console.error('Chat error:', error);
       setMessages((prev) => [
         ...prev,
         {
