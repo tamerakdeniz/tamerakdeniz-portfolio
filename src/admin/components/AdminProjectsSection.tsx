@@ -23,7 +23,7 @@ function ProjectForm({
       id: Date.now().toString(),
       title: { en: '', tr: '' },
       description: { en: '', tr: '' },
-      category: 'web',
+      category: ['web'],
       techStack: [],
       githubUrl: '',
       demoUrl: '',
@@ -89,21 +89,36 @@ function ProjectForm({
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <select
-            value={Array.isArray(form.category) ? form.category[0] : form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-          >
-            {['web', 'ai', 'startup', 'opensource', 'desktop', 'mobile', 'practice', 'test'].map(
-              (c) => (
-                <option key={c} value={c}>{c}</option>
-              )
-            )}
-          </select>
+      <div>
+        <label className="block text-sm font-medium mb-1">Categories</label>
+        <div className="flex flex-wrap gap-2">
+          {['web', 'ai', 'startup', 'opensource', 'desktop', 'mobile', 'practice', 'test'].map((c) => {
+            const cats = Array.isArray(form.category) ? form.category : [form.category];
+            const selected = cats.includes(c);
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => {
+                  const current = Array.isArray(form.category) ? form.category : [form.category];
+                  const updated = selected
+                    ? current.filter((v) => v !== c)
+                    : [...current, c];
+                  setForm({ ...form, category: updated.length > 0 ? updated : current });
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                  selected
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white dark:bg-background-dark border-gray-300 dark:border-slate-700 hover:border-primary/40'
+                }`}
+              >
+                {c}
+              </button>
+            );
+          })}
         </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">GitHub URL</label>
           <input
@@ -351,7 +366,7 @@ export function AdminProjectsSection() {
                   </span>
                 </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                  {project.techStack.join(', ')}
+                  {(project.techStack || []).join(', ')}
                 </p>
               </div>
               <div className="flex items-center gap-1 shrink-0">

@@ -67,7 +67,7 @@ export function ProjectCard({
         <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{title}</h3>
         <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm">{description}</p>
         <div className="flex flex-wrap gap-2 mb-4 mt-auto">
-          {project.techStack.map((tech) => (
+          {(project.techStack || []).map((tech) => (
             <span
               key={tech}
               className="px-2 py-1 bg-gray-100/80 dark:bg-slate-800/80 text-xs rounded-md"

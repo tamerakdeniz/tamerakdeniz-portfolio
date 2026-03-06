@@ -65,17 +65,34 @@ function InlineEditForm({
           className="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
         />
       </div>
-      <div>
-        <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Category</label>
-        <select
-          value={Array.isArray(form.category) ? form.category[0] : form.category}
-          onChange={(e) => setForm({ ...form, category: e.target.value })}
-          className="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+      <div className="col-span-full">
+        <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Categories</label>
+        <div className="flex flex-wrap gap-1.5">
+          {CATEGORIES.map((c) => {
+            const cats = Array.isArray(form.category) ? form.category : [form.category];
+            const selected = cats.includes(c);
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => {
+                  const current = Array.isArray(form.category) ? form.category : [form.category];
+                  const updated = selected
+                    ? current.filter((v) => v !== c)
+                    : [...current, c];
+                  setForm({ ...form, category: updated.length > 0 ? updated : current });
+                }}
+                className={`px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wide border transition-all ${
+                  selected
+                    ? 'bg-primary text-white border-primary'
+                    : `border-gray-200 dark:border-slate-700 hover:border-primary/40 ${CATEGORY_COLORS[c] ?? CATEGORY_COLORS.other}`
+                }`}
+              >
+                {c}
+              </button>
+            );
+          })}
+        </div>
       </div>
       <label className="flex items-center gap-2 text-xs">
         <input
@@ -106,7 +123,7 @@ export function AdminSkillsSection() {
   const [editing, setEditing] = useState<number | null>(null);
   const [adding, setAdding] = useState(false);
   const [deleteIdx, setDeleteIdx] = useState<number | null>(null);
-  const [form, setForm] = useState<Skill>({ name: '', iconKey: '', category: 'frontend', published: true });
+  const [form, setForm] = useState<Skill>({ name: '', iconKey: '', category: ['frontend'], published: true });
 
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
@@ -209,7 +226,7 @@ export function AdminSkillsSection() {
   };
 
   const startAdd = () => {
-    setForm({ name: '', iconKey: '', category: 'frontend', published: true });
+    setForm({ name: '', iconKey: '', category: ['frontend'], published: true });
     setAdding(true);
     setEditing(null);
   };
