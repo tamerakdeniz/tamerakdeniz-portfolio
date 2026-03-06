@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store';
 import { logoutAdmin, logActivity } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminDashboardSection } from './AdminDashboardSection';
 import { AdminHomeSection } from './AdminHomeSection';
@@ -35,10 +36,12 @@ export function AdminDashboard() {
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const language = useAppStore((s) => s.language);
   const toggleLanguage = useAppStore((s) => s.toggleLanguage);
+  const router = useRouter();
 
   const handleLogout = async () => {
     await logActivity('logout', 'Admin logged out');
     await logoutAdmin();
+    router.push('/');
   };
 
   const ActiveSection = sections[currentSection] || AdminDashboardSection;

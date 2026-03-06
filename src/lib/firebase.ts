@@ -15,6 +15,13 @@ import {
   type Auth,
   type User,
 } from 'firebase/auth';
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+  type FirebaseStorage,
+} from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
@@ -30,6 +37,7 @@ const firebaseConfig = {
 let app: FirebaseApp;
 let database: Database;
 let auth: Auth;
+let storage: FirebaseStorage;
 
 function getFirebaseApp(): FirebaseApp {
   if (!app) {
@@ -50,6 +58,13 @@ export function getFirebaseAuth(): Auth {
     auth = getAuth(getFirebaseApp());
   }
   return auth;
+}
+
+export function getFirebaseStorage(): FirebaseStorage {
+  if (!storage) {
+    storage = getStorage(getFirebaseApp());
+  }
+  return storage;
 }
 
 export async function loginAdmin(
@@ -106,6 +121,15 @@ export async function saveFirebaseData(path: string, data: unknown) {
   const db = getFirebaseDatabase();
   const dataRef = ref(db, path);
   await set(dataRef, data);
+}
+
+export async function uploadImage(file: File, folder: string = 'uploads'): Promise<string> {
+  const store = getFirebaseStorage();
+  const fileName = `${Date.now()}_${file.name}`;
+  const fileRef = storageRef(store, `${folder}/${fileName}`);
+  await uploadBytes(fileRef, file);
+  const downloadUrl = await getDownloadURL(fileRef);
+  return downloadUrl;
 }
 
 export interface ActivityEntry {

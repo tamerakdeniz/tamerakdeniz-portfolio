@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectProjects } from '@/store';
-import { saveSiteData, logActivity } from '@/lib/firebase';
+import { saveSiteData, logActivity, uploadImage } from '@/lib/firebase';
 import { showToast } from '@/components/ui/Toast';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import type { Project } from '@/types';
@@ -34,6 +34,24 @@ function ProjectForm({
   const [techInput, setTechInput] = useState(
     project?.techStack?.join(', ') || ''
   );
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const url = await uploadImage(file, 'projects');
+      setForm({ ...form, image: url });
+      showToast(t('admin-saved'), 'success'); 
+    } catch (err) {
+      console.error(err);
+      showToast(t('admin-save-failed'), 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800 space-y-4">
@@ -139,11 +157,22 @@ function ProjectForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">{t('admin-label-image-url')}</label>
-          <input
-            value={form.image}
-            onChange={(e) => setForm({ ...form, image: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-          />
+          <div className="flex gap-2">
+            <input
+              value={form.image || ''}
+              onChange={(e) => setForm({ ...form, image: e.target.value })}
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
+              placeholder="URL veya dosya seçin"
+            />
+            <label className={`px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-center transition-colors min-w-[100px] ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              {uploading ? (
+                <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
+              ) : (
+                <span>Gözat</span>
+              )}
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+            </label>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">{t('admin-label-tech-stack')}</label>
