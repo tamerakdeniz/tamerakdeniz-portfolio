@@ -82,23 +82,23 @@ graph TD
     end
 
     %% Visitor Interactions
-    UI <--> |Interactions| Z
-    UI <--> |Fetch Translations| I18
-    UI --> |Render Pages| AppRouter
+    UI <-->|Interactions| Z
+    UI <-->|Fetch Translations| I18
+    UI -->|Render Pages| AppRouter
     AppRouter --> Components
 
     %% Data Fetching (Read)
-    AppRouter -.-> |Read Data (Client/SSR)| FB_RTDB
-    Z -.-> |Data Sync| FB_RTDB
+    AppRouter -. Read Data Client SSR .-> FB_RTDB
+    Z -. Data Sync .-> FB_RTDB
 
     %% Admin Interactions
-    AdminUI --> |Login Request| FB_Auth
-    FB_Auth --> |Authorization Confirmed| AdminUI
-    AdminUI <--> |CRUD Operations, Update| FB_RTDB
-    AdminUI <--> |Reordering| DND
+    AdminUI -->|Login Request| FB_Auth
+    FB_Auth -->|Authorization Confirmed| AdminUI
+    AdminUI <-->|CRUD Operations Update| FB_RTDB
+    AdminUI <-->|Reordering| DND
 
     %% AI Integration
-    AppRouter -.-> |AI Requests| Gemini
+    AppRouter -. AI Requests .-> Gemini
 ```
 
 ### Flowchart Analysis:
