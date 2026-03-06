@@ -108,4 +108,18 @@ export async function saveFirebaseData(path: string, data: unknown) {
   await set(dataRef, data);
 }
 
+export async function logActivity(
+  type: 'login' | 'logout' | 'add' | 'edit' | 'delete' | 'contact' | 'reorder' | 'info',
+  message: string
+) {
+  try {
+    const db = getFirebaseDatabase();
+    const id = Date.now().toString();
+    const entry = { id, type, message, timestamp: new Date().toISOString() };
+    await set(ref(db, `activityLog/${id}`), entry);
+  } catch {
+    /* silent fail for logging */
+  }
+}
+
 export { ref, onValue, get, set };

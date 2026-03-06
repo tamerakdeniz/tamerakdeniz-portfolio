@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectProjects } from '@/store';
-import { saveSiteData } from '@/lib/firebase';
+import { saveSiteData, logActivity } from '@/lib/firebase';
 import { showToast } from '@/components/ui/Toast';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import type { Project } from '@/types';
@@ -181,6 +181,8 @@ export function AdminProjectsSection() {
   const [editing, setEditing] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const saveProjects = useCallback(
     async (newProjects: Project[]) => {
@@ -203,8 +205,10 @@ export function AdminProjectsSection() {
       newProjects = projects.map((p) =>
         p.id === project.id ? project : p
       );
+      logActivity('edit', `Edited project: ${project.title.en || project.title.tr}`);
     } else {
       newProjects = [...projects, { ...project, order: projects.length }];
+      logActivity('add', `Added project: ${project.title.en || project.title.tr}`);
     }
     saveProjects(newProjects);
     setEditing(null);
@@ -213,8 +217,10 @@ export function AdminProjectsSection() {
 
   const handleDelete = () => {
     if (!deleteId) return;
+    const deleted = projects.find((p) => p.id === deleteId);
     const newProjects = projects.filter((p) => p.id !== deleteId);
     saveProjects(newProjects);
+    if (deleted) logActivity('delete', `Deleted project: ${deleted.title.en || deleted.title.tr}`);
     setDeleteId(null);
   };
 
@@ -226,6 +232,58 @@ export function AdminProjectsSection() {
   };
 
   const sorted = [...projects].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  const handleDragStart = (id: string) => {
+    setDraggedId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    if (draggedId && draggedId !== id) {
+      setDragOverId(id);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverId(null);
+  };
+
+  const handleDrop = (targetId: string) => {
+    if (!draggedId || draggedId === targetId) {
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    const draggedIndex = sorted.findIndex((p) => p.id === draggedId);
+    const targetIndex = sorted.findIndex((p) => p.id === targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    const reordered = [...sorted];
+    const [removed] = reordered.splice(draggedIndex, 1);
+    reordered.splice(targetIndex, 0, removed);
+
+    const reorderedWithOrder = reordered.map((p, i) => ({ ...p, order: i }));
+
+    const updatedProjects = projects.map((p) => {
+      const updated = reorderedWithOrder.find((r) => r.id === p.id);
+      return updated ?? p;
+    });
+
+    saveProjects(updatedProjects);
+    setDraggedId(null);
+    setDragOverId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -256,8 +314,27 @@ export function AdminProjectsSection() {
           ) : (
             <div
               key={project.id}
-              className="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-slate-800 flex items-center gap-4"
+              onDragOver={(e) => handleDragOver(e, project.id)}
+              onDragLeave={handleDragLeave}
+              onDrop={() => handleDrop(project.id)}
+              onDragEnd={handleDragEnd}
+              className={`bg-white dark:bg-surface-dark rounded-xl p-4 border flex items-center gap-4 transition-all ${
+                dragOverId === project.id
+                  ? 'border-primary border-2 shadow-lg scale-[1.01]'
+                  : 'border-gray-200 dark:border-slate-800'
+              } ${
+                draggedId === project.id ? 'opacity-40' : 'opacity-100'
+              }`}
             >
+              <div
+                draggable="true"
+                onDragStart={() => handleDragStart(project.id)}
+                className={`flex items-center justify-center p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors select-none ${
+                  draggedId === project.id ? 'cursor-grabbing' : 'cursor-grab'
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">drag_indicator</span>
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold truncate">

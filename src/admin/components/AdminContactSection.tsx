@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectContactInfo } from '@/store';
-import { saveSiteData, getFirebaseDatabase } from '@/lib/firebase';
+import { saveSiteData, getFirebaseDatabase, saveFirebaseData, logActivity } from '@/lib/firebase';
 import { ref, onValue } from 'firebase/database';
 import { showToast } from '@/components/ui/Toast';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import type { ContactSubmission, ContactInfo } from '@/types';
 
 export function AdminContactSection() {
@@ -15,6 +16,7 @@ export function AdminContactSection() {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [editingInfo, setEditingInfo] = useState(false);
   const [form, setForm] = useState<ContactInfo>(contactInfo);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -26,6 +28,8 @@ export function AdminContactSection() {
           const arr = Object.values(val) as ContactSubmission[];
           arr.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
           setSubmissions(arr);
+        } else {
+          setSubmissions([]);
         }
       });
       return () => unsub();
@@ -45,6 +49,37 @@ export function AdminContactSection() {
   }, [siteData, form, t]);
 
   useEffect(() => { setForm(contactInfo); }, [contactInfo]);
+
+  const toggleRead = async (sub: ContactSubmission) => {
+    const newRead = !sub.read;
+    try {
+      await saveFirebaseData(`contactSubmissions/${sub.id}/read`, newRead);
+      showToast(newRead ? 'Marked as read' : 'Marked as unread', 'success');
+    } catch { showToast('Failed to update', 'error'); }
+  };
+
+  const toggleImportant = async (sub: ContactSubmission) => {
+    const current = (sub as unknown as Record<string, unknown>).important as boolean | undefined;
+    const newVal = !current;
+    try {
+      await saveFirebaseData(`contactSubmissions/${sub.id}/important`, newVal);
+      showToast(newVal ? 'Marked as important' : 'Removed importance', 'success');
+    } catch { showToast('Failed to update', 'error'); }
+  };
+
+  const deleteSubmission = async () => {
+    if (!deleteTarget) return;
+    const sub = submissions.find((s) => s.id === deleteTarget);
+    try {
+      await saveFirebaseData(`contactSubmissions/${deleteTarget}`, null);
+      showToast('Message deleted', 'success');
+      if (sub) logActivity('delete', `Deleted contact message from ${sub.name}`);
+    } catch { showToast('Failed to delete', 'error'); }
+    setDeleteTarget(null);
+  };
+
+  const isImportant = (sub: ContactSubmission) =>
+    !!(sub as unknown as Record<string, unknown>).important;
 
   return (
     <div className="space-y-6">
@@ -91,22 +126,80 @@ export function AdminContactSection() {
       <div>
         <h3 className="font-bold mb-4">Messages ({submissions.length})</h3>
         <div className="space-y-3">
-          {submissions.map((sub) => (
-            <div key={sub.id} className="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-slate-800">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <p className="font-semibold text-sm">{sub.name}</p>
-                  <p className="text-xs text-slate-500">{sub.email}</p>
+          {submissions.map((sub) => {
+            const important = isImportant(sub);
+            const unread = !sub.read;
+
+            return (
+              <div
+                key={sub.id}
+                className={`bg-white dark:bg-surface-dark rounded-xl p-4 border transition-colors ${
+                  important
+                    ? 'border-amber-300 dark:border-amber-500/40 bg-amber-50/30 dark:bg-amber-500/5'
+                    : 'border-gray-200 dark:border-slate-800'
+                } ${unread ? 'border-l-4 border-l-blue-500' : ''}`}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm ${unread ? 'font-bold' : 'font-semibold'}`}>{sub.name}</p>
+                    <p className="text-xs text-slate-500">{sub.email}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                    <button
+                      onClick={() => toggleImportant(sub)}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        important
+                          ? 'text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-500/20'
+                          : 'text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                      }`}
+                      title={important ? 'Remove importance' : 'Mark as important'}
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        {important ? 'star' : 'star_outline'}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => toggleRead(sub)}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        unread
+                          ? 'text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-500/20'
+                          : 'text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                      }`}
+                      title={unread ? 'Mark as read' : 'Mark as unread'}
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        {unread ? 'mark_email_unread' : 'mark_email_read'}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(sub.id)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                      title="Delete message"
+                    >
+                      <span className="material-symbols-outlined text-sm">delete</span>
+                    </button>
+                    <span className="text-xs text-slate-400 ml-1">{new Date(sub.timestamp).toLocaleDateString()}</span>
+                  </div>
                 </div>
-                <span className="text-xs text-slate-400">{new Date(sub.timestamp).toLocaleDateString()}</span>
+                <p className={`text-sm text-primary mb-1 ${unread ? 'font-semibold' : 'font-medium'}`}>{sub.subject}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">{sub.message}</p>
               </div>
-              <p className="text-sm font-medium text-primary mb-1">{sub.subject}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">{sub.message}</p>
-            </div>
-          ))}
+            );
+          })}
           {submissions.length === 0 && <p className="text-center py-8 text-slate-500">No messages yet.</p>}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteTarget !== null}
+        title="Delete Message"
+        message="Are you sure you want to delete this message? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        onConfirm={deleteSubmission}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

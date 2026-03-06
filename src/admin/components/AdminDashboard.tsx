@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store';
-import { logoutAdmin } from '@/lib/firebase';
+import { logoutAdmin, logActivity } from '@/lib/firebase';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminDashboardSection } from './AdminDashboardSection';
 import { AdminHomeSection } from './AdminHomeSection';
@@ -35,6 +35,7 @@ export function AdminDashboard() {
   const toggleTheme = useAppStore((s) => s.toggleTheme);
 
   const handleLogout = async () => {
+    await logActivity('logout', 'Admin logged out');
     await logoutAdmin();
   };
 

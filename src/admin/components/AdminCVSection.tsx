@@ -7,6 +7,16 @@ import { saveSiteData } from '@/lib/firebase';
 import { showToast } from '@/components/ui/Toast';
 import type { CVFile } from '@/types';
 
+function formatAddedDate(id: string): string {
+  const ts = parseInt(id, 10);
+  if (isNaN(ts)) return '';
+  return new Date(ts).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export function AdminCVSection() {
   const { t } = useTranslation();
   const siteData = useAppStore((s) => s.siteData);
@@ -51,7 +61,10 @@ export function AdminCVSection() {
         {cvFiles.map((file) => (
           <div key={file.id} className="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-slate-800 flex items-center gap-4">
             <span className="material-symbols-outlined text-primary">description</span>
-            <div className="flex-1 min-w-0"><p className="font-medium text-sm truncate">{file.name}</p></div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm truncate">{file.name}</p>
+              <p className="text-xs text-slate-400 mt-0.5">Added: {formatAddedDate(file.id)}</p>
+            </div>
             <div className="flex items-center gap-1 shrink-0">
               <button onClick={() => save(cvFiles, file.id)} className={`p-2 rounded-lg transition-colors ${siteData?.activeCvId === file.id ? 'text-green-500' : 'hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
                 <span className="material-symbols-outlined text-sm">{siteData?.activeCvId === file.id ? 'check_circle' : 'radio_button_unchecked'}</span>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store';
-import { loginAdmin } from '@/lib/firebase';
+import { loginAdmin, logActivity } from '@/lib/firebase';
 import { AdminDashboard } from '@/admin/components/AdminDashboard';
 
 export default function AdminPage() {
@@ -30,6 +30,7 @@ export default function AdminPage() {
     setLoading(true);
     try {
       await loginAdmin(email, password);
+      logActivity('login', `Admin logged in: ${email}`);
     } catch {
       setError(t('admin-login-error'));
     } finally {
