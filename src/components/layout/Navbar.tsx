@@ -65,6 +65,7 @@ export function Navbar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isHome = pathname === '/';
 
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
@@ -86,7 +87,11 @@ export function Navbar() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/80 dark:border-[#282e39]/80"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isHome
+          ? 'glass md:bg-transparent md:backdrop-blur-none border-b border-gray-200/80 dark:border-[#282e39]/80 md:border-transparent'
+          : 'glass border-b border-gray-200/80 dark:border-[#282e39]/80'
+      }`}
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}

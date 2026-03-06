@@ -28,7 +28,7 @@ export function AdminCVSection() {
     try {
       await saveSiteData({ ...siteData, cvFiles: files, activeCvId: activeId || siteData.activeCvId });
       showToast(t('admin-saved'), 'success');
-    } catch { showToast('Save failed', 'error'); }
+    } catch { showToast(t('admin-save-failed'), 'error'); }
   }, [siteData, t]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +52,7 @@ export function AdminCVSection() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">{t('admin-nav-cv')}</h2>
         <button onClick={() => fileRef.current?.click()} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-blue-700">
-          <span className="material-symbols-outlined text-sm">upload</span>Upload PDF
+          <span className="material-symbols-outlined text-sm">upload</span>{t('admin-upload-pdf')}
         </button>
         <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
       </div>
@@ -63,7 +63,7 @@ export function AdminCVSection() {
             <span className="material-symbols-outlined text-primary">description</span>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm truncate">{file.name}</p>
-              <p className="text-xs text-slate-400 mt-0.5">Added: {formatAddedDate(file.id)}</p>
+              <p className="text-xs text-slate-400 mt-0.5">{t('admin-added', { date: formatAddedDate(file.id) })}</p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <button onClick={() => save(cvFiles, file.id)} className={`p-2 rounded-lg transition-colors ${siteData?.activeCvId === file.id ? 'text-green-500' : 'hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
@@ -78,7 +78,7 @@ export function AdminCVSection() {
         {cvFiles.length === 0 && (
           <div className="text-center py-12 text-slate-500">
             <span className="material-symbols-outlined text-4xl mb-2">description</span>
-            <p>No CV files uploaded yet. Upload a PDF to get started.</p>
+            <p>{t('admin-no-cv-hint')}</p>
           </div>
         )}
       </div>

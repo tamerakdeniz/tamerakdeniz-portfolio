@@ -33,17 +33,26 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  background: var(--color-background-light);
+}
+
+html.dark {
+  background: var(--color-background-dark);
 }
 
 body {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
 }
 
 html,
 body {
-  overflow-x: hidden;
   max-width: 100vw;
 }
 
@@ -314,6 +323,8 @@ body {
   transform: translate(-50%, -50%);
   z-index: 0;
   transition: opacity 0.3s;
+  will-change: transform;
+  contain: layout style;
 }
 
 .dark .cursor-glow {

@@ -50,7 +50,7 @@ export function AdminTimelineSection() {
         await saveSiteData({ ...siteData, timeline: items });
         showToast(t('admin-saved'), 'success');
       } catch {
-        showToast('Save failed', 'error');
+        showToast(t('admin-save-failed'), 'error');
       }
     },
     [siteData, t],
@@ -136,7 +136,7 @@ export function AdminTimelineSection() {
     <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Type</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-type')}</label>
           <select
             value={form.type}
             onChange={(e) =>
@@ -144,13 +144,13 @@ export function AdminTimelineSection() {
             }
             className={inputClass}
           >
-            <option value="work">Work</option>
-            <option value="education">Education</option>
-            <option value="certification">Certification</option>
+            <option value="work">{t('admin-timeline-type-work')}</option>
+            <option value="education">{t('admin-timeline-type-education')}</option>
+            <option value="certification">{t('admin-timeline-type-certification')}</option>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Title (EN)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-title-en')}</label>
           <input
             value={form.title.en}
             onChange={(e) =>
@@ -160,7 +160,7 @@ export function AdminTimelineSection() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Title (TR)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-title-tr')}</label>
           <input
             value={form.title.tr}
             onChange={(e) =>
@@ -173,7 +173,7 @@ export function AdminTimelineSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Company (EN)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-company-en')}</label>
           <input
             value={form.company.en}
             onChange={(e) =>
@@ -183,7 +183,7 @@ export function AdminTimelineSection() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Company (TR)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-company-tr')}</label>
           <input
             value={form.company.tr}
             onChange={(e) =>
@@ -196,7 +196,7 @@ export function AdminTimelineSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Period (EN)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-period-en')}</label>
           <input
             value={form.period.en}
             onChange={(e) =>
@@ -206,7 +206,7 @@ export function AdminTimelineSection() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Period (TR)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-period-tr')}</label>
           <input
             value={form.period.tr}
             onChange={(e) =>
@@ -219,7 +219,7 @@ export function AdminTimelineSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Description (EN)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-description-en')}</label>
           <textarea
             rows={3}
             value={form.description.en}
@@ -233,7 +233,7 @@ export function AdminTimelineSection() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Description (TR)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-description-tr')}</label>
           <textarea
             rows={3}
             value={form.description.tr}
@@ -256,7 +256,7 @@ export function AdminTimelineSection() {
             onChange={(e) => setForm({ ...form, published: e.target.checked })}
             className="rounded border-gray-300 dark:border-slate-700"
           />
-          Published
+          {t('admin-published')}
         </label>
       </div>
 
@@ -342,7 +342,7 @@ export function AdminTimelineSection() {
 
               {!item.published && (
                 <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400">
-                  Draft
+                  {t('admin-draft')}
                 </span>
               )}
 

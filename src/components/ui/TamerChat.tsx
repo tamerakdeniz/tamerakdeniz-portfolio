@@ -60,6 +60,60 @@ function NeuralLoader() {
   );
 }
 
+function parseMarkdown(text: string): React.ReactNode {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let listItems: React.ReactNode[] = [];
+
+  const parseLine = (line: string, key: string): React.ReactNode => {
+    const parts: React.ReactNode[] = [];
+    let remaining = line;
+    let partKey = 0;
+
+    while (remaining) {
+      const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+      if (boldMatch && boldMatch.index !== undefined) {
+        if (boldMatch.index > 0) {
+          parts.push(remaining.slice(0, boldMatch.index));
+        }
+        parts.push(<strong key={`${key}-b-${partKey++}`} className="font-semibold">{boldMatch[1]}</strong>);
+        remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
+      } else {
+        parts.push(remaining);
+        break;
+      }
+    }
+    return <span key={key}>{parts}</span>;
+  };
+
+  const flushList = () => {
+    if (listItems.length > 0) {
+      elements.push(
+        <ul key={`ul-${elements.length}`} className="list-disc list-inside space-y-1 my-1.5">
+          {listItems}
+        </ul>
+      );
+      listItems = [];
+    }
+  };
+
+  lines.forEach((line, i) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+      const content = trimmed.slice(2);
+      listItems.push(<li key={`li-${i}`}>{parseLine(content, `li-c-${i}`)}</li>);
+    } else {
+      flushList();
+      if (trimmed) {
+        elements.push(<p key={`p-${i}`} className="my-1">{parseLine(trimmed, `p-c-${i}`)}</p>);
+      }
+    }
+  });
+  flushList();
+
+  return <>{elements}</>;
+}
+
 function MessageItem({ message, isLast }: { message: ChatMessage; isLast: boolean }) {
   const isUser = message.role === 'user';
   const time = new Date(message.timestamp);
@@ -94,7 +148,7 @@ function MessageItem({ message, isLast }: { message: ChatMessage; isLast: boolea
               : 'text-slate-600 dark:text-slate-300/90 px-1'
           }`}
         >
-          {message.text}
+          {isUser ? message.text : parseMarkdown(message.text)}
         </div>
 
         {isUser && (
@@ -136,19 +190,30 @@ export function TamerChat() {
 
     try {
       const history = messages.map((m) => ({ role: m.role, text: m.text }));
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text.trim(), history, siteData }),
-      });
 
-      const data = await res.json();
-      if (data.reply) {
+      let data: { reply?: string; error?: string } | null = null;
+      const MAX_RETRIES = 2;
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text.trim(), history, siteData, language }),
+        });
+        data = await res.json();
+
+        if (data?.error === 'rate_limit' && attempt < MAX_RETRIES) {
+          await new Promise((r) => setTimeout(r, 3000 * (attempt + 1)));
+          continue;
+        }
+        break;
+      }
+
+      if (data?.reply) {
         setMessages((prev) => [
           ...prev,
-          { role: 'assistant', text: data.reply, timestamp: Date.now() },
+          { role: 'assistant', text: data!.reply!, timestamp: Date.now() },
         ]);
-      } else if (data.error === 'rate_limit') {
+      } else if (data?.error === 'rate_limit') {
         setMessages((prev) => [
           ...prev,
           {

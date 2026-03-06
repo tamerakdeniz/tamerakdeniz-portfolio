@@ -72,7 +72,7 @@ export function MagneticButton({
   const content = (
     <motion.div
       ref={ref}
-      style={{ x: springX, y: springY }}
+      style={{ x: springX, y: springY, willChange: 'transform' }}
       onMouseMove={handleMouse}
       onMouseLeave={handleLeave}
       className={`inline-block ${className}`}
@@ -92,17 +92,17 @@ export function PageBackground({ intensity = 'normal' }: { intensity?: 'subtle' 
   const opacity = intensity === 'subtle' ? 0.5 : 1;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0" style={{ opacity }}>
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" style={{ opacity }}>
       <div className="absolute inset-0 hero-grid" />
       <div className="absolute inset-0 aurora-bg" />
       <motion.div
-        className="absolute top-20 -right-20 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px]"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.35, 0.2] }}
+        className="absolute top-20 -right-20 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] will-change-transform"
+        animate={{ opacity: [0.2, 0.35, 0.2] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute -bottom-20 -left-20 w-[500px] h-[500px] bg-purple-600/8 rounded-full blur-[130px]"
-        animate={{ scale: [1, 1.15, 1], opacity: [0.15, 0.25, 0.15] }}
+        className="absolute -bottom-20 -left-20 w-[500px] h-[500px] bg-purple-600/8 rounded-full blur-[130px] will-change-transform"
+        animate={{ opacity: [0.15, 0.25, 0.15] }}
         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
       />
     </div>

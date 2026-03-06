@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -173,37 +173,22 @@ function StatusLine() {
 
 function AdminLink() {
   const router = useRouter();
-  const clickCountRef = React.useRef(0);
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const handleClick = () => {
-    clickCountRef.current += 1;
-    
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    if (clickCountRef.current >= 3) {
-      clickCountRef.current = 0;
-      router.push('/admin');
-    } else {
-      timeoutRef.current = setTimeout(() => {
-        clickCountRef.current = 0;
-      }, 2000);
-    }
-  };
+  const [clickCount, setClickCount] = useState(0);
 
   useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+    if (clickCount >= 3) {
+      router.push('/admin');
+      setClickCount(0);
+    }
+    if (clickCount > 0) {
+      const timeout = setTimeout(() => setClickCount(0), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [clickCount, router]);
 
   return (
     <button
-      onClick={handleClick}
+      onClick={() => setClickCount((c) => c + 1)}
       className="absolute bottom-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center text-slate-300/30 dark:text-slate-700/30 hover:text-slate-400/50 dark:hover:text-slate-600/50 transition-colors cursor-default"
       aria-label="Settings"
     >
@@ -244,7 +229,7 @@ export function HeroSection() {
       : ['LLM Integration', 'Full-Stack', 'AI Products', 'Smart Systems', 'Automation'];
 
   return (
-    <section className="relative overflow-hidden lg:h-[calc(100dvh-4rem)] lg:max-h-[calc(100dvh-4rem)] flex items-center min-h-[calc(100dvh-5rem)] lg:min-h-0">
+    <section className="relative lg:overflow-hidden lg:h-[calc(100dvh-4rem)] lg:max-h-[calc(100dvh-4rem)] flex items-center min-h-[calc(100dvh-5rem)] lg:min-h-0">
       {/* backgrounds — contained in a clipped layer to prevent overflow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 hero-grid" />
@@ -381,19 +366,12 @@ export function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Copyright Footer */}
-      <motion.div
-        className="absolute bottom-4 left-0 right-0 text-center z-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 0.5 }}
-      >
-        <p className="text-[10px] text-slate-400/60 dark:text-slate-600/60">
-          © 2026 Tamer Akdeniz. Tüm hakları saklıdır.
-        </p>
-      </motion.div>
-
       <AdminLink />
+
+      {/* Copyright */}
+      <div className="absolute bottom-3 left-0 right-0 text-center text-[10px] sm:text-xs text-slate-400/60 dark:text-slate-600/60 z-10">
+        © {new Date().getFullYear()} Tamer Akdeniz. {language === 'tr' ? 'Tüm hakları saklıdır.' : 'All rights reserved.'}
+      </div>
     </section>
   );
 }

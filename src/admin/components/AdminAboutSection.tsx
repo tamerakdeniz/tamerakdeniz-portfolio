@@ -22,7 +22,7 @@ export function AdminAboutSection() {
         await saveSiteData(updated);
         showToast(t('admin-saved'), 'success');
       } catch {
-        showToast('Save failed', 'error');
+        showToast(t('admin-save-failed'), 'error');
       }
     },
     [siteData, t]
@@ -75,7 +75,7 @@ export function AdminAboutSection() {
         <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Title (EN)</label>
+              <label className="block text-sm font-medium mb-1">{t('admin-label-title-en')}</label>
               <input
                 value={form.title.en}
                 onChange={(e) => setForm({ ...form, title: { ...form.title, en: e.target.value } })}
@@ -83,7 +83,7 @@ export function AdminAboutSection() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Title (TR)</label>
+              <label className="block text-sm font-medium mb-1">{t('admin-label-title-tr')}</label>
               <input
                 value={form.title.tr}
                 onChange={(e) => setForm({ ...form, title: { ...form.title, tr: e.target.value } })}
@@ -93,21 +93,21 @@ export function AdminAboutSection() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Content (EN)</label>
+              <label className="block text-sm font-medium mb-1">{t('admin-label-content-en')}</label>
               <textarea rows={6} value={form.content.en} onChange={(e) => setForm({ ...form, content: { ...form.content, en: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm resize-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Content (TR)</label>
+              <label className="block text-sm font-medium mb-1">{t('admin-label-content-tr')}</label>
               <textarea rows={6} value={form.content.tr} onChange={(e) => setForm({ ...form, content: { ...form.content, tr: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm resize-none" />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Avatar Text</label>
+              <label className="block text-sm font-medium mb-1">{t('admin-label-avatar-text')}</label>
               <input value={form.avatar.text} onChange={(e) => setForm({ ...form, avatar: { ...form.avatar, text: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Avatar Image URL</label>
+              <label className="block text-sm font-medium mb-1">{t('admin-label-avatar-image-url')}</label>
               <input value={form.avatar.imageUrl} onChange={(e) => setForm({ ...form, avatar: { ...form.avatar, imageUrl: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" />
             </div>
           </div>

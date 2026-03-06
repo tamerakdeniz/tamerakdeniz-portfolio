@@ -3,15 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectProjects, selectSkills, selectTimeline } from '@/store';
-import { getFirebaseDatabase } from '@/lib/firebase';
+import { getFirebaseDatabase, getActivityLog, type ActivityEntry } from '@/lib/firebase';
 import { ref, onValue } from 'firebase/database';
-
-interface ActivityEntry {
-  id: string;
-  type: 'login' | 'logout' | 'add' | 'edit' | 'delete' | 'contact' | 'reorder' | 'info';
-  message: string;
-  timestamp: string;
-}
 
 export function AdminDashboardSection() {
   const { t } = useTranslation();
@@ -23,29 +16,40 @@ export function AdminDashboardSection() {
   const [activityLog, setActivityLog] = useState<ActivityEntry[]>([]);
 
   useEffect(() => {
+    setActivityLog(getActivityLog());
+  }, []);
+
+  useEffect(() => {
     try {
       const db = getFirebaseDatabase();
-
       const subRef = ref(db, 'contactSubmissions');
-      const unsubContacts = onValue(subRef, (snap) => {
+      const unsub = onValue(subRef, (snap) => {
         const val = snap.val();
-        if (val) setContactCount(Object.keys(val).length);
+        setContactCount(val ? Object.keys(val).length : 0);
       });
+      return () => unsub();
+    } catch { /* offline */ }
+  }, []);
 
+  useEffect(() => {
+    try {
+      const db = getFirebaseDatabase();
       const logRef = ref(db, 'activityLog');
-      const unsubLog = onValue(logRef, (snap) => {
+      const unsub = onValue(logRef, (snap) => {
         const val = snap.val();
         if (val) {
-          const entries = Object.values(val) as ActivityEntry[];
-          entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-          setActivityLog(entries.slice(0, 50));
+          const remote = Object.values(val) as ActivityEntry[];
+          const local = getActivityLog();
+          const merged = new Map<string, ActivityEntry>();
+          [...local, ...remote].forEach((e) => merged.set(e.id, e));
+          const all = Array.from(merged.values())
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .slice(0, 50);
+          setActivityLog(all);
         }
       });
-
-      return () => { unsubContacts(); unsubLog(); };
-    } catch {
-      /* offline fallback */
-    }
+      return () => unsub();
+    } catch { /* offline - local data already loaded */ }
   }, []);
 
   const stats = [
@@ -56,25 +60,13 @@ export function AdminDashboardSection() {
   ];
 
   const iconMap: Record<string, string> = {
-    login: 'login',
-    logout: 'logout',
-    add: 'add_circle',
-    edit: 'edit',
-    delete: 'delete',
-    contact: 'mail',
-    reorder: 'swap_vert',
-    info: 'info',
+    login: 'login', logout: 'logout', add: 'add_circle', edit: 'edit',
+    delete: 'delete', contact: 'mail', reorder: 'swap_vert', info: 'info',
   };
 
   const colorMap: Record<string, string> = {
-    login: 'text-green-500',
-    logout: 'text-slate-400',
-    add: 'text-blue-500',
-    edit: 'text-amber-500',
-    delete: 'text-red-500',
-    contact: 'text-purple-500',
-    reorder: 'text-cyan-500',
-    info: 'text-slate-500',
+    login: 'text-green-500', logout: 'text-slate-400', add: 'text-blue-500', edit: 'text-amber-500',
+    delete: 'text-red-500', contact: 'text-purple-500', reorder: 'text-cyan-500', info: 'text-slate-500',
   };
 
   const formatTime = (ts: string) => {
@@ -82,18 +74,17 @@ export function AdminDashboardSection() {
     const now = new Date();
     const diff = now.getTime() - d.getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return t('admin-log-just-now');
+    if (mins < 60) return `${mins}${t('admin-log-min-ago')}`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) return `${hours}${t('admin-log-hour-ago')}`;
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (days < 7) return `${days}${t('admin-log-day-ago')}`;
+    return d.toLocaleDateString();
   };
 
   return (
     <div className="space-y-6">
-      {/* Firebase Status */}
       <div className={`flex items-center gap-3 p-4 rounded-xl border ${
         isFirebaseConnected
           ? 'bg-green-50 dark:bg-green-500/5 border-green-200 dark:border-green-500/20'
@@ -103,11 +94,10 @@ export function AdminDashboardSection() {
           {isFirebaseConnected ? 'cloud_done' : 'cloud_off'}
         </span>
         <span className="text-sm font-medium">
-          Firebase: {isFirebaseConnected ? 'Connected & Syncing' : 'Offline'}
+          Firebase: {isFirebaseConnected ? t('admin-firebase-connected') : t('admin-firebase-offline')}
         </span>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <div key={stat.label} className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-sm">
@@ -122,12 +112,11 @@ export function AdminDashboardSection() {
         ))}
       </div>
 
-      {/* Activity Log */}
       <div className="bg-white dark:bg-surface-dark rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-3 p-5 border-b border-gray-200 dark:border-slate-800">
           <span className="material-symbols-outlined text-primary">history</span>
-          <h3 className="font-bold">Activity Log</h3>
-          <span className="ml-auto text-xs text-slate-400 font-mono">{activityLog.length} entries</span>
+          <h3 className="font-bold">{t('admin-activity-log')}</h3>
+          <span className="ml-auto text-xs text-slate-400 font-mono">{activityLog.length} {t('admin-log-entries')}</span>
         </div>
 
         <div className="max-h-[400px] overflow-y-auto">
@@ -136,9 +125,7 @@ export function AdminDashboardSection() {
               {activityLog.map((entry) => (
                 <div key={entry.id} className="flex items-start gap-3 px-5 py-3 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className={`mt-0.5 shrink-0 ${colorMap[entry.type] || 'text-slate-400'}`}>
-                    <span className="material-symbols-outlined text-[18px]">
-                      {iconMap[entry.type] || 'info'}
-                    </span>
+                    <span className="material-symbols-outlined text-[18px]">{iconMap[entry.type] || 'info'}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-700 dark:text-slate-300">{entry.message}</p>
@@ -152,8 +139,8 @@ export function AdminDashboardSection() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-slate-400">
               <span className="material-symbols-outlined text-4xl mb-3">event_note</span>
-              <p className="text-sm">No activity recorded yet</p>
-              <p className="text-xs text-slate-400/60 mt-1">Actions will be logged here automatically</p>
+              <p className="text-sm">{t('admin-log-empty')}</p>
+              <p className="text-xs text-slate-400/60 mt-1">{t('admin-log-empty-hint')}</p>
             </div>
           )}
         </div>

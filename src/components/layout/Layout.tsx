@@ -15,7 +15,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <>
       <CursorGlow />
       <Navbar />
-      <main className={`flex-1 flex flex-col ${isHome ? 'pt-16' : 'pt-20 sm:pt-20'}`}>
+      <main className={`flex-1 flex flex-col ${isHome ? 'pt-20 md:pt-16' : 'pt-20 md:pt-16'}`}>
         {children}
       </main>
       {!isHome && <Footer />}

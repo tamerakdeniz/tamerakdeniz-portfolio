@@ -39,7 +39,7 @@ function ProjectForm({
     <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Title (EN)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-title-en')}</label>
           <input
             value={form.title.en}
             onChange={(e) =>
@@ -49,7 +49,7 @@ function ProjectForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Title (TR)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-title-tr')}</label>
           <input
             value={form.title.tr}
             onChange={(e) =>
@@ -61,7 +61,7 @@ function ProjectForm({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Description (EN)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-description-en')}</label>
           <textarea
             rows={3}
             value={form.description.en}
@@ -75,7 +75,7 @@ function ProjectForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Description (TR)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-description-tr')}</label>
           <textarea
             rows={3}
             value={form.description.tr}
@@ -90,7 +90,7 @@ function ProjectForm({
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Categories</label>
+        <label className="block text-sm font-medium mb-1">{t('admin-label-categories')}</label>
         <div className="flex flex-wrap gap-2">
           {['web', 'ai', 'startup', 'opensource', 'desktop', 'mobile', 'practice', 'test'].map((c) => {
             const cats = Array.isArray(form.category) ? form.category : [form.category];
@@ -120,7 +120,7 @@ function ProjectForm({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">GitHub URL</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-github-url')}</label>
           <input
             value={form.githubUrl}
             onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
@@ -128,7 +128,7 @@ function ProjectForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Demo URL</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-demo-url')}</label>
           <input
             value={form.demoUrl}
             onChange={(e) => setForm({ ...form, demoUrl: e.target.value })}
@@ -138,7 +138,7 @@ function ProjectForm({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Image URL</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-image-url')}</label>
           <input
             value={form.image}
             onChange={(e) => setForm({ ...form, image: e.target.value })}
@@ -146,7 +146,7 @@ function ProjectForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Tech Stack (comma-separated)</label>
+          <label className="block text-sm font-medium mb-1">{t('admin-label-tech-stack')}</label>
           <input
             value={techInput}
             onChange={(e) => setTechInput(e.target.value)}
@@ -162,7 +162,7 @@ function ProjectForm({
             onChange={(e) => setForm({ ...form, published: e.target.checked })}
             className="rounded"
           />
-          Published
+          {t('admin-published')}
         </label>
       </div>
       <div className="flex gap-3 justify-end">
@@ -207,7 +207,7 @@ export function AdminProjectsSection() {
         await saveSiteData(updated);
         showToast(t('admin-saved'), 'success');
       } catch {
-        showToast('Save failed', 'error');
+        showToast(t('admin-save-failed'), 'error');
       }
     },
     [siteData, t]
@@ -362,7 +362,7 @@ export function AdminProjectsSection() {
                         : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-500'
                     }`}
                   >
-                    {project.published ? 'Published' : 'Draft'}
+                    {project.published ? t('admin-published') : t('admin-draft')}
                   </span>
                 </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400 truncate">

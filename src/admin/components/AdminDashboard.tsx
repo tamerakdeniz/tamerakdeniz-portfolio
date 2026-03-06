@@ -33,6 +33,8 @@ export function AdminDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
+  const language = useAppStore((s) => s.language);
+  const toggleLanguage = useAppStore((s) => s.toggleLanguage);
 
   const handleLogout = async () => {
     await logActivity('logout', 'Admin logged out');
@@ -89,7 +91,14 @@ export function AdminDashboard() {
               {t(`admin-nav-${currentSection}`)}
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center justify-center h-10 px-3 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-sm font-bold"
+              title={language === 'en' ? 'Türkçe\'ye geç' : 'Switch to English'}
+            >
+              {language === 'en' ? 'TR' : 'EN'}
+            </button>
             <button
               onClick={toggleTheme}
               className="flex items-center justify-center size-10 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
@@ -102,7 +111,7 @@ export function AdminDashboard() {
               href="/"
               target="_blank"
               className="flex items-center justify-center size-10 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-              title="View Site"
+              title={t('admin-view-site')}
             >
               <span className="material-symbols-outlined">open_in_new</span>
             </a>

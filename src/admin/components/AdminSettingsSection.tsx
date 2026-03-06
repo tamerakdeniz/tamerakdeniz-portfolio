@@ -18,7 +18,7 @@ export function AdminSettingsSection() {
     if (!data) {
       try { data = await getSiteDataOnce() as SiteData; } catch { /* ignore */ }
     }
-    if (!data) { showToast('No data to export', 'error'); return; }
+    if (!data) { showToast(t('admin-no-data-export'), 'error'); return; }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -26,7 +26,7 @@ export function AdminSettingsSection() {
     a.download = `site-data-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('Data exported successfully!', 'success');
+    showToast(t('admin-export-success'), 'success');
   }, [siteData]);
 
   const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,9 +37,9 @@ export function AdminSettingsSection() {
       try {
         const data = JSON.parse(reader.result as string) as SiteData;
         await saveSiteData(data);
-        showToast('Data imported successfully!', 'success');
+        showToast(t('admin-import-success'), 'success');
       } catch {
-        showToast('Invalid JSON file', 'error');
+        showToast(t('admin-invalid-json'), 'error');
       }
     };
     reader.readAsText(file);
@@ -52,17 +52,17 @@ export function AdminSettingsSection() {
 
       {/* Firebase Status */}
       <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800">
-        <h3 className="font-bold mb-4">Firebase Status</h3>
+        <h3 className="font-bold mb-4">{t('admin-firebase-status')}</h3>
         <div className={`flex items-center gap-3 p-4 rounded-xl ${isFirebaseConnected ? 'bg-green-50 dark:bg-green-500/5' : 'bg-red-50 dark:bg-red-500/5'}`}>
           <span className={`material-symbols-outlined ${isFirebaseConnected ? 'text-green-500' : 'text-red-500'}`}>
             {isFirebaseConnected ? 'cloud_done' : 'cloud_off'}
           </span>
           <div>
-            <p className="text-sm font-medium">{isFirebaseConnected ? 'Connected' : 'Disconnected'}</p>
+            <p className="text-sm font-medium">{isFirebaseConnected ? t('admin-connected') : t('admin-disconnected')}</p>
             <p className="text-xs text-slate-500">
               {isFirebaseConnected
-                ? 'Real-time sync is active. Changes are saved to Firebase automatically.'
-                : 'Working offline. Data changes will sync when connection is restored.'}
+                ? t('admin-firebase-connected-desc')
+                : t('admin-firebase-offline-desc')}
             </p>
           </div>
         </div>
@@ -70,7 +70,7 @@ export function AdminSettingsSection() {
 
       {/* Export / Import */}
       <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800">
-        <h3 className="font-bold mb-4">Data Management</h3>
+        <h3 className="font-bold mb-4">{t('admin-data-management')}</h3>
         <div className="flex flex-wrap gap-4">
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
             <span className="material-symbols-outlined text-sm">download</span>

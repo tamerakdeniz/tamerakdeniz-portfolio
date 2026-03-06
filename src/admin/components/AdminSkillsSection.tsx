@@ -45,10 +45,11 @@ function InlineEditForm({
   saveLabel: string;
   cancelLabel: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-white dark:bg-surface-dark rounded-xl border-2 border-primary p-4 space-y-3 flex flex-col">
       <div>
-        <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Name</label>
+        <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('admin-label-name')}</label>
         <input
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -57,16 +58,16 @@ function InlineEditForm({
         />
       </div>
       <div>
-        <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Icon Key</label>
+        <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('admin-label-icon-key')}</label>
         <input
           value={form.iconKey}
           onChange={(e) => setForm({ ...form, iconKey: e.target.value })}
-          placeholder="e.g. react, python"
+          placeholder={t('admin-placeholder-icon-key')}
           className="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
         />
       </div>
       <div className="col-span-full">
-        <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Categories</label>
+        <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('admin-label-categories')}</label>
         <div className="flex flex-wrap gap-1.5">
           {CATEGORIES.map((c) => {
             const cats = Array.isArray(form.category) ? form.category : [form.category];
@@ -101,7 +102,7 @@ function InlineEditForm({
           onChange={(e) => setForm({ ...form, published: e.target.checked })}
           className="rounded"
         />
-        Published
+        {t('admin-published')}
       </label>
       <div className="flex gap-2 pt-1">
         <button onClick={onCancel} className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">
@@ -134,7 +135,7 @@ export function AdminSkillsSection() {
       await saveSiteData({ ...siteData, skills: newSkills });
       showToast(t('admin-saved'), 'success');
     } catch {
-      showToast('Save failed', 'error');
+      showToast(t('admin-save-failed'), 'error');
     }
   }, [siteData, t]);
 
@@ -300,7 +301,7 @@ export function AdminSkillsSection() {
               <div className="flex items-start justify-between mb-3">
                 <div
                   className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 dark:text-gray-500"
-                  title="Drag to reorder"
+                  title={t('admin-drag-to-reorder')}
                 >
                   <span className="material-symbols-outlined text-base">drag_indicator</span>
                 </div>
@@ -309,7 +310,7 @@ export function AdminSkillsSection() {
                   <button
                     onClick={() => handleTogglePublish(sortedIndex)}
                     className={`p-1 rounded-lg transition-colors ${skill.published ? 'hover:bg-gray-100 dark:hover:bg-slate-800 text-green-500' : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400'}`}
-                    title={skill.published ? 'Unpublish' : 'Publish'}
+                    title={skill.published ? t('admin-unpublish') : t('admin-publish')}
                   >
                     <span className="material-symbols-outlined text-sm">
                       {skill.published ? 'visibility' : 'visibility_off'}
@@ -344,7 +345,7 @@ export function AdminSkillsSection() {
 
       {sorted.length === 0 && !adding && (
         <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-8">
-          No skills yet. Click &quot;{t('admin-add')}&quot; to get started.
+          {t('admin-no-skills-hint', { add: t('admin-add') })}
         </p>
       )}
 

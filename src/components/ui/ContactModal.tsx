@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore, selectContactInfo } from '@/store';
 import { Modal } from './Modal';
 import { showToast } from './Toast';
-import { saveFirebaseData } from '@/lib/firebase';
+import { saveFirebaseData, logActivity } from '@/lib/firebase';
 
 export function ContactModal() {
   const { t } = useTranslation();
@@ -32,6 +32,7 @@ export function ContactModal() {
 
     try {
       await saveFirebaseData('contactSubmissions/' + data.id, data);
+      logActivity('contact', `New contact message from ${data.name}: ${data.subject}`);
       showToast(t('contact-success'), 'success');
       form.reset();
       setTimeout(() => onClose(false), 1000);
@@ -44,6 +45,7 @@ export function ContactModal() {
         'portfolio_contact_submissions',
         JSON.stringify(submissions)
       );
+      logActivity('contact', `New contact message from ${data.name}: ${data.subject}`);
       showToast(t('contact-success'), 'success');
       form.reset();
       setTimeout(() => onClose(false), 1000);

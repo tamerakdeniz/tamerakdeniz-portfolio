@@ -35,7 +35,7 @@ export function AdminSidebar({
             admin_panel_settings
           </span>
         </div>
-        <h2 className="text-lg font-bold">Admin</h2>
+        <h2 className="text-lg font-bold">{t('admin-title')}</h2>
       </div>
 
       <nav className="flex-1 p-4 space-y-2">

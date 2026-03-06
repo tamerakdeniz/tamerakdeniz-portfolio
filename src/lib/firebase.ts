@@ -108,18 +108,51 @@ export async function saveFirebaseData(path: string, data: unknown) {
   await set(dataRef, data);
 }
 
-export async function logActivity(
-  type: 'login' | 'logout' | 'add' | 'edit' | 'delete' | 'contact' | 'reorder' | 'info',
+export interface ActivityEntry {
+  id: string;
+  type: 'login' | 'logout' | 'add' | 'edit' | 'delete' | 'contact' | 'reorder' | 'info';
+  message: string;
+  timestamp: string;
+}
+
+const ACTIVITY_STORAGE_KEY = 'admin_activity_log';
+const MAX_LOG_ENTRIES = 100;
+
+function getLocalActivityLog(): ActivityEntry[] {
+  try {
+    const raw = localStorage.getItem(ACTIVITY_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveLocalActivityLog(entries: ActivityEntry[]) {
+  try {
+    localStorage.setItem(ACTIVITY_STORAGE_KEY, JSON.stringify(entries.slice(0, MAX_LOG_ENTRIES)));
+  } catch { /* quota */ }
+}
+
+export function getActivityLog(): ActivityEntry[] {
+  return getLocalActivityLog();
+}
+
+export function logActivity(
+  type: ActivityEntry['type'],
   message: string
 ) {
+  const entry: ActivityEntry = {
+    id: Date.now().toString(),
+    type,
+    message,
+    timestamp: new Date().toISOString(),
+  };
+
+  const existing = getLocalActivityLog();
+  saveLocalActivityLog([entry, ...existing]);
+
   try {
     const db = getFirebaseDatabase();
-    const id = Date.now().toString();
-    const entry = { id, type, message, timestamp: new Date().toISOString() };
-    await set(ref(db, `activityLog/${id}`), entry);
-  } catch {
-    /* silent fail for logging */
-  }
+    set(ref(db, `activityLog/${entry.id}`), entry).catch(() => {});
+  } catch { /* offline */ }
 }
 
 export { ref, onValue, get, set };
