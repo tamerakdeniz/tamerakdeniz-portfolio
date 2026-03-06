@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectProjects, selectHomeHero } from '@/store';
@@ -170,6 +171,47 @@ function StatusLine() {
   );
 }
 
+function AdminLink() {
+  const router = useRouter();
+  const clickCountRef = React.useRef(0);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const handleClick = () => {
+    clickCountRef.current += 1;
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    if (clickCountRef.current >= 3) {
+      clickCountRef.current = 0;
+      router.push('/admin');
+    } else {
+      timeoutRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+      }, 2000);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <button
+      onClick={handleClick}
+      className="absolute bottom-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center text-slate-300/30 dark:text-slate-700/30 hover:text-slate-400/50 dark:hover:text-slate-600/50 transition-colors cursor-default"
+      aria-label="Settings"
+    >
+      <span className="material-symbols-outlined text-[16px]">settings</span>
+    </button>
+  );
+}
+
 export function HeroSection() {
   const { t } = useTranslation();
   const heroSettings = useAppStore(selectHomeHero);
@@ -202,19 +244,19 @@ export function HeroSection() {
       : ['LLM Integration', 'Full-Stack', 'AI Products', 'Smart Systems', 'Automation'];
 
   return (
-    <section className="relative overflow-hidden lg:h-[calc(100vh-4rem)] lg:max-h-[calc(100vh-4rem)] flex items-center min-h-[calc(100vh-5rem)] lg:min-h-0">
-      {/* backgrounds */}
-      <div className="absolute inset-0 hero-grid pointer-events-none" />
-      <div className="absolute inset-0 aurora-bg pointer-events-none" />
-      <div className="absolute inset-0 z-0 pointer-events-none">
+    <section className="relative overflow-hidden lg:h-[calc(100dvh-4rem)] lg:max-h-[calc(100dvh-4rem)] flex items-center min-h-[calc(100dvh-5rem)] lg:min-h-0">
+      {/* backgrounds — contained in a clipped layer to prevent overflow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 hero-grid" />
+        <div className="absolute inset-0 aurora-bg" />
         <motion.div
-          className="absolute top-1/4 left-1/4 w-[700px] h-[700px] bg-primary/10 rounded-full blur-[180px]"
-          animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.35, 0.2] }}
+          className="absolute top-1/4 left-1/4 w-[700px] h-[700px] bg-primary/10 rounded-full blur-[180px] will-change-transform"
+          animate={{ opacity: [0.2, 0.35, 0.2] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-0 right-[10%] w-[500px] h-[500px] bg-violet-600/8 rounded-full blur-[140px]"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+          className="absolute bottom-0 right-[10%] w-[500px] h-[500px] bg-violet-600/8 rounded-full blur-[140px] will-change-transform"
+          animate={{ opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
         />
       </div>
@@ -338,6 +380,20 @@ export function HeroSection() {
           </div>
         </motion.div>
       </div>
+
+      {/* Copyright Footer */}
+      <motion.div
+        className="absolute bottom-4 left-0 right-0 text-center z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 0.5 }}
+      >
+        <p className="text-[10px] text-slate-400/60 dark:text-slate-600/60">
+          © 2026 Tamer Akdeniz. Tüm hakları saklıdır.
+        </p>
+      </motion.div>
+
+      <AdminLink />
     </section>
   );
 }
