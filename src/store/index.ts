@@ -42,7 +42,7 @@ const defaultContactInfo: ContactInfo = {
 };
 
 const defaultHomeHero: HomeHero = {
-  title: { en: 'I Build with AI.', tr: 'AI ile İnşa Ediyorum.' },
+  title: { en: 'Think Deep Build Smart', tr: 'Derin Düşün Akıllı Yapı' },
   description: {
     en: 'From concept to deployment — AI-powered products, full-stack solutions, and intelligent systems. End to end.',
     tr: 'Fikirden ürüne — yapay zeka destekli uygulamalar, full-stack çözümler ve akıllı sistemler. Uçtan uca.',
