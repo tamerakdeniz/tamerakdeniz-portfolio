@@ -42,10 +42,10 @@ const defaultContactInfo: ContactInfo = {
 };
 
 const defaultHomeHero: HomeHero = {
-  title: { en: 'Think Deep Build Smart', tr: 'Derin Düşün Akıllı Yapı' },
+  title: { en: 'Think Deep Build Smart', tr: 'Derin Düşün Akıllı Yap' },
   description: {
-    en: 'From concept to deployment — AI-powered products, full-stack solutions, and intelligent systems. End to end.',
-    tr: 'Fikirden ürüne — yapay zeka destekli uygulamalar, full-stack çözümler ve akıllı sistemler. Uçtan uca.',
+    en: 'End-to-end, from concept to product — AI-powered applications, full-stack solutions, and intelligent systems.',
+    tr: 'Uçtan uca, fikirden ürüne — yapay zeka destekli uygulamalar, full-stack çözümler ve akıllı sistemler.',
   },
   moreLabel: { en: 'More About', tr: 'Daha Fazla' },
   icon: { mode: 'material', materialIcon: 'code', imageUrl: '' },
