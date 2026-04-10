@@ -28,20 +28,19 @@ export default function ProjectsPage() {
   const availableCategories = useMemo(() => {
     const cats = new Set<string>(['all']);
     publishedProjects.forEach((p) => {
-      if (Array.isArray(p.category)) {
-        p.category.forEach((c) => cats.add(c));
-      } else if (p.category) {
-        cats.add(p.category);
-      }
+      const pCats = Array.isArray(p.category) ? p.category : [p.category || 'web'];
+      pCats.forEach((c) => cats.add(c));
     });
-    return allCategories.filter((c) => cats.has(c));
+    // Keep 'all' first, then sort others
+    const others = Array.from(cats).filter(c => c !== 'all').sort();
+    return ['all', ...others];
   }, [publishedProjects]);
 
   const filtered = useMemo(() => {
     if (activeFilter === 'all') return publishedProjects;
     return publishedProjects.filter((p) => {
-      if (Array.isArray(p.category)) return p.category.includes(activeFilter);
-      return p.category === activeFilter;
+      const pCats = Array.isArray(p.category) ? p.category : [p.category || 'web'];
+      return pCats.includes(activeFilter);
     });
   }, [publishedProjects, activeFilter]);
 
@@ -75,7 +74,7 @@ export default function ProjectsPage() {
                 transition={{ delay: 0.1 + i * 0.03 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {t(`filter-${cat}`)}
+                {t(`filter-${cat}`) === `filter-${cat}` ? cat.toUpperCase() : t(`filter-${cat}`)}
               </motion.button>
             ))}
           </motion.div>

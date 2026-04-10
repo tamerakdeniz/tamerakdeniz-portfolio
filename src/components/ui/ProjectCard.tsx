@@ -76,28 +76,41 @@ export function ProjectCard({
             </span>
           ))}
         </div>
-        <div className="flex gap-3">
-          {project.githubUrl && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-1 gap-3">
+            {project.githubUrl && (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 px-4 py-2 bg-gray-100/80 dark:bg-slate-800/80 rounded-xl text-center font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-sm active:scale-95"
+              >
+                <span className="material-symbols-outlined text-sm">code</span>
+                {t('view-code')}
+              </a>
+            )}
+            {project.demoUrl && (
+              <a
+                href={project.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/btn flex-1 px-4 py-2 bg-white/10 dark:bg-white/5 border border-gray-200 dark:border-slate-700 backdrop-blur-md rounded-xl text-center font-medium hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-sm active:scale-95 overflow-hidden"
+              >
+                <span className="material-symbols-outlined text-sm">open_in_new</span>
+                <span>{t('view-demo')}</span>
+              </a>
+            )}
+          </div>
+          {project.liveUrl && (
             <a
-              href={project.githubUrl}
+              href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 px-4 py-2 bg-gray-100/80 dark:bg-slate-800/80 rounded-xl text-center font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-sm active:scale-95"
-            >
-              <span className="material-symbols-outlined text-sm">code</span>
-              {t('view-code')}
-            </a>
-          )}
-          {project.demoUrl && (
-            <a
-              href={project.demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group/btn flex-1 px-4 py-2 bg-primary text-white rounded-xl text-center font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm active:scale-95 relative overflow-hidden"
+              className="group/btn px-4 py-2 bg-primary text-white rounded-xl text-center font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm active:scale-95 relative overflow-hidden flex-1 sm:flex-none sm:min-w-[100px]"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
-              <span className="material-symbols-outlined text-sm relative">open_in_new</span>
-              <span className="relative">{t('view-demo')}</span>
+              <span className="material-symbols-outlined text-sm relative">rocket_launch</span>
+              <span className="relative">{t('view-live')}</span>
             </a>
           )}
         </div>

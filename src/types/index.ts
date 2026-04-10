@@ -11,6 +11,7 @@ export interface Project {
   techStack: string[];
   githubUrl: string;
   demoUrl: string;
+  liveUrl?: string;
   image: string;
   order?: number;
   published: boolean;
