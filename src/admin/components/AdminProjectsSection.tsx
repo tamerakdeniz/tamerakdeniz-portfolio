@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectProjects } from '@/store';
 import { saveSiteData, logActivity, fileToBase64 } from '@/lib/firebase';
@@ -35,31 +35,7 @@ function ProjectForm({
   const [techInput, setTechInput] = useState(
     project?.techStack?.join(', ') || ''
   );
-  const [newCategory, setNewCategory] = useState('');
   const [uploading, setUploading] = useState(false);
-  const projects = useAppStore(selectProjects);
-
-  const allAvailableCategories = useMemo(() => {
-    const cats = new Set(['web', 'ai', 'startup', 'opensource', 'desktop', 'mobile', 'practice', 'test']);
-    projects.forEach((p) => {
-      if (Array.isArray(p.category)) {
-        p.category.forEach((c) => cats.add(c));
-      } else if (p.category) {
-        cats.add(p.category);
-      }
-    });
-    return Array.from(cats).sort();
-  }, [projects]);
-
-  const handleAddCategory = () => {
-    if (!newCategory.trim()) return;
-    const cat = newCategory.trim().toLowerCase();
-    const current = Array.isArray(form.category) ? form.category : [form.category];
-    if (!current.includes(cat)) {
-      setForm({ ...form, category: [...current, cat] });
-    }
-    setNewCategory('');
-  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -139,8 +115,8 @@ function ProjectForm({
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">{t('admin-label-categories')}</label>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {allAvailableCategories.map((c) => {
+        <div className="flex flex-wrap gap-2">
+          {['web', 'ai', 'startup', 'opensource', 'desktop', 'mobile', 'extension', 'practice', 'test'].map((c) => {
             const cats = Array.isArray(form.category) ? form.category : [form.category];
             const selected = cats.includes(c);
             return (
@@ -164,22 +140,6 @@ function ProjectForm({
               </button>
             );
           })}
-        </div>
-        <div className="flex gap-2 max-w-xs">
-          <input
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
-            placeholder={t('admin-add-category-placeholder')}
-            className="flex-1 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-xs"
-          />
-          <button
-            type="button"
-            onClick={handleAddCategory}
-            className="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-lg text-xs font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
-          >
-            {t('admin-add')}
-          </button>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

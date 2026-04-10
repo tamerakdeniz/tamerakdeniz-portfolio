@@ -9,7 +9,7 @@ import { useAppStore, selectProjects } from '@/store';
 import { PageBackground, SectionHeading } from '@/components/ui/InteractiveEffects';
 
 const allCategories = [
-  'all', 'web', 'ai', 'startup', 'opensource', 'desktop', 'mobile', 'practice', 'test',
+  'all', 'web', 'ai', 'startup', 'opensource', 'desktop', 'mobile', 'extension', 'practice', 'test',
 ] as const;
 
 export default function ProjectsPage() {
@@ -31,9 +31,7 @@ export default function ProjectsPage() {
       const pCats = Array.isArray(p.category) ? p.category : [p.category || 'web'];
       pCats.forEach((c) => cats.add(c));
     });
-    // Keep 'all' first, then sort others
-    const others = Array.from(cats).filter(c => c !== 'all').sort();
-    return ['all', ...others];
+    return allCategories.filter((c) => cats.has(c));
   }, [publishedProjects]);
 
   const filtered = useMemo(() => {
