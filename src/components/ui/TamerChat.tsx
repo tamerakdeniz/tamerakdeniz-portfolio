@@ -229,6 +229,17 @@ export function TamerChat() {
             timestamp: Date.now(),
           },
         ]);
+      } else if (data?.error === 'service_unavailable') {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            text: language === 'tr'
+              ? 'Yapay zeka servisi şu anda yoğun talep görüyor. Lütfen biraz sonra tekrar deneyin.'
+              : 'AI service is currently experiencing high demand. Please try again in a moment.',
+            timestamp: Date.now(),
+          },
+        ]);
       } else {
         setMessages((prev) => [
           ...prev,

@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3.1-flash-lite-preview', 
+      model: 'gemini-1.5-flash', 
       systemInstruction: systemText,
       generationConfig: {
         maxOutputTokens: 300,
@@ -149,6 +149,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'rate_limit' },
         { status: 429 }
+      );
+    }
+
+    if (errMsg.includes('503') || errMsg.includes('Service Unavailable') || errMsg.includes('high demand')) {
+      return NextResponse.json(
+        { error: 'service_unavailable' },
+        { status: 503 }
       );
     }
 
