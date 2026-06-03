@@ -1,8 +1,30 @@
-/** Trigger a file download; works for cross-origin URLs (e.g. Firebase Storage). */
+function isFirebaseStorageUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return (
+      host.includes('firebasestorage.googleapis.com') ||
+      host.endsWith('.firebasestorage.app') ||
+      host === 'storage.googleapis.com'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function cvProxyDownloadUrl(storageUrl: string, fileName: string): string {
+  const params = new URLSearchParams({
+    url: storageUrl,
+    name: fileName,
+  });
+  return `/api/download-cv?${params.toString()}`;
+}
+
+/** Trigger a file download; Firebase Storage uses same-origin API proxy (no CORS). */
 export async function downloadFile(url: string, fileName: string): Promise<void> {
   const safeName = fileName.toLowerCase().endsWith('.pdf') ? fileName : `${fileName}.pdf`;
+  const fetchUrl = isFirebaseStorageUrl(url) ? cvProxyDownloadUrl(url, safeName) : url;
 
-  if (url.startsWith('/') && typeof window !== 'undefined') {
+  if (fetchUrl.startsWith('/') && typeof window !== 'undefined') {
     const link = document.createElement('a');
     link.href = url;
     link.download = safeName;
@@ -13,7 +35,7 @@ export async function downloadFile(url: string, fileName: string): Promise<void>
     return;
   }
 
-  const res = await fetch(url);
+  const res = await fetch(fetchUrl);
   if (!res.ok) {
     throw new Error(`Download failed: ${res.status}`);
   }
