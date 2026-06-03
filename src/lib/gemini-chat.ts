@@ -36,12 +36,13 @@ export type GenerateChatOptions = {
   apiKey: string;
   systemInstruction: string;
   prompt: string;
+  maxOutputTokens?: number;
 };
 
 export async function generateChatWithModelFallback(
   options: GenerateChatOptions
 ): Promise<string> {
-  const { apiKey, systemInstruction, prompt } = options;
+  const { apiKey, systemInstruction, prompt, maxOutputTokens = 512 } = options;
   const models = getModelChain();
   let lastError = 'No Gemini models configured';
 
@@ -53,7 +54,7 @@ export async function generateChatWithModelFallback(
         model: modelName,
         systemInstruction,
         generationConfig: {
-          maxOutputTokens: 256,
+          maxOutputTokens,
           temperature: 0.3,
         },
       });
