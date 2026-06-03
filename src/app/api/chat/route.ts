@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { checkChatRateLimit, getClientIp } from '@/lib/chat-rate-limit';
+import { generateChatWithModelFallback } from '@/lib/gemini-chat';
 
 export const maxDuration = 60;
 
@@ -142,19 +142,6 @@ export async function POST(req: NextRequest) {
       .replace('{CONTEXT}', context)
       .replace('{LANGUAGE}', langLabel);
 
-    const modelName =
-      process.env.GEMINI_MODEL?.trim() || 'gemini-3.1-flash-lite';
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      systemInstruction: systemText,
-      generationConfig: {
-        maxOutputTokens: 256,
-        temperature: 0.3,
-      },
-    });
-
     const recentHistory = (history || []).slice(-4) as { role: string; text: string }[];
     let prompt = message;
     if (recentHistory.length > 0) {
@@ -164,8 +151,11 @@ export async function POST(req: NextRequest) {
       prompt = `Previous conversation:\n${transcript}\n\nUser: ${message}`;
     }
 
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
+    const response = await generateChatWithModelFallback({
+      apiKey,
+      systemInstruction: systemText,
+      prompt,
+    });
 
     return NextResponse.json({ reply: response });
   } catch (error: unknown) {
