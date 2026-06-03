@@ -174,6 +174,8 @@ export function TamerChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const [cooldownSec, setCooldownSec] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -182,8 +184,32 @@ export function TamerChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) {
+      setCooldownSec(0);
+      return;
+    }
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+      setCooldownSec(left);
+      if (left <= 0) setCooldownUntil(0);
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [cooldownUntil]);
+
+  const isCoolingDown = cooldownSec > 0;
+
+  const rateLimitMessage = (retrySec?: number) => {
+    const sec = retrySec ?? 60;
+    return language === 'tr'
+      ? `Gemini API kotası dolu. ${sec} saniye sonra tekrar deneyin. (Her soru tek istek gönderir; hızlı tıklamayın.)`
+      : `Gemini API quota reached. Try again in ${sec} seconds. (One request per message; avoid rapid clicks.)`;
+  };
+
   const sendMessage = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading || !chatReady) return;
+    if (!text.trim() || isLoading || !chatReady || isCoolingDown) return;
 
     setHasInteracted(true);
     const userMsg: ChatMessage = { role: 'user', text: text.trim(), timestamp: Date.now() };
@@ -196,27 +222,21 @@ export function TamerChat() {
 
       const payloadSiteData = siteData ? compactSiteDataForChat(siteData) : null;
 
-      let data: { reply?: string; error?: string } | null = null;
-      const MAX_RETRIES = 3;
-      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: text.trim(),
-            history,
-            siteData: payloadSiteData,
-            language,
-          }),
-        });
-        data = await res.json();
-
-        if (data?.error === 'rate_limit' && attempt < MAX_RETRIES) {
-          await new Promise((r) => setTimeout(r, 2000 * Math.pow(2, attempt)));
-          continue;
-        }
-        break;
-      }
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text.trim(),
+          history,
+          siteData: payloadSiteData,
+          language,
+        }),
+      });
+      const data = (await res.json()) as {
+        reply?: string;
+        error?: string;
+        retryAfterSec?: number;
+      };
 
       if (data?.reply) {
         setMessages((prev) => [
@@ -224,13 +244,13 @@ export function TamerChat() {
           { role: 'assistant', text: data!.reply!, timestamp: Date.now() },
         ]);
       } else if (data?.error === 'rate_limit') {
+        const retrySec = data.retryAfterSec ?? 60;
+        setCooldownUntil(Date.now() + retrySec * 1000);
         setMessages((prev) => [
           ...prev,
           {
             role: 'assistant',
-            text: language === 'tr'
-              ? 'Çok fazla istek gönderildi. Lütfen birkaç saniye bekleyip tekrar deneyin.'
-              : 'Too many requests. Please wait a few seconds and try again.',
+            text: rateLimitMessage(retrySec),
             timestamp: Date.now(),
           },
         ]);
@@ -272,7 +292,7 @@ export function TamerChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [chatReady, isLoading, language, messages, siteData]);
+  }, [chatReady, isCoolingDown, isLoading, language, messages, siteData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -415,13 +435,21 @@ export function TamerChat() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={language === 'tr' ? 'Tamer hakkında sor...' : 'Ask about Tamer...'}
-            disabled={isLoading || !chatReady}
+            disabled={isLoading || !chatReady || isCoolingDown}
+            placeholder={
+              isCoolingDown
+                ? language === 'tr'
+                  ? `Bekleyin (${cooldownSec}s)…`
+                  : `Wait (${cooldownSec}s)…`
+                : language === 'tr'
+                  ? 'Tamer hakkında sor...'
+                  : 'Ask about Tamer...'
+            }
             className="w-full h-11 pl-4 pr-12 bg-white/50 dark:bg-white/[0.03] border border-slate-200/50 dark:border-slate-700/20 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400/70 dark:placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:bg-white/70 dark:focus:bg-white/[0.05] transition-all duration-300 disabled:opacity-40 font-mono"
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading || !chatReady}
+            disabled={!input.trim() || isLoading || !chatReady || isCoolingDown}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white disabled:opacity-20 disabled:grayscale hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 active:scale-90"
           >
             <span className="material-symbols-outlined text-[14px]">arrow_upward</span>

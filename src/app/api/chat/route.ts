@@ -1,7 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
+import { checkChatRateLimit, getClientIp } from '@/lib/chat-rate-limit';
 
 export const maxDuration = 60;
+
+const MAX_CONTEXT_CHARS = 12_000;
+const MAX_DESC_CHARS = 280;
 
 const SYSTEM_PROMPT = `You are Tamer Akdeniz's portfolio assistant. Answer ONLY about Tamer — skills, projects, experience, education.
 
@@ -24,6 +28,9 @@ function buildContext(siteData: Record<string, unknown> | null, lang: string): s
     return obj[lang] || obj.en || obj.tr || '';
   };
 
+  const clip = (text: string, max = MAX_DESC_CHARS) =>
+    text.length > max ? `${text.slice(0, max)}…` : text;
+
   const parts: string[] = [];
 
   const hero = siteData.homeHero as Record<string, Record<string, string>> | undefined;
@@ -33,7 +40,7 @@ function buildContext(siteData: Record<string, unknown> | null, lang: string): s
   const about = siteData.aboutEntries as Record<string, Record<string, Record<string, string>>> | undefined;
   if (about) {
     Object.values(about).forEach((entry) => {
-      if (entry.content) parts.push(`About: ${l(entry.content)}`);
+      if (entry.content) parts.push(`About: ${clip(l(entry.content))}`);
     });
   }
 
@@ -60,7 +67,7 @@ function buildContext(siteData: Record<string, unknown> | null, lang: string): s
       const desc = l(p.description as Record<string, string>);
       const tech = Array.isArray(p.techStack) ? (p.techStack as string[]).join(', ') : '';
       const cats = Array.isArray(p.category) ? (p.category as string[]).join(', ') : p.category || '';
-      parts.push(`- ${title}: ${desc} [${tech}] [${cats}]`);
+      parts.push(`- ${title}: ${clip(desc)} [${tech}] [${cats}]`);
     });
   }
 
@@ -91,7 +98,10 @@ function buildContext(siteData: Record<string, unknown> | null, lang: string): s
     parts.push(`\nAvailability: ${availability.status}`);
   }
 
-  return parts.join('\n') || 'No data available.';
+  const text = parts.join('\n') || 'No data available.';
+  return text.length > MAX_CONTEXT_CHARS
+    ? `${text.slice(0, MAX_CONTEXT_CHARS)}…`
+    : text;
 }
 
 export async function POST(req: NextRequest) {
@@ -101,6 +111,19 @@ export async function POST(req: NextRequest) {
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    }
+
+    if (message.length > 500) {
+      return NextResponse.json({ error: 'Message too long' }, { status: 400 });
+    }
+
+    const clientIp = getClientIp(req);
+    const rateCheck = checkChatRateLimit(clientIp);
+    if (!rateCheck.ok) {
+      return NextResponse.json(
+        { error: 'rate_limit', retryAfterSec: rateCheck.retryAfterSec },
+        { status: 429 }
+      );
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -119,26 +142,29 @@ export async function POST(req: NextRequest) {
       .replace('{CONTEXT}', context)
       .replace('{LANGUAGE}', langLabel);
 
+    const modelName =
+      process.env.GEMINI_MODEL?.trim() || 'gemini-2.0-flash';
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash-lite',
+      model: modelName,
       systemInstruction: systemText,
       generationConfig: {
-        maxOutputTokens: 300,
+        maxOutputTokens: 256,
         temperature: 0.3,
       },
     });
 
-    const chatHistory = (history || [])
-      .slice(-6)
-      .map((msg: { role: string; text: string }) => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }],
-      }));
+    const recentHistory = (history || []).slice(-4) as { role: string; text: string }[];
+    let prompt = message;
+    if (recentHistory.length > 0) {
+      const transcript = recentHistory
+        .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`)
+        .join('\n');
+      prompt = `Previous conversation:\n${transcript}\n\nUser: ${message}`;
+    }
 
-    const chat = model.startChat({ history: chatHistory });
-
-    const result = await chat.sendMessage(message);
+    const result = await model.generateContent(prompt);
     const response = result.response.text();
 
     return NextResponse.json({ reply: response });
@@ -148,7 +174,7 @@ export async function POST(req: NextRequest) {
 
     if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('Too Many Requests')) {
       return NextResponse.json(
-        { error: 'rate_limit' },
+        { error: 'rate_limit', retryAfterSec: 60 },
         { status: 429 }
       );
     }
