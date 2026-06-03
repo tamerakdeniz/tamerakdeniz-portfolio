@@ -7,9 +7,12 @@ import { getCvDownloadHref } from '@/lib/download-file';
 import { Modal } from './Modal';
 
 const btnPrimary =
-  'inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-medium hover:bg-blue-700 transition-all text-sm';
+  'inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-medium hover:bg-blue-700 transition-all text-sm shrink-0';
 const btnSecondary =
-  'inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-all text-sm';
+  'inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-all text-sm shrink-0';
+/** Header on small screens: icon-only (full labels in body below) */
+const btnHeader =
+  'max-sm:size-10 max-sm:p-0 max-sm:gap-0';
 
 export function CVModal() {
   const { t } = useTranslation();
@@ -44,15 +47,25 @@ export function CVModal() {
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
       <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-800 gap-3">
-        <h2 className="text-2xl font-bold shrink-0">{t('cv-title')}</h2>
-        <div className="flex items-center gap-2 flex-wrap justify-end">
-          <a href={downloadHref} download={fileName} className={btnPrimary}>
-            <span className="material-symbols-outlined text-sm">download</span>
-            {t('cv-download')}
+        <h2 className="text-xl sm:text-2xl font-bold min-w-0 truncate">{t('cv-title')}</h2>
+        <div className="flex items-center gap-2 justify-end shrink-0">
+          <a
+            href={downloadHref}
+            download={fileName}
+            className={`${btnPrimary} ${btnHeader}`}
+            aria-label={t('cv-download')}
+          >
+            <span className="material-symbols-outlined text-xl sm:text-sm">download</span>
+            <span className="hidden sm:inline">{t('cv-download')}</span>
           </a>
-          <button type="button" onClick={openCvInNewTab} className={btnSecondary}>
-            <span className="material-symbols-outlined text-sm">open_in_new</span>
-            {t('cv-open-tab')}
+          <button
+            type="button"
+            onClick={openCvInNewTab}
+            className={`${btnSecondary} ${btnHeader}`}
+            aria-label={t('cv-open-tab')}
+          >
+            <span className="material-symbols-outlined text-xl sm:text-sm">open_in_new</span>
+            <span className="hidden sm:inline">{t('cv-open-tab')}</span>
           </button>
           <button
             type="button"
