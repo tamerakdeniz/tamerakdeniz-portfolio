@@ -8,6 +8,7 @@ import { SkillCard } from '@/components/ui/SkillCard';
 import { TimelineItem } from '@/components/ui/TimelineItem';
 import { useAppStore, selectAboutEntries, selectSkills, selectTimeline } from '@/store';
 import { PageBackground, SectionHeading, GlassCard } from '@/components/ui/InteractiveEffects';
+import { CachedImage } from '@/components/ui/CachedImage';
 
 const skillCategories = [
   'all', 'mobile', 'frontend', 'backend', 'database', 'devops', 'ai', 'tools', 'other',
@@ -75,7 +76,13 @@ export default function AboutPage() {
                 >
                   <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center text-white text-5xl font-bold mx-auto md:mx-0 overflow-hidden shadow-lg shadow-primary/20">
                     {avatarUrl ? (
-                      <img src={avatarUrl} alt={avatarText} className="w-full h-full object-cover" />
+                      <CachedImage
+                        src={avatarUrl}
+                        alt={avatarText}
+                        loading="eager"
+                        fetchPriority="high"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       avatarText
                     )}

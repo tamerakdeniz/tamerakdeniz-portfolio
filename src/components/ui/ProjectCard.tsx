@@ -3,6 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useAppStore } from '@/store';
+import { CachedImage } from '@/components/ui/CachedImage';
 import type { Project, Language } from '@/types';
 
 const categoryDisplayName: Record<string, Record<Language, string>> = {
@@ -44,11 +45,11 @@ export function ProjectCard({
     >
       <div className="aspect-video bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center overflow-hidden relative">
         {project.image ? (
-          <img
+          <CachedImage
             src={project.image}
             alt={title}
-            loading="lazy"
-            decoding="async"
+            loading={index < 6 ? 'eager' : 'lazy'}
+            fetchPriority={index < 3 ? 'high' : undefined}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

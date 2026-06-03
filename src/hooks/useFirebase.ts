@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useAppStore } from '@/store';
 import { subscribeToSiteData, onAuthChange } from '@/lib/firebase';
+import { prefetchSiteMedia } from '@/lib/prefetch-media';
 import type { SiteData } from '@/types';
 
 const SITE_DATA_CACHE_KEY = 'portfolio_siteData_cache';
@@ -35,13 +36,16 @@ export function useFirebaseSync() {
     const cached = readSiteDataCache();
     if (cached) {
       setSiteData(cached);
+      prefetchSiteMedia(cached);
     }
 
     const unsubData = subscribeToSiteData((data) => {
       if (data) {
-        setSiteData(data as SiteData);
+        const site = data as SiteData;
+        setSiteData(site);
+        prefetchSiteMedia(site);
         setFirebaseConnected(true);
-        writeSiteDataCache(data as SiteData);
+        writeSiteDataCache(site);
       } else {
         if (!cached) {
           const fallback = readSiteDataCache();
