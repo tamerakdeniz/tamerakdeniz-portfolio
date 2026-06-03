@@ -16,6 +16,9 @@
 # misc
 .DS_Store
 *.pem
+*.key
+*.p12
+*.pfx
 
 # debug
 npm-debug.log*
@@ -23,12 +26,29 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
-.env*.local
+# environment & secrets (never commit real keys)
 .env
+.env.*
+!.env.example
 
 # vercel
 .vercel
+
+# firebase local / credentials
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+ui-debug.log
+*-debug.log
+serviceAccount*.json
+**/firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+
+# admin exports / backups (may contain base64 media or contact data)
+site-data*.json
+site-data-*.json
+*-export.json
 
 # typescript
 *.tsbuildinfo

@@ -4,6 +4,7 @@ import { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectCvFiles } from '@/store';
 import { saveSiteData } from '@/lib/firebase';
+import { uploadPortfolioFile } from '@/lib/portfolio-storage';
 import { showToast } from '@/components/ui/Toast';
 import type { CVFile } from '@/types';
 
@@ -31,20 +32,29 @@ export function AdminCVSection() {
     } catch { showToast(t('admin-save-failed'), 'error'); }
   }, [siteData, t]);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const newFile: CVFile = {
-        id: Date.now().toString(),
-        name: file.name,
-        dataUrl: reader.result as string,
-      };
-      save([...cvFiles, newFile], newFile.id);
-    };
-    reader.readAsDataURL(file);
     e.target.value = '';
+
+    if (file.size > 1024 * 1024 * 10) {
+      showToast(t('admin-file-too-large'), 'error');
+      return;
+    }
+
+    const id = Date.now().toString();
+    try {
+      const url = await uploadPortfolioFile(file, 'cv', id);
+      const newFile: CVFile = { id, name: file.name, dataUrl: url };
+      save([...cvFiles, newFile], newFile.id);
+    } catch (err) {
+      console.error(err);
+      const message =
+        err instanceof Error && err.message === 'AUTH_REQUIRED'
+          ? t('admin-auth-required-upload')
+          : t('admin-save-failed');
+      showToast(message, 'error');
+    }
   };
 
   return (

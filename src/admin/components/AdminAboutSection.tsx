@@ -3,7 +3,8 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectAboutEntries } from '@/store';
-import { saveSiteData, fileToBase64 } from '@/lib/firebase';
+import { saveSiteData } from '@/lib/firebase';
+import { uploadPortfolioFile } from '@/lib/portfolio-storage';
 import { showToast } from '@/components/ui/Toast';
 import type { AboutEntry } from '@/types';
 
@@ -53,20 +54,23 @@ export function AdminAboutSection() {
     const file = e.target.files?.[0];
     if (!file || !form) return;
 
-    // Optional: Warn if file is too large since we are storing it in the realtime DB
-    if (file.size > 1024 * 1024 * 2) { // 2MB limit
-      showToast(t('admin-save-failed') + ' - File too large (Max 2MB)', 'error');
+    if (file.size > 1024 * 1024 * 5) {
+      showToast(t('admin-file-too-large'), 'error');
       return;
     }
 
     setUploading(true);
     try {
-      const base64String = await fileToBase64(file);
-      setForm({ ...form, avatar: { ...form.avatar, imageUrl: base64String } });
-      showToast(t('admin-saved'), 'success');
+      const url = await uploadPortfolioFile(file, 'about', form.id);
+      setForm({ ...form, avatar: { ...form.avatar, imageUrl: url } });
+      showToast(t('admin-upload-success'), 'success');
     } catch (err) {
       console.error(err);
-      showToast(t('admin-save-failed'), 'error');
+      const message =
+        err instanceof Error && err.message === 'AUTH_REQUIRED'
+          ? t('admin-auth-required-upload')
+          : t('admin-save-failed');
+      showToast(message, 'error');
     } finally {
       setUploading(false);
     }

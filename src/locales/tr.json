@@ -199,5 +199,18 @@
   "admin-status-available": "Çalışmaya Açık",
   "admin-status-not-available": "Müsait Değil",
   "admin-status-working": "Şu Anda Çalışıyor",
-  "admin-status-open-to-offers": "Tekliflere Açık"
+  "admin-status-open-to-offers": "Tekliflere Açık",
+  "admin-media-storage-title": "Medya (Firebase Storage)",
+  "admin-media-storage-desc": "Görseller ve PDF'ler Firebase Storage'da tutulur. Realtime Database'de yalnızca metin ve indirme URL'leri kalır; site hızlı açılır.",
+  "admin-media-inline-count": "{{count}} öğe hâlâ veritabanında gömülü base64 kullanıyor. Storage'a taşımak için bir kez migrasyon çalıştırın.",
+  "admin-media-all-storage": "Tüm medya Storage URL'leri kullanıyor. Migrasyon gerekmez.",
+  "admin-migrate-media": "Gömülü medyayı Storage'a taşı",
+  "admin-migrate-media-hint": "Yükseltmeden sonra bir kez çalıştırın. Admin girişi gerekir. Önce storage.rules Firebase'e deploy edin (firebase deploy --only storage).",
+  "admin-migrate-success": "Medya Firebase Storage'a taşındı. Site verisi artık hafif.",
+  "admin-migrate-failed": "Migrasyon başarısız. Konsol ve Storage kurallarını kontrol edin.",
+  "admin-migrate-nothing": "Gömülü medya bulunamadı.",
+  "admin-upload-success": "Dosya Firebase Storage'a yüklendi.",
+  "admin-file-too-large": "Dosya çok büyük.",
+  "admin-auth-required-upload": "Yüklemeden önce admin paneline giriş yapın.",
+  "admin-import-inline-hint": "İçe aktarılan veride gömülü görseller var. Ayarlar'dan \"Gömülü medyayı Storage'a taşı\"yı çalıştırın."
 }

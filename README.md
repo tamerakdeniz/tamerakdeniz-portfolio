@@ -27,7 +27,7 @@ The following technologies and libraries form the foundation of the project:
 - **Language:** TypeScript
 - **Styling & Design:** Tailwind CSS v4
 - **State Management:** Zustand
-- **Database & Backend:** Firebase (Realtime Database)
+- **Database & Backend:** Firebase Realtime Database (text/URLs only) + Firebase Storage (images, PDFs)
 - **Authentication:** Firebase Authentication
 - **Animation:** Framer Motion
 - **Form Management:** React Hook Form
@@ -145,4 +145,17 @@ You can view the project by navigating to [http://localhost:3000](http://localho
 
 ## 🔒 Firebase Security (Rules)
 
-To safeguard manipulations within the admin panel, all database read/write rules are configured in `database.rules.json`. Only (*Authenticated*) users can perform CRUD operations on the data, whereas guest visitors can only access corresponding data in a (*Read-Only*) manner.
+- **Realtime Database** (`database.rules.json`): `siteData` is public read; writes require auth.
+- **Storage** (`storage.rules`): `portfolio/**` is public read; uploads require auth.
+
+Deploy rules after cloning:
+
+```bash
+firebase deploy --only database,storage
+```
+
+## 📦 Media architecture
+
+Large files (project images, about avatars, CV PDFs) must **not** be stored as base64 in Realtime Database. They are uploaded to **Firebase Storage**; RTDB keeps HTTPS URLs only (~KB instead of ~MB).
+
+After deploying this version, open **Admin → Settings** and run **Migrate embedded media to Storage** once (while logged in) to move existing base64 data from your ~8MB export.

@@ -3,7 +3,8 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectProjects } from '@/store';
-import { saveSiteData, logActivity, fileToBase64 } from '@/lib/firebase';
+import { saveSiteData, logActivity } from '@/lib/firebase';
+import { uploadPortfolioFile } from '@/lib/portfolio-storage';
 import { showToast } from '@/components/ui/Toast';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import type { Project } from '@/types';
@@ -41,19 +42,23 @@ function ProjectForm({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 1024 * 1024 * 2) { // 2MB limit
-      showToast(t('admin-save-failed') + ' - File too large (Max 2MB)', 'error');
+    if (file.size > 1024 * 1024 * 5) {
+      showToast(t('admin-file-too-large'), 'error');
       return;
     }
 
     setUploading(true);
     try {
-      const base64String = await fileToBase64(file);
-      setForm({ ...form, image: base64String });
-      showToast(t('admin-saved'), 'success'); 
+      const url = await uploadPortfolioFile(file, 'projects', form.id);
+      setForm({ ...form, image: url });
+      showToast(t('admin-upload-success'), 'success');
     } catch (err) {
       console.error(err);
-      showToast(t('admin-save-failed'), 'error');
+      const message =
+        err instanceof Error && err.message === 'AUTH_REQUIRED'
+          ? t('admin-auth-required-upload')
+          : t('admin-save-failed');
+      showToast(message, 'error');
     } finally {
       setUploading(false);
     }

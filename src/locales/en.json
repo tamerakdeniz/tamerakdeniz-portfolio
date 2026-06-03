@@ -199,5 +199,18 @@
   "admin-status-available": "Available / Open to Work",
   "admin-status-not-available": "Not Available",
   "admin-status-working": "Currently Working",
-  "admin-status-open-to-offers": "Open to Offers"
+  "admin-status-open-to-offers": "Open to Offers",
+  "admin-media-storage-title": "Media (Firebase Storage)",
+  "admin-media-storage-desc": "Images and PDFs are stored in Firebase Storage. Realtime Database keeps only text and download URLs for fast page loads.",
+  "admin-media-inline-count": "{{count}} item(s) still use embedded base64 in the database. Run migration once to move them to Storage.",
+  "admin-media-all-storage": "All media uses Storage URLs. No migration needed.",
+  "admin-migrate-media": "Migrate embedded media to Storage",
+  "admin-migrate-media-hint": "Run once after upgrading. Requires admin login. Deploy storage.rules to Firebase first (firebase deploy --only storage).",
+  "admin-migrate-success": "Media migrated to Firebase Storage. Site data is now lightweight.",
+  "admin-migrate-failed": "Migration failed. Check console and Storage rules.",
+  "admin-migrate-nothing": "No embedded media found.",
+  "admin-upload-success": "File uploaded to Firebase Storage.",
+  "admin-file-too-large": "File is too large.",
+  "admin-auth-required-upload": "Sign in to the admin panel before uploading.",
+  "admin-import-inline-hint": "Imported data contains embedded images. Use “Migrate embedded media” in Settings."
 }

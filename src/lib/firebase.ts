@@ -15,6 +15,8 @@ import {
   type Auth,
   type User,
 } from 'firebase/auth';
+import { isInlineDataUrl } from '@/lib/media';
+import type { SiteData } from '@/types';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
@@ -31,7 +33,7 @@ let app: FirebaseApp;
 let database: Database;
 let auth: Auth;
 
-function getFirebaseApp(): FirebaseApp {
+export function getFirebaseApp(): FirebaseApp {
   if (!app) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   }
@@ -96,25 +98,52 @@ export async function getSiteDataOnce() {
   return snapshot.val();
 }
 
+/** Strip legacy base64 so RTDB stays small; media must live in Firebase Storage. */
+export function stripInlineMediaFromSiteData(data: SiteData): SiteData {
+  return {
+    ...data,
+    projects: (data.projects || []).map((p) => ({
+      ...p,
+      image: isInlineDataUrl(p.image) ? '' : p.image,
+    })),
+    aboutEntries: (data.aboutEntries || []).map((e) => ({
+      ...e,
+      avatar: {
+        ...e.avatar,
+        imageUrl: isInlineDataUrl(e.avatar?.imageUrl) ? '' : e.avatar?.imageUrl || '',
+      },
+    })),
+    cvFiles: (data.cvFiles || []).map((f) => ({
+      ...f,
+      dataUrl: isInlineDataUrl(f.dataUrl) ? '' : f.dataUrl,
+    })),
+    homeHero: data.homeHero
+      ? {
+          ...data.homeHero,
+          icon: data.homeHero.icon
+            ? {
+                ...data.homeHero.icon,
+                imageUrl: isInlineDataUrl(data.homeHero.icon.imageUrl)
+                  ? ''
+                  : data.homeHero.icon.imageUrl || '',
+              }
+            : data.homeHero.icon,
+        }
+      : data.homeHero,
+  };
+}
+
 export async function saveSiteData(data: unknown) {
   const db = getFirebaseDatabase();
   const siteDataRef = ref(db, 'siteData');
-  await set(siteDataRef, data);
+  const cleaned = stripInlineMediaFromSiteData(data as SiteData);
+  await set(siteDataRef, cleaned);
 }
 
 export async function saveFirebaseData(path: string, data: unknown) {
   const db = getFirebaseDatabase();
   const dataRef = ref(db, path);
   await set(dataRef, data);
-}
-
-export async function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
 }
 
 export interface ActivityEntry {
