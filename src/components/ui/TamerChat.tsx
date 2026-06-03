@@ -167,6 +167,8 @@ function MessageItem({ message, isLast }: { message: ChatMessage; isLast: boolea
 export function TamerChat() {
   const language = useAppStore((s) => s.language);
   const siteData = useAppStore((s) => s.siteData);
+  const siteDataLoaded = useAppStore((s) => s.siteDataLoaded);
+  const chatReady = siteDataLoaded && !!siteData;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -181,7 +183,7 @@ export function TamerChat() {
   }, [messages, isLoading]);
 
   const sendMessage = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading) return;
+    if (!text.trim() || isLoading || !chatReady) return;
 
     setHasInteracted(true);
     const userMsg: ChatMessage = { role: 'user', text: text.trim(), timestamp: Date.now() };
@@ -270,7 +272,7 @@ export function TamerChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, language, messages, siteData]);
+  }, [chatReady, isLoading, language, messages, siteData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -321,7 +323,20 @@ export function TamerChat() {
 
       {/* Messages area */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0 space-y-4 py-3 pr-1 chat-scroll relative z-10">
-        {!hasInteracted && (
+        {!chatReady && (
+          <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-4">
+            <span className="material-symbols-outlined text-3xl text-primary/40 animate-pulse">
+              cloud_sync
+            </span>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {language === 'tr'
+                ? 'Portföy verisi yükleniyor…'
+                : 'Loading portfolio data…'}
+            </p>
+          </div>
+        )}
+
+        {chatReady && !hasInteracted && (
           <motion.div
             className="flex flex-col items-center justify-center h-full gap-5"
             initial={{ opacity: 0 }}
@@ -401,12 +416,12 @@ export function TamerChat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={language === 'tr' ? 'Tamer hakkında sor...' : 'Ask about Tamer...'}
-            disabled={isLoading}
+            disabled={isLoading || !chatReady}
             className="w-full h-11 pl-4 pr-12 bg-white/50 dark:bg-white/[0.03] border border-slate-200/50 dark:border-slate-700/20 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400/70 dark:placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:bg-white/70 dark:focus:bg-white/[0.05] transition-all duration-300 disabled:opacity-40 font-mono"
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || !chatReady}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white disabled:opacity-20 disabled:grayscale hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 active:scale-90"
           >
             <span className="material-symbols-outlined text-[14px]">arrow_upward</span>

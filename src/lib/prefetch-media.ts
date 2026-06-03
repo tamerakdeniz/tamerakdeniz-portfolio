@@ -20,12 +20,25 @@ export function prefetchMediaUrl(url: string | undefined | null): void {
   img.src = url;
 }
 
+function prefetchBinaryUrl(url: string | undefined | null): void {
+  if (!url || url.startsWith('data:') || inflight.has(url) || loaded.has(url)) return;
+  inflight.add(url);
+  fetch(url)
+    .then((res) => (res.ok ? res.blob() : Promise.reject()))
+    .then(() => loaded.add(url))
+    .catch(() => {})
+    .finally(() => inflight.delete(url));
+}
+
 export function prefetchSiteMedia(data: SiteData): void {
   for (const p of data.projects || []) {
     prefetchMediaUrl(p.image);
   }
   for (const e of data.aboutEntries || []) {
     prefetchMediaUrl(e.avatar?.imageUrl);
+  }
+  for (const cv of data.cvFiles || []) {
+    prefetchBinaryUrl(cv.dataUrl);
   }
   if (data.homeHero?.icon?.mode === 'image') {
     prefetchMediaUrl(data.homeHero.icon.imageUrl);
