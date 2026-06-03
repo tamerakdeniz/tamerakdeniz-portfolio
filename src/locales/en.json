@@ -69,7 +69,7 @@
   "timeline-work": "Work",
   "timeline-education": "Education",
   "timeline-certification": "Certificate",
-  "cv-mobile-info": "Opens the PDF in a new browser tab. You can save it from there if needed.",
+  "cv-mobile-info": "Download uses the site server (reliable). Open in new tab shows the file in your browser.",
   "cv-open-tab": "Open in New Tab",
   "cv-download": "Download",
   "contact-success": "Thank you! Your message has been sent.",

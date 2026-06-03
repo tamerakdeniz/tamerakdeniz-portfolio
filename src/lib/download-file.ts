@@ -11,45 +11,17 @@ function isFirebaseStorageUrl(url: string): boolean {
   }
 }
 
-function cvProxyDownloadUrl(storageUrl: string, fileName: string): string {
-  const params = new URLSearchParams({
-    url: storageUrl,
-    name: fileName,
-  });
-  return `/api/download-cv?${params.toString()}`;
+function safePdfName(fileName: string): string {
+  return fileName.toLowerCase().endsWith('.pdf') ? fileName : `${fileName}.pdf`;
 }
 
-/** Trigger a file download; Firebase Storage uses same-origin API proxy (no CORS). */
-export async function downloadFile(url: string, fileName: string): Promise<void> {
-  const safeName = fileName.toLowerCase().endsWith('.pdf') ? fileName : `${fileName}.pdf`;
-  const fetchUrl = isFirebaseStorageUrl(url) ? cvProxyDownloadUrl(url, safeName) : url;
-
-  if (fetchUrl.startsWith('/') && typeof window !== 'undefined') {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = safeName;
-    link.rel = 'noopener';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    return;
+/** Same-origin URL — server fetches Storage and returns Content-Disposition: attachment */
+export function getCvDownloadHref(fileUrl: string, fileName: string): string {
+  const safeName = safePdfName(fileName);
+  if (fileUrl.startsWith('/')) return fileUrl;
+  if (isFirebaseStorageUrl(fileUrl)) {
+    const params = new URLSearchParams({ url: fileUrl, name: safeName });
+    return `/api/download-cv?${params.toString()}`;
   }
-
-  const res = await fetch(fetchUrl);
-  if (!res.ok) {
-    throw new Error(`Download failed: ${res.status}`);
-  }
-  const blob = await res.blob();
-  const blobUrl = URL.createObjectURL(blob);
-  try {
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = safeName;
-    link.rel = 'noopener';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } finally {
-    URL.revokeObjectURL(blobUrl);
-  }
+  return fileUrl;
 }
