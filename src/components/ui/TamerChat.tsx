@@ -1,6 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/store';
+import { compactSiteDataForChat } from '@/lib/chat-quick-answer';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -191,23 +192,25 @@ export function TamerChat() {
     try {
       const history = messages.map((m) => ({ role: m.role, text: m.text }));
 
-      // Remove Base64 strings from siteData to prevent FUNCTION_PAYLOAD_TOO_LARGE error on Vercel
-      const sanitizedSiteData = siteData 
-        ? JSON.parse(JSON.stringify(siteData, (k, v) => (typeof v === 'string' && v.length > 5000 ? undefined : v)))
-        : null;
+      const payloadSiteData = siteData ? compactSiteDataForChat(siteData) : null;
 
       let data: { reply?: string; error?: string } | null = null;
-      const MAX_RETRIES = 2;
+      const MAX_RETRIES = 3;
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text.trim(), history, siteData: sanitizedSiteData, language }),
+          body: JSON.stringify({
+            message: text.trim(),
+            history,
+            siteData: payloadSiteData,
+            language,
+          }),
         });
         data = await res.json();
 
         if (data?.error === 'rate_limit' && attempt < MAX_RETRIES) {
-          await new Promise((r) => setTimeout(r, 3000 * (attempt + 1)));
+          await new Promise((r) => setTimeout(r, 2000 * Math.pow(2, attempt)));
           continue;
         }
         break;
