@@ -1,7 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/store';
-import { compactSiteDataForChat } from '@/lib/chat-quick-answer';
+import { compactSiteDataForChat } from '@/lib/chat-payload';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 

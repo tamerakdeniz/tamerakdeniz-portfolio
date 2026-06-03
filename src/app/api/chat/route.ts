@@ -1,7 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
-import { tryQuickAnswer } from '@/lib/chat-quick-answer';
-import type { SiteData } from '@/types';
 
 export const maxDuration = 60;
 
@@ -115,15 +113,6 @@ export async function POST(req: NextRequest) {
 
     const lang = language === 'tr' ? 'tr' : 'en';
     const langLabel = lang === 'tr' ? 'Turkish' : 'English';
-
-    const quickReply = tryQuickAnswer(
-      message,
-      siteData as SiteData | null,
-      lang
-    );
-    if (quickReply) {
-      return NextResponse.json({ reply: quickReply });
-    }
 
     const context = buildContext(siteData, lang);
     const systemText = SYSTEM_PROMPT
