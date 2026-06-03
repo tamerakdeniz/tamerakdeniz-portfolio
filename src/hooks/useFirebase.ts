@@ -1,29 +1,28 @@
 'use client';
 
 import { useEffect } from 'react';
+import {
+  subscribeToSiteData,
+  onAuthChange,
+  getSiteDataOnce,
+} from '@/lib/firebase';
+import {
+  readSiteDataCache,
+  writeSiteDataCache,
+} from '@/lib/site-data-cache';
+import { schedulePrefetchSiteMedia } from '@/lib/prefetch-media';
 import { useAppStore } from '@/store';
-import { subscribeToSiteData, onAuthChange } from '@/lib/firebase';
-import { prefetchSiteMedia } from '@/lib/prefetch-media';
 import type { SiteData } from '@/types';
 
-const SITE_DATA_CACHE_KEY = 'portfolio_siteData_cache';
-
-function readSiteDataCache(): SiteData | null {
-  try {
-    const cached = localStorage.getItem(SITE_DATA_CACHE_KEY);
-    if (!cached) return null;
-    return JSON.parse(cached) as SiteData;
-  } catch {
-    return null;
-  }
-}
-
-function writeSiteDataCache(data: SiteData) {
-  try {
-    localStorage.setItem(SITE_DATA_CACHE_KEY, JSON.stringify(data));
-  } catch {
-    /* quota exceeded */
-  }
+function applySiteData(
+  site: SiteData,
+  setSiteData: (d: SiteData) => void,
+  setFirebaseConnected: (c: boolean) => void
+) {
+  setSiteData(site);
+  setFirebaseConnected(true);
+  writeSiteDataCache(site);
+  schedulePrefetchSiteMedia(site);
 }
 
 export function useFirebaseSync() {
@@ -33,27 +32,49 @@ export function useFirebaseSync() {
   const setAuthUser = useAppStore((s) => s.setAuthUser);
 
   useEffect(() => {
+    let cancelled = false;
     const cached = readSiteDataCache();
-    if (cached) {
+    const existing = useAppStore.getState().siteData;
+
+    if (existing) {
+      schedulePrefetchSiteMedia(existing);
+    } else if (cached) {
       setSiteData(cached);
-      prefetchSiteMedia(cached);
     }
 
-    const unsubData = subscribeToSiteData((data) => {
-      if (data) {
-        const site = data as SiteData;
-        setSiteData(site);
-        prefetchSiteMedia(site);
-        setFirebaseConnected(true);
-        writeSiteDataCache(site);
-      } else {
-        if (!cached) {
+    // One-shot fetch often completes before the WebSocket listener on mobile.
+    getSiteDataOnce()
+      .then((data) => {
+        if (cancelled) return;
+        if (data) {
+          applySiteData(data as SiteData, setSiteData, setFirebaseConnected);
+        } else if (!cached) {
+          setSiteDataLoaded(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled && cached) setSiteData(cached);
+        if (!cancelled) setSiteDataLoaded(true);
+      });
+
+    const unsubData = subscribeToSiteData(
+      (data) => {
+        if (cancelled) return;
+        if (data) {
+          applySiteData(data as SiteData, setSiteData, setFirebaseConnected);
+        } else {
           const fallback = readSiteDataCache();
           if (fallback) setSiteData(fallback);
+          setSiteDataLoaded(true);
         }
+      },
+      () => {
+        if (cancelled) return;
+        const fallback = readSiteDataCache();
+        if (fallback) setSiteData(fallback);
         setSiteDataLoaded(true);
       }
-    });
+    );
 
     const unsubAuth = onAuthChange((user) => {
       if (user) {
@@ -64,6 +85,7 @@ export function useFirebaseSync() {
     });
 
     return () => {
+      cancelled = true;
       unsubData();
       unsubAuth();
     };

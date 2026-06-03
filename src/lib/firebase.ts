@@ -77,16 +77,20 @@ export function onAuthChange(callback: (user: User | null) => void) {
   return onAuthStateChanged(authInstance, callback);
 }
 
-export function subscribeToSiteData(callback: (data: unknown) => void) {
+export function subscribeToSiteData(
+  onData: (data: unknown) => void,
+  onError?: (error: Error) => void
+) {
   const db = getFirebaseDatabase();
   const siteDataRef = ref(db, 'siteData');
   return onValue(
     siteDataRef,
     (snapshot) => {
-      callback(snapshot.val());
+      onData(snapshot.val());
     },
     (error) => {
       console.error('Firebase subscription error:', error);
+      onError?.(error);
     }
   );
 }

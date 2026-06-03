@@ -44,3 +44,15 @@ export function prefetchSiteMedia(data: SiteData): void {
     prefetchMediaUrl(data.homeHero.icon.imageUrl);
   }
 }
+
+/** Run after text/RTDB is shown — avoids competing with Firebase on slow mobile networks. */
+export function schedulePrefetchSiteMedia(data: SiteData, delayMs = 2000): void {
+  if (typeof window === 'undefined') return;
+  const run = () => prefetchSiteMedia(data);
+  const start = () => window.setTimeout(run, delayMs);
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(start, { timeout: delayMs + 500 });
+  } else {
+    start();
+  }
+}

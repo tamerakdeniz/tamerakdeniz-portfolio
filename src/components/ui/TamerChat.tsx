@@ -168,7 +168,12 @@ export function TamerChat() {
   const language = useAppStore((s) => s.language);
   const siteData = useAppStore((s) => s.siteData);
   const siteDataLoaded = useAppStore((s) => s.siteDataLoaded);
-  const chatReady = siteDataLoaded && !!siteData;
+  const hasUsableData =
+    !!siteData &&
+    ((siteData.projects?.length ?? 0) > 0 ||
+      !!siteData.homeHero?.title?.en ||
+      !!siteData.homeHero?.title?.tr);
+  const chatReady = siteDataLoaded && hasUsableData;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -350,8 +355,12 @@ export function TamerChat() {
             </span>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {language === 'tr'
-                ? 'Portföy verisi yükleniyor…'
-                : 'Loading portfolio data…'}
+                ? siteDataLoaded && !siteData
+                  ? 'Realtime Database\'de siteData yok. Konsolda RTDB (Firestore değil) kontrol edin veya admin\'den içe aktarın.'
+                  : 'Portföy verisi yükleniyor…'
+                : siteDataLoaded && !siteData
+                  ? 'No siteData in Realtime Database. Check RTDB in console (not Firestore) or import via admin.'
+                  : 'Loading portfolio data…'}
             </p>
           </div>
         )}
