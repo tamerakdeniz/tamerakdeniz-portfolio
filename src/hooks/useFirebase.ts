@@ -25,6 +25,18 @@ function applySiteData(
   schedulePrefetchSiteMedia(site);
 }
 
+async function getSiteDataFromApi(signal: AbortSignal): Promise<SiteData | null> {
+  const response = await fetch('/api/site-data', {
+    signal,
+    headers: { Accept: 'application/json' },
+  });
+
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error('SITE_DATA_API_FAILED');
+
+  return (await response.json()) as SiteData;
+}
+
 export function useFirebaseSync() {
   const setSiteData = useAppStore((s) => s.setSiteData);
   const setSiteDataLoaded = useAppStore((s) => s.setSiteDataLoaded);
@@ -33,6 +45,7 @@ export function useFirebaseSync() {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
     const cached = readSiteDataCache();
     const existing = useAppStore.getState().siteData;
 
@@ -41,6 +54,23 @@ export function useFirebaseSync() {
     } else if (cached) {
       setSiteData(cached);
     }
+
+    // Instagram's in-app browser can delay Firebase RTDB transports heavily.
+    // Same-origin HTTP gives visitors visible content first; realtime sync follows.
+    getSiteDataFromApi(controller.signal)
+      .then((data) => {
+        if (cancelled) return;
+        if (data) {
+          applySiteData(data, setSiteData, setFirebaseConnected);
+        } else if (!cached && !useAppStore.getState().siteData) {
+          setSiteDataLoaded(true);
+        }
+      })
+      .catch((error) => {
+        if (cancelled || error?.name === 'AbortError') return;
+        if (cached) setSiteData(cached);
+        if (!useAppStore.getState().siteData) setSiteDataLoaded(true);
+      });
 
     // One-shot fetch often completes before the WebSocket listener on mobile.
     getSiteDataOnce()
@@ -86,6 +116,7 @@ export function useFirebaseSync() {
 
     return () => {
       cancelled = true;
+      controller.abort();
       unsubData();
       unsubAuth();
     };

@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { getInitialSiteDataFromCache } from '@/lib/site-data-cache';
 import type {
   SiteData,
   Theme,
@@ -8,11 +7,6 @@ import type {
   HomeHero,
   Availability,
 } from '@/types';
-
-const initialSiteCache =
-  typeof window !== 'undefined'
-    ? getInitialSiteDataFromCache()
-    : { data: null, loaded: false };
 
 interface AppState {
   theme: Theme;
@@ -74,8 +68,8 @@ function getInitialLanguage(): Language {
 export const useAppStore = create<AppState>((set, get) => ({
   theme: getInitialTheme(),
   language: getInitialLanguage(),
-  siteData: initialSiteCache.data,
-  siteDataLoaded: initialSiteCache.loaded,
+  siteData: null,
+  siteDataLoaded: false,
   isFirebaseConnected: false,
   authUser: null,
   contactModalOpen: false,

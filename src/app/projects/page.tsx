@@ -16,6 +16,7 @@ export default function ProjectsPage() {
   const { t } = useTranslation();
   const [activeFilter, setActiveFilter] = useState('all');
   const projects = useAppStore(selectProjects);
+  const siteDataLoaded = useAppStore((s) => s.siteDataLoaded);
 
   const publishedProjects = useMemo(
     () =>
@@ -78,7 +79,22 @@ export default function ProjectsPage() {
           </motion.div>
 
           <AnimatePresence mode="wait">
-            {filtered.length === 0 ? (
+            {!siteDataLoaded && projects.length === 0 ? (
+              <motion.div
+                key="loading"
+                className="text-center py-16"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <span className="material-symbols-outlined text-5xl text-primary/60 mb-4 block animate-pulse">
+                  hourglass_empty
+                </span>
+                <p className="text-slate-600 dark:text-slate-400">
+                  {t('projects-loading')}
+                </p>
+              </motion.div>
+            ) : filtered.length === 0 ? (
               <motion.div
                 key="empty"
                 className="text-center py-16"
