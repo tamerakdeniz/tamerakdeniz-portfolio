@@ -47,7 +47,14 @@ function ScrambleText({ text, delay = 0 }: { text: string; delay?: number }) {
     return () => clearInterval(interval);
   }, [started, text]);
 
-  return <>{display || '\u00A0'}</>;
+  return (
+    <span className="relative inline-block" aria-label={text}>
+      <span className="invisible whitespace-pre">{text}</span>
+      <span className="absolute inset-0 whitespace-pre" aria-hidden="true">
+        {display || text}
+      </span>
+    </span>
+  );
 }
 
 function AnimatedCounter({
