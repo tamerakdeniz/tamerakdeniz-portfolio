@@ -1,13 +1,21 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { useAppStore, selectProjects, selectHomeHero } from '@/store';
+import {
+  useAppStore,
+  selectProjects,
+  selectHomeHero,
+  selectSkills,
+} from '@/store';
 import { AvailabilityBadge } from '@/components/ui/AvailabilityBadge';
+import { CachedImage } from '@/components/ui/CachedImage';
 import { MagneticButton } from '@/components/ui/InteractiveEffects';
 import { TamerChat } from '@/components/ui/TamerChat';
+import type { Project, Skill } from '@/types';
 
 function ScrambleText({ text, delay = 0 }: { text: string; delay?: number }) {
   const [display, setDisplay] = useState('');
@@ -42,7 +50,15 @@ function ScrambleText({ text, delay = 0 }: { text: string; delay?: number }) {
   return <>{display || '\u00A0'}</>;
 }
 
-function AnimatedCounter({ target, suffix = '+', delay = 0 }: { target: number; suffix?: string; delay?: number }) {
+function AnimatedCounter({
+  target,
+  suffix = '+',
+  delay = 0,
+}: {
+  target: number;
+  suffix?: string;
+  delay?: number;
+}) {
   const [count, setCount] = useState(0);
   const [started, setStarted] = useState(false);
 
@@ -53,8 +69,8 @@ function AnimatedCounter({ target, suffix = '+', delay = 0 }: { target: number; 
 
   useEffect(() => {
     if (!started) return;
-    const duration = 2000;
-    const steps = 60;
+    const duration = 1600;
+    const steps = 48;
     const increment = target / steps;
     let current = 0;
     const interval = setInterval(() => {
@@ -69,7 +85,12 @@ function AnimatedCounter({ target, suffix = '+', delay = 0 }: { target: number; 
     return () => clearInterval(interval);
   }, [started, target]);
 
-  return <>{count}{suffix}</>;
+  return (
+    <>
+      {count}
+      {suffix}
+    </>
+  );
 }
 
 function TypewriterLoop({ words, delay = 0 }: { words: string[]; delay?: number }) {
@@ -84,7 +105,7 @@ function TypewriterLoop({ words, delay = 0 }: { words: string[]; delay?: number 
   }, [delay]);
 
   const tick = useCallback(() => {
-    if (!started) return;
+    if (!started || words.length === 0) return;
     const word = words[currentWordIdx];
 
     if (phase === 'typing') {
@@ -107,16 +128,16 @@ function TypewriterLoop({ words, delay = 0 }: { words: string[]; delay?: number 
 
   useEffect(() => {
     if (!started) return;
-    const speed = phase === 'pausing' ? 2000 : phase === 'deleting' ? 35 : 70;
+    const speed = phase === 'pausing' ? 1700 : phase === 'deleting' ? 34 : 64;
     const timer = setTimeout(tick, speed);
     return () => clearTimeout(timer);
   }, [tick, started, phase]);
 
   return (
-    <span className="text-primary">
+    <span className="text-teal-700 dark:text-teal-300">
       {text}
       <motion.span
-        className="inline-block w-[2px] h-[1em] bg-primary ml-0.5 align-middle"
+        className="inline-block w-[2px] h-[1em] bg-teal-600 dark:bg-teal-300 ml-0.5 align-middle"
         animate={{ opacity: [1, 0] }}
         transition={{ duration: 0.53, repeat: Infinity, repeatType: 'reverse' }}
       />
@@ -124,224 +145,485 @@ function TypewriterLoop({ words, delay = 0 }: { words: string[]; delay?: number 
   );
 }
 
-function StatusLine() {
-  const { t } = useTranslation();
-  const projects = useAppStore(selectProjects);
-  const language = useAppStore((s) => s.language);
-  const projectCount = projects.filter((p) => p.published).length;
-  const startYear = 2021;
-  const yearsExp = new Date().getFullYear() - startYear;
+function splitHeroTitle(fullTitle: string, fallbackA: string, fallbackB: string) {
+  const words = fullTitle.trim().split(/\s+/).filter(Boolean);
+  if (words.length >= 2) {
+    const mid = Math.ceil(words.length / 2);
+    return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+  }
+  if (words.length === 1) return [words[0], ''];
+  return [fallbackA, fallbackB];
+}
 
+function getProjectTitle(project: Project, language: 'en' | 'tr') {
+  return project.title?.[language] || project.title?.en || 'Untitled';
+}
+
+function getSkillName(skill: Skill) {
+  return skill.name || skill.iconKey || 'tool';
+}
+
+function SignalMetric({
+  icon,
+  value,
+  label,
+  delay,
+}: {
+  icon: string;
+  value: React.ReactNode;
+  label: string;
+  delay: number;
+}) {
   return (
     <motion.div
-      className="flex flex-wrap items-center gap-5 text-xs font-mono"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 1.6, duration: 0.6 }}
+      className="relative overflow-hidden rounded-lg border border-slate-900/10 dark:border-white/10 bg-white/65 dark:bg-white/[0.035] p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.5 }}
     >
-      <div className="flex items-center gap-2 text-slate-500">
-        <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-primary text-sm">trending_up</span>
-        </span>
-        <div>
-          <span className="text-slate-900 dark:text-white font-bold text-lg font-sans leading-none">
-            <AnimatedCounter target={yearsExp} delay={1.8} />
-          </span>
-          <span className="text-slate-400 dark:text-slate-600 ml-1.5 text-[10px] uppercase tracking-wider font-sans">
-            {language === 'tr' ? 'Yıl' : 'Years'}
-          </span>
-        </div>
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-400/70 to-transparent" />
+      <span className="material-symbols-outlined mb-4 block text-[20px] text-coral-500">
+        {icon}
+      </span>
+      <div className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+        {value}
       </div>
-      <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
-      <div className="flex items-center gap-2 text-slate-500">
-        <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-primary text-sm">deployed_code</span>
-        </span>
-        <div>
-          <span className="text-slate-900 dark:text-white font-bold text-lg font-sans leading-none">
-            <AnimatedCounter target={projectCount} delay={2.0} />
-          </span>
-          <span className="text-slate-400 dark:text-slate-600 ml-1.5 text-[10px] uppercase tracking-wider font-sans">
-            {language === 'tr' ? 'Proje' : 'Projects'}
-          </span>
-        </div>
+      <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500">
+        {label}
       </div>
     </motion.div>
+  );
+}
+
+function ProjectSignal({
+  item,
+  index,
+  language,
+}: {
+  item: {
+    title: string;
+    stack: string[];
+    image?: string;
+    href?: string;
+  };
+  index: number;
+  language: 'en' | 'tr';
+}) {
+  const content = (
+    <motion.article
+      className="group grid grid-cols-[64px_1fr_auto] items-center gap-3 rounded-lg border border-slate-900/10 dark:border-white/10 bg-white/70 dark:bg-white/[0.035] p-2 transition-all hover:border-teal-500/40 hover:bg-white/95 dark:hover:bg-white/[0.065]"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 1 + index * 0.08, duration: 0.45 }}
+    >
+      <div className="relative h-14 overflow-hidden rounded-md bg-slate-100 dark:bg-black/30">
+        {item.image ? (
+          <CachedImage
+            src={item.image}
+            alt={item.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <span className="material-symbols-outlined text-teal-500/70">deployed_code</span>
+          </div>
+        )}
+      </div>
+      <div className="min-w-0">
+        <h3 className="truncate text-sm font-bold text-slate-900 dark:text-white">
+          {item.title}
+        </h3>
+        <p className="mt-1 truncate text-[11px] font-mono text-slate-500 dark:text-slate-500">
+          {(item.stack.length ? item.stack : ['product', 'system']).slice(0, 3).join(' / ')}
+        </p>
+      </div>
+      <span className="material-symbols-outlined text-[18px] text-slate-400 transition-all group-hover:translate-x-0.5 group-hover:text-teal-500">
+        {item.href ? 'arrow_forward' : 'radio_button_unchecked'}
+      </span>
+    </motion.article>
+  );
+
+  if (!item.href) return content;
+
+  return (
+    <Link href={item.href} aria-label={`${language === 'tr' ? 'Projeye git' : 'Open project'}: ${item.title}`}>
+      {content}
+    </Link>
   );
 }
 
 export function HeroSection() {
   const { t } = useTranslation();
   const heroSettings = useAppStore(selectHomeHero);
+  const projects = useAppStore(selectProjects);
+  const skills = useAppStore(selectSkills);
   const language = useAppStore((s) => s.language);
   const setContactModalOpen = useAppStore((s) => s.setContactModalOpen);
   const setCvModalOpen = useAppStore((s) => s.setCvModalOpen);
 
   const fullTitle = heroSettings.title?.[language] || heroSettings.title?.en || '';
-  const words = fullTitle.trim().split(/\s+/).filter(Boolean);
-
-  let part1 = t('hero-title-1');
-  let part2 = t('hero-title-2');
-  if (words.length >= 2) {
-    const mid = Math.ceil(words.length / 2);
-    part1 = words.slice(0, mid).join(' ');
-    part2 = words.slice(mid).join(' ');
-  } else if (words.length === 1) {
-    part1 = words[0];
-    part2 = '';
-  }
-
+  const [part1, part2] = splitHeroTitle(
+    fullTitle,
+    t('hero-title-1'),
+    t('hero-title-2')
+  );
   const heroDesc =
     heroSettings.description?.[language] || heroSettings.description?.en || t('hero-description');
   const moreLabel =
     heroSettings.moreLabel?.[language] || heroSettings.moreLabel?.en || t('hero-more-about');
 
+  const publishedProjects = projects
+    .filter((p) => p.published)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const visibleSkills = skills
+    .filter((skill) => skill.published !== false)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .slice(0, 8);
+
+  const yearsExp = Math.max(1, new Date().getFullYear() - 2021);
   const typewriterWords =
+    visibleSkills.length > 0
+      ? visibleSkills.slice(0, 5).map(getSkillName)
+      : language === 'tr'
+        ? ['LLM entegrasyonu', 'ürün mimarisi', 'hızlı prototip', 'otomasyon']
+        : ['LLM integration', 'product architecture', 'rapid prototyping', 'automation'];
+
+  const modes =
     language === 'tr'
-      ? ['LLM Entegrasyonu', 'Full-Stack', 'Yapay Zeka', 'Akıllı Sistemler', 'Otomasyon']
-      : ['LLM Integration', 'Full-Stack', 'AI Products', 'Smart Systems', 'Automation'];
+      ? [
+          {
+            icon: 'travel_explore',
+            title: 'Derine iner',
+            text: 'Belirsizliği net ürün kararlarına dönüştürür.',
+          },
+          {
+            icon: 'architecture',
+            title: 'Sistemi kurar',
+            text: 'Frontend, backend ve AI katmanını aynı akışta bağlar.',
+          },
+          {
+            icon: 'rocket_launch',
+            title: 'Yayına taşır',
+            text: 'Fikirden çalışan ürüne kadar sorumluluk alır.',
+          },
+        ]
+      : [
+          {
+            icon: 'travel_explore',
+            title: 'Goes below surface',
+            text: 'Turns ambiguity into crisp product decisions.',
+          },
+          {
+            icon: 'architecture',
+            title: 'Builds the system',
+            text: 'Connects frontend, backend, and AI layers in one flow.',
+          },
+          {
+            icon: 'rocket_launch',
+            title: 'Ships to users',
+            text: 'Owns the path from raw idea to working product.',
+          },
+        ];
+
+  const fallbackSignals =
+    language === 'tr'
+      ? [
+          {
+            title: 'Autonomous Tutor',
+            stack: ['AI', 'öğrenme', 'ürün'],
+            image: '/img/portfolio-logo/autonomous-tutor.png',
+          },
+          {
+            title: 'FiyatIQ',
+            stack: ['otomasyon', 'veri', 'web'],
+            image: '/img/portfolio-logo/fiyatiq.png',
+          },
+          {
+            title: 'Wxco Food',
+            stack: ['mobil', 'sipariş', 'sistem'],
+            image: '/img/portfolio-logo/wxcofood.png',
+          },
+        ]
+      : [
+          {
+            title: 'Autonomous Tutor',
+            stack: ['AI', 'learning', 'product'],
+            image: '/img/portfolio-logo/autonomous-tutor.png',
+          },
+          {
+            title: 'FiyatIQ',
+            stack: ['automation', 'data', 'web'],
+            image: '/img/portfolio-logo/fiyatiq.png',
+          },
+          {
+            title: 'Wxco Food',
+            stack: ['mobile', 'orders', 'system'],
+            image: '/img/portfolio-logo/wxcofood.png',
+          },
+        ];
+
+  const projectSignals =
+    publishedProjects.length > 0
+      ? publishedProjects.slice(0, 3).map((project) => ({
+          title: getProjectTitle(project, language),
+          stack: project.techStack || [],
+          image: project.image,
+          href: '/projects',
+        }))
+      : fallbackSignals;
 
   return (
-    <section className="relative lg:overflow-hidden lg:h-[calc(100dvh-4rem)] lg:max-h-[calc(100dvh-4rem)] flex items-center min-h-[calc(100dvh-5rem)] lg:min-h-0">
-      {/* backgrounds — contained in a clipped layer to prevent overflow */}
+    <section className="relative min-h-[calc(100dvh-4rem)] overflow-hidden bg-[#f6f8f2] text-slate-950 dark:bg-[#090d0d] dark:text-white">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 hero-grid" />
+        <div className="absolute inset-0 hero-grid opacity-80" />
         <div className="absolute inset-0 aurora-bg" />
+        <div className="absolute inset-x-0 top-0 h-48 bg-[linear-gradient(180deg,rgba(20,184,166,0.16),transparent)] dark:bg-[linear-gradient(180deg,rgba(20,184,166,0.11),transparent)]" />
         <motion.div
-          className="absolute top-1/4 left-1/4 w-[700px] h-[700px] bg-primary/10 rounded-full blur-[180px] will-change-transform"
-          animate={{ opacity: [0.2, 0.35, 0.2] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute left-[8%] top-0 h-full w-px bg-gradient-to-b from-transparent via-teal-400/30 to-transparent"
+          animate={{ opacity: [0.15, 0.45, 0.15] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-0 right-[10%] w-[500px] h-[500px] bg-violet-600/8 rounded-full blur-[140px] will-change-transform"
-          animate={{ opacity: [0.1, 0.2, 0.1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+          className="absolute right-[16%] top-0 h-full w-px bg-gradient-to-b from-transparent via-coral-400/25 to-transparent"
+          animate={{ opacity: [0.1, 0.35, 0.1] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         />
       </div>
 
-      {/* side accent */}
-      <motion.div
-        className="absolute left-0 top-1/2 -translate-y-1/2 w-px h-32 bg-gradient-to-b from-transparent via-primary/30 to-transparent hidden lg:block"
-        initial={{ scaleY: 0 }}
-        animate={{ scaleY: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-      />
-
-      {/* content: left hero + right chat */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-0 flex flex-col lg:flex-row items-center lg:items-center gap-8 lg:gap-12">
-        {/* LEFT: hero content */}
-        <div className="flex-1 flex flex-col items-start text-left space-y-4 sm:space-y-5 w-full min-w-0">
-          <AvailabilityBadge />
-
-          <div className="space-y-1">
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-8xl font-black tracking-tighter leading-[1.1]">
-              <motion.span
-                className="block"
-                initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <ScrambleText text={part1} delay={0.3} />
-              </motion.span>
-              <motion.span
-                className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-cyan-400"
-                initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <ScrambleText text={part2} delay={0.6} />
-              </motion.span>
-            </h1>
-
-            {/* typewriter */}
+      <div className="relative z-10 mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-7xl flex-col px-4 py-8 sm:px-6 lg:px-8 lg:py-6">
+        <div className="grid flex-1 items-center gap-6 lg:grid-cols-[minmax(0,1.04fr)_minmax(380px,0.96fr)] lg:gap-8">
+          <div className="min-w-0">
             <motion.div
-              className="flex items-center gap-2 text-sm font-mono pt-2"
+              className="flex flex-wrap items-center gap-3"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <AvailabilityBadge />
+              <span className="rounded-md border border-slate-900/10 bg-white/65 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-600 dark:border-white/10 dark:bg-white/[0.035] dark:text-slate-400">
+                {language === 'tr' ? 'İstanbul / AI ürün sistemleri' : 'Istanbul / AI product systems'}
+              </span>
+            </motion.div>
+
+            <div className="relative mt-7 border-l border-slate-900/10 pl-4 dark:border-white/10 sm:pl-6">
+              <span className="mb-3 block text-[11px] font-black uppercase tracking-[0.24em] text-coral-600 dark:text-coral-300">
+                Tamer Akdeniz
+              </span>
+              <h1 className="max-w-4xl break-words text-5xl font-black leading-[0.95] tracking-normal text-slate-950 dark:text-white sm:text-6xl md:text-7xl xl:text-8xl">
+                <motion.span
+                  className="block"
+                  initial={{ opacity: 0, y: 36, filter: 'blur(8px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <ScrambleText text={part1} delay={0.25} />
+                </motion.span>
+                {part2 && (
+                  <motion.span
+                    className="block text-teal-700 dark:text-teal-300"
+                    initial={{ opacity: 0, y: 36, filter: 'blur(8px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <ScrambleText text={part2} delay={0.45} />
+                  </motion.span>
+                )}
+              </h1>
+            </div>
+
+            <motion.div
+              className="mt-5 flex items-center gap-2 text-sm font-mono"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.0, duration: 0.5 }}
+              transition={{ delay: 0.85, duration: 0.5 }}
             >
-              <span className="text-slate-400 dark:text-slate-600 select-none">{'>'}</span>
-              <span className="text-slate-500 dark:text-slate-500 select-none">focus:</span>
-              <TypewriterLoop words={typewriterWords} delay={1.2} />
-            </motion.div>
-          </div>
-
-          {/* description */}
-          <motion.p
-            className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md leading-relaxed"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
-          >
-            {heroDesc}{' '}
-            <Link
-              href="/about"
-              className="inline-flex items-baseline gap-0 ml-1 text-primary underline underline-offset-4 decoration-1 decoration-primary/40 hover:decoration-primary transition-all group font-medium"
-            >
-              <span>{moreLabel}</span>
-              <span className="material-symbols-outlined text-sm leading-none group-hover:translate-x-1 transition-transform">
-                arrow_forward
+              <span className="text-slate-400 select-none">{'>'}</span>
+              <span className="text-slate-500 select-none">
+                {language === 'tr' ? 'odak' : 'focus'}:
               </span>
-            </Link>
-          </motion.p>
+              <TypewriterLoop words={typewriterWords} delay={1} />
+            </motion.div>
 
-          {/* CTA buttons */}
-          <motion.div
-            className="flex flex-wrap gap-3 w-full"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1.1 }}
-          >
-            <MagneticButton href="/projects">
-              <div className="group relative flex items-center justify-center h-11 px-5 sm:px-7 rounded-xl bg-primary text-white text-sm font-semibold transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-primary/25 active:scale-95 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                <span className="relative">{t('btn-view-projects')}</span>
-                <span className="material-symbols-outlined ml-2 text-[18px] group-hover:translate-x-1 transition-transform shrink-0 relative">
-                  arrow_forward
-                </span>
-              </div>
-            </MagneticButton>
+            <motion.p
+              className="mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300 sm:text-lg"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.75 }}
+            >
+              {heroDesc}{' '}
+              <Link
+                href="/about"
+                className="inline-flex items-baseline gap-1 text-teal-700 underline decoration-teal-500/30 underline-offset-4 transition-colors hover:text-coral-600 hover:decoration-coral-500 dark:text-teal-300 dark:hover:text-coral-300"
+              >
+                <span>{moreLabel}</span>
+                <span className="material-symbols-outlined text-sm leading-none">arrow_forward</span>
+              </Link>
+            </motion.p>
 
-            <MagneticButton onClick={() => setContactModalOpen(true)}>
-              <div className="flex items-center justify-center h-11 px-5 sm:px-7 rounded-xl bg-white/80 dark:bg-[#282e39]/80 backdrop-blur-sm border border-gray-200 dark:border-slate-700/50 text-slate-900 dark:text-white text-sm font-semibold hover:bg-white dark:hover:bg-[#323945] transition-all active:scale-95 hover:border-primary/30">
-                {t('btn-contact')}
-              </div>
-            </MagneticButton>
+            <motion.div
+              className="mt-7 flex flex-wrap gap-3"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.95 }}
+            >
+              <MagneticButton href="/projects">
+                <div className="group relative flex h-12 items-center justify-center overflow-hidden rounded-lg bg-slate-950 px-5 text-sm font-bold text-white transition-all hover:bg-teal-700 active:scale-95 dark:bg-teal-300 dark:text-slate-950 dark:hover:bg-coral-300 sm:px-7">
+                  <span className="material-symbols-outlined mr-2 text-[18px]">deployed_code</span>
+                  <span>{t('btn-view-projects')}</span>
+                  <span className="material-symbols-outlined ml-2 text-[18px] transition-transform group-hover:translate-x-1">
+                    arrow_forward
+                  </span>
+                </div>
+              </MagneticButton>
 
-            <MagneticButton onClick={() => setCvModalOpen(true)}>
-              <div className="flex items-center justify-center h-11 px-5 sm:px-7 rounded-xl bg-transparent border border-slate-300/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95 hover:border-primary/30">
-                <span className="material-symbols-outlined mr-1.5 text-[18px] shrink-0">download</span>
-                {t('btn-cv')}
-              </div>
-            </MagneticButton>
-          </motion.div>
+              <MagneticButton onClick={() => setContactModalOpen(true)}>
+                <div className="flex h-12 items-center justify-center rounded-lg border border-slate-900/15 bg-white/75 px-5 text-sm font-bold text-slate-950 transition-all hover:border-coral-500/50 hover:bg-white active:scale-95 dark:border-white/10 dark:bg-white/[0.045] dark:text-white dark:hover:bg-white/[0.08] sm:px-7">
+                  <span className="material-symbols-outlined mr-2 text-[18px] text-coral-500">forum</span>
+                  {t('btn-contact')}
+                </div>
+              </MagneticButton>
 
-          {/* stats */}
-          <StatusLine />
-        </div>
+              <MagneticButton onClick={() => setCvModalOpen(true)}>
+                <div className="flex h-12 items-center justify-center rounded-lg border border-slate-900/15 bg-transparent px-5 text-sm font-semibold text-slate-700 transition-all hover:border-teal-500/50 hover:bg-teal-500/5 active:scale-95 dark:border-white/10 dark:text-slate-300 dark:hover:bg-teal-300/10 sm:px-7">
+                  <span className="material-symbols-outlined mr-2 text-[18px]">download</span>
+                  {t('btn-cv')}
+                </div>
+              </MagneticButton>
+            </motion.div>
 
-        {/* RIGHT: chat widget */}
-        <motion.div
-          className="w-full lg:w-[380px] xl:w-[400px] shrink-0"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.7 }}
-        >
-          <div className="relative">
-            {/* Outer glow */}
-            <div className="absolute -inset-4 bg-gradient-to-br from-primary/8 via-transparent to-cyan-400/6 rounded-3xl blur-2xl pointer-events-none" />
-            {/* Border gradient frame */}
-            <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-cyan-400/15 pointer-events-none" />
-            <div className="relative bg-white/50 dark:bg-[#13151a]/70 backdrop-blur-2xl rounded-2xl border border-white/30 dark:border-slate-700/20 shadow-2xl shadow-primary/5 p-4 h-[420px] lg:h-[480px] flex flex-col overflow-hidden">
-              <TamerChat />
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              <SignalMetric
+                icon="timeline"
+                value={<AnimatedCounter target={yearsExp} delay={1.05} />}
+                label={language === 'tr' ? 'yıl üretim' : 'years building'}
+                delay={1.05}
+              />
+              <SignalMetric
+                icon="deployed_code"
+                value={<AnimatedCounter target={publishedProjects.length} delay={1.15} />}
+                label={language === 'tr' ? 'canlı iz' : 'shipped signals'}
+                delay={1.15}
+              />
+              <SignalMetric
+                icon="hub"
+                value={<AnimatedCounter target={visibleSkills.length || 8} delay={1.25} />}
+                label={language === 'tr' ? 'aktif araç' : 'active tools'}
+                delay={1.25}
+              />
             </div>
           </div>
-        </motion.div>
-      </div>
 
-      {/* Copyright */}
-      <div className="absolute bottom-3 left-0 right-0 text-center text-[10px] sm:text-xs text-slate-400/60 dark:text-slate-600/60 z-10">
-        © {new Date().getFullYear()} Tamer Akdeniz. {language === 'tr' ? 'Tüm hakları saklıdır.' : 'All rights reserved.'}
+          <div className="grid min-w-0 gap-4 lg:grid-rows-[minmax(290px,0.9fr)_minmax(260px,0.75fr)]">
+            <motion.div
+              className="relative min-h-[320px] overflow-hidden rounded-lg border border-white/20 bg-slate-950 shadow-[0_30px_90px_rgba(15,23,42,0.18)] dark:border-white/10"
+              initial={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              transition={{ delay: 0.35, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Image
+                src="/img/underwaterme.jpg"
+                alt="Tamer Akdeniz underwater profile"
+                fill
+                priority
+                sizes="(min-width: 1024px) 46vw, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,13,13,0.72),rgba(9,13,13,0.1)_55%,rgba(9,13,13,0.42)),linear-gradient(0deg,rgba(9,13,13,0.78),transparent_58%)]" />
+              <div className="absolute left-4 top-4 rounded-md border border-white/15 bg-black/30 px-3 py-2 backdrop-blur">
+                <span className="block text-[10px] font-black uppercase tracking-[0.22em] text-teal-200">
+                  {language === 'tr' ? 'profil izi' : 'profile signal'}
+                </span>
+                <span className="mt-1 block text-xs text-white/75">
+                  {language === 'tr' ? 'yüzeyin altına bakan geliştirici' : 'the developer below the surface'}
+                </span>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+                <p className="max-w-md text-2xl font-black leading-tight text-white sm:text-3xl">
+                  {language === 'tr'
+                    ? 'Derinlik merak, ürün disiplin ister.'
+                    : 'Depth takes curiosity. Product takes discipline.'}
+                </p>
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {modes.map((mode) => (
+                    <div
+                      key={mode.title}
+                      className="rounded-md border border-white/10 bg-white/[0.08] p-3 backdrop-blur"
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-coral-200">
+                        {mode.icon}
+                      </span>
+                      <h2 className="mt-2 text-xs font-bold text-white">{mode.title}</h2>
+                      <p className="mt-1 hidden text-[10px] leading-4 text-white/60 sm:block">
+                        {mode.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr] lg:grid-cols-2">
+              <motion.div
+                className="rounded-lg border border-slate-900/10 bg-white/70 p-3 dark:border-white/10 dark:bg-white/[0.035]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.55 }}
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="text-xs font-black uppercase tracking-[0.18em] text-slate-600 dark:text-slate-400">
+                    {language === 'tr' ? 'son üretim izleri' : 'recent build signals'}
+                  </h2>
+                  <Link
+                    href="/projects"
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-300"
+                    aria-label={language === 'tr' ? 'Projeleri aç' : 'Open projects'}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                  </Link>
+                </div>
+                <div className="space-y-2">
+                  {projectSignals.map((item, index) => (
+                    <ProjectSignal
+                      key={`${item.title}-${index}`}
+                      item={item}
+                      index={index}
+                      language={language}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="h-[310px] rounded-lg border border-slate-900/10 bg-white/70 p-3 shadow-[0_24px_70px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[#0d1111]/80"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.95, duration: 0.55 }}
+              >
+                <TamerChat />
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        <motion.div
+          className="mt-6 grid gap-3 border-t border-slate-900/10 pt-4 dark:border-white/10 sm:grid-cols-3"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.25, duration: 0.5 }}
+        >
+          {modes.map((mode) => (
+            <div key={mode.title} className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-400">
+              <span className="material-symbols-outlined mt-0.5 text-[18px] text-teal-700 dark:text-teal-300">
+                {mode.icon}
+              </span>
+              <div>
+                <h2 className="font-bold text-slate-900 dark:text-white">{mode.title}</h2>
+                <p className="mt-1 leading-6">{mode.text}</p>
+              </div>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );

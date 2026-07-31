@@ -10,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Tamer Akdeniz | AI-Focused Software Developer & Full-Stack Developer',
+  title: 'Tamer Akdeniz | Deep Work for AI Product Systems',
   description:
-    'AI-Focused Software Developer building intelligent applications with product thinking and end-to-end execution. Specializing in LLM integrations, full-stack solutions, and AI-powered products.',
+    'Tamer Akdeniz builds AI-powered product systems from unclear ideas to working software, combining deep research, full-stack execution, and LLM integration.',
   keywords: [
     'Tamer Akdeniz',
     'AI Developer',
@@ -27,18 +27,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: 'https://tamerakdeniz.com',
-    title: 'Tamer Akdeniz | AI-Focused Software Developer',
+    title: 'Tamer Akdeniz | AI Product Systems',
     description:
-      'AI-Focused Software Developer building intelligent applications with product thinking and end-to-end execution.',
-    images: [{ url: '/img/logo.png', width: 1200, height: 630 }],
+      'AI-powered product systems built with deep research, full-stack execution, and LLM integration.',
+    images: [{ url: '/img/underwaterme.jpg', width: 1200, height: 630 }],
     siteName: 'Tamer Akdeniz Portfolio',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tamer Akdeniz | AI-Focused Software Developer',
+    title: 'Tamer Akdeniz | AI Product Systems',
     description:
-      'AI-Focused Software Developer building intelligent applications with product thinking and end-to-end execution.',
-    images: ['/img/logo.png'],
+      'AI-powered product systems built with deep research, full-stack execution, and LLM integration.',
+    images: ['/img/underwaterme.jpg'],
   },
   icons: {
     icon: '/img/favicon.ico',

@@ -31,7 +31,7 @@ export function SkillCard({
             svg.setAttribute('height', '40');
             svg.setAttribute('class', 'w-10 h-10');
             svg.style.fill = 'currentColor';
-            svg.style.color = '#135bec';
+            svg.style.color = '#0f766e';
             setSvgHtml(svg.outerHTML);
           }
         })
@@ -51,21 +51,21 @@ export function SkillCard({
       initial={{ opacity: 0, scale: 0.9, filter: 'blur(4px)' }}
       animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
       transition={{ duration: 0.4, delay: index * 0.04 }}
-      whileHover={{ scale: 1.08, y: -2 }}
-      className="group bg-white/80 dark:bg-surface-dark/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200/80 dark:border-slate-800/80 flex flex-col items-center justify-center hover:shadow-lg transition-all hover:border-primary/30 dark:hover:border-primary/30 cursor-default"
+      whileHover={{ scale: 1.04, y: -2 }}
+      className="group flex min-h-[112px] cursor-default flex-col items-center justify-center rounded-lg border border-slate-900/10 bg-white/75 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.07)] backdrop-blur-sm transition-all hover:border-teal-500/30 hover:bg-white dark:border-white/10 dark:bg-white/[0.045] dark:hover:border-teal-300/25"
     >
-      <div className="mb-2 flex items-center justify-center h-10 w-10 transition-transform group-hover:scale-110">
+      <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-md border border-teal-500/20 bg-teal-500/10 text-teal-700 transition-transform group-hover:scale-105 dark:text-teal-300">
         {skill.iconKey === 'material' ? (
-          <span className="material-symbols-outlined text-3xl text-primary">
+          <span className="material-symbols-outlined text-3xl">
             {materialIconName}
           </span>
         ) : svgHtml ? (
           <div dangerouslySetInnerHTML={{ __html: svgHtml }} />
         ) : (
-          <span className="material-symbols-outlined text-3xl text-primary">code</span>
+          <span className="material-symbols-outlined text-3xl">code</span>
         )}
       </div>
-      <span className="font-medium text-center text-xs">{skill.name}</span>
+      <span className="text-center text-xs font-bold text-slate-800 dark:text-slate-200">{skill.name}</span>
     </motion.div>
   );
 }

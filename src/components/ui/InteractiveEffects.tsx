@@ -95,15 +95,16 @@ export function PageBackground({ intensity = 'normal' }: { intensity?: 'subtle' 
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" style={{ opacity }}>
       <div className="absolute inset-0 hero-grid" />
       <div className="absolute inset-0 aurora-bg" />
+      <div className="absolute inset-x-0 top-0 h-72 bg-[linear-gradient(180deg,rgba(20,184,166,0.14),transparent)] dark:bg-[linear-gradient(180deg,rgba(20,184,166,0.08),transparent)]" />
       <motion.div
-        className="absolute top-20 -right-20 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] will-change-transform"
-        animate={{ opacity: [0.2, 0.35, 0.2] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute left-[12%] top-0 h-full w-px bg-gradient-to-b from-transparent via-teal-400/30 to-transparent"
+        animate={{ opacity: [0.12, 0.36, 0.12] }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute -bottom-20 -left-20 w-[500px] h-[500px] bg-purple-600/8 rounded-full blur-[130px] will-change-transform"
-        animate={{ opacity: [0.15, 0.25, 0.15] }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+        className="absolute right-[18%] top-0 h-full w-px bg-gradient-to-b from-transparent via-coral-400/25 to-transparent"
+        animate={{ opacity: [0.1, 0.28, 0.1] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
       />
     </div>
   );
@@ -120,32 +121,28 @@ export function SectionHeading({
 }) {
   return (
     <motion.div
-      className="text-center mb-12 sm:mb-16"
+      className="mx-auto mb-12 max-w-4xl text-center sm:mb-16"
       initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
       animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
       transition={{ duration: 0.7, delay }}
     >
+      <motion.div
+        className="mx-auto mb-4 h-1 w-16 bg-gradient-to-r from-teal-500 via-coral-400 to-amber-300"
+        initial={{ opacity: 0, scaleX: 0 }}
+        animate={{ opacity: 1, scaleX: 1 }}
+        transition={{ duration: 0.5, delay: delay + 0.05 }}
+      />
       <motion.h2
-        className="text-4xl md:text-5xl font-bold mb-3"
+        className="text-4xl font-black tracking-normal text-slate-950 dark:text-white md:text-5xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: delay + 0.1 }}
       >
         {title}
       </motion.h2>
-      <motion.div
-        className="flex items-center justify-center gap-3 mb-4"
-        initial={{ opacity: 0, scaleX: 0 }}
-        animate={{ opacity: 1, scaleX: 1 }}
-        transition={{ duration: 0.5, delay: delay + 0.3 }}
-      >
-        <div className="h-px w-12 bg-gradient-to-r from-transparent to-primary/60" />
-        <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-        <div className="h-px w-12 bg-gradient-to-l from-transparent to-primary/60" />
-      </motion.div>
       {subtitle && (
         <motion.p
-          className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto"
+          className="mx-auto mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-400 sm:text-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: delay + 0.4 }}
@@ -173,7 +170,7 @@ export function GlassCard({
       initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
       animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
       transition={{ duration: 0.5, delay }}
-      className={`bg-white/80 dark:bg-surface-dark/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/80 dark:border-slate-800/80 ${hoverEffect ? 'hover:shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300' : ''} ${className}`}
+      className={`rounded-lg border border-slate-900/10 bg-white/75 shadow-[0_22px_70px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.045] ${hoverEffect ? 'transition-all duration-300 hover:border-teal-500/30 hover:shadow-xl dark:hover:border-teal-300/25' : ''} ${className}`}
     >
       {children}
     </motion.div>

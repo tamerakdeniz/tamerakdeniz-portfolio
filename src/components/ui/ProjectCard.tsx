@@ -40,10 +40,11 @@ export function ProjectCard({
       animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
       whileHover={{ y: -4 }}
-      className="group bg-white/80 dark:bg-surface-dark/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-gray-200/80 dark:border-slate-800/80 hover:shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all h-full"
+      className="group relative grid h-full overflow-hidden rounded-lg border border-slate-900/10 bg-white/75 shadow-[0_22px_70px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-all hover:border-teal-500/35 hover:bg-white dark:border-white/10 dark:bg-white/[0.045] dark:hover:border-teal-300/25"
       style={{ display: 'grid', gridTemplateRows: 'auto 1fr' }}
     >
-      <div className="aspect-video bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center overflow-hidden relative">
+      <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-teal-500 via-coral-400 to-amber-300 opacity-80" />
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-black/35">
         {project.image ? (
           <CachedImage
             src={project.image}
@@ -53,40 +54,47 @@ export function ProjectCard({
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <span className="material-symbols-outlined text-6xl text-primary/50">code</span>
+          <div className="flex h-full items-center justify-center">
+            <span className="material-symbols-outlined text-6xl text-teal-500/50">code_blocks</span>
+          </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent opacity-80" />
+        <div className="absolute bottom-3 left-4 rounded-md border border-white/15 bg-black/35 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/80 backdrop-blur">
+          Build {String(index + 1).padStart(2, '0')}
+        </div>
       </div>
-      <div className="p-6 flex flex-col">
-        <div className="flex flex-wrap gap-2 mb-3">
+      <div className="flex flex-col p-5 pl-6">
+        <div className="mb-4 flex flex-wrap gap-2">
           {categories.map((cat) => (
             <span
               key={cat}
-              className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full"
+              className="inline-block rounded-md border border-teal-500/20 bg-teal-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-teal-700 dark:text-teal-300"
             >
               {categoryDisplayName[cat]?.[lang] || cat.toUpperCase()}
             </span>
           ))}
         </div>
-        <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{title}</h3>
-        <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm">{description}</p>
-        <div className="flex flex-wrap gap-2 mb-4 mt-auto">
+        <h3 className="text-xl font-black tracking-normal text-slate-950 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">
+          {title}
+        </h3>
+        <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">{description}</p>
+        <div className="mt-5 flex flex-wrap gap-2">
           {(project.techStack || []).map((tech) => (
             <span
               key={tech}
-              className="px-2 py-1 bg-gray-100/80 dark:bg-slate-800/80 text-xs rounded-md"
+              className="rounded-md bg-slate-900/[0.055] px-2 py-1 text-[11px] font-medium text-slate-600 dark:bg-white/[0.06] dark:text-slate-300"
             >
               {tech}
             </span>
           ))}
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 mt-auto">
+        <div className="mt-auto flex flex-col gap-2 pt-5 sm:flex-row">
           {project.githubUrl && (
             <a
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 px-4 py-2 bg-gray-100/80 dark:bg-slate-800/80 rounded-xl text-center font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-sm active:scale-95"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-900/10 bg-slate-900/[0.04] px-4 py-2 text-sm font-bold text-slate-700 transition-all hover:border-teal-500/30 hover:bg-teal-500/10 active:scale-95 dark:border-white/10 dark:bg-white/[0.045] dark:text-slate-300"
             >
               <span className="material-symbols-outlined text-base">code</span>
               {t('view-code')}
@@ -97,7 +105,11 @@ export function ProjectCard({
               href={project.demoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex-1 px-4 py-2 bg-white/10 dark:bg-white/5 border border-gray-200 dark:border-slate-700 backdrop-blur-md rounded-xl text-center font-medium hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-sm active:scale-95 overflow-hidden ${!project.liveUrl ? 'bg-primary text-white border-primary hover:bg-blue-700 dark:bg-primary dark:text-white' : ''}`}
+              className={`flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg border px-4 py-2 text-sm font-bold transition-all active:scale-95 ${
+                !project.liveUrl
+                  ? 'border-slate-950 bg-slate-950 text-white hover:bg-teal-700 dark:border-teal-300 dark:bg-teal-300 dark:text-slate-950'
+                  : 'border-slate-900/10 bg-white/35 text-slate-700 hover:border-coral-500/30 hover:bg-coral-500/10 dark:border-white/10 dark:bg-white/[0.035] dark:text-slate-300'
+              }`}
             >
               <span className="material-symbols-outlined text-base">open_in_new</span>
               <span>{t('view-demo')}</span>
@@ -108,9 +120,9 @@ export function ProjectCard({
               href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group/btn flex-1 px-4 py-2 bg-primary text-white rounded-xl text-center font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm active:scale-95 relative overflow-hidden"
+              className="group/btn relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-teal-700 active:scale-95 dark:bg-teal-300 dark:text-slate-950 dark:hover:bg-coral-300"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
+              <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-white/0 via-white/20 to-white/0 transition-transform duration-700 group-hover/btn:translate-x-[100%]" />
               <span className="material-symbols-outlined text-base relative">rocket_launch</span>
               <span className="relative">{t('view-live')}</span>
             </a>

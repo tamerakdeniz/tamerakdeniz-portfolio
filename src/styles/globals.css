@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #135bec;
-  --color-background-light: #f8fafc;
-  --color-background-dark: #111318;
-  --color-surface-dark: #1a1d24;
+  --color-primary: #0f766e;
+  --color-background-light: #f6f8f2;
+  --color-background-dark: #090d0d;
+  --color-surface-dark: #121817;
+  --color-coral-200: #fed7c3;
+  --color-coral-300: #fbac8b;
+  --color-coral-400: #f9735b;
+  --color-coral-500: #ef5a3d;
+  --color-coral-600: #cf412d;
   --font-display: "Inter", sans-serif;
 }
 
@@ -28,7 +33,7 @@
 }
 
 .dark .glass {
-  background: rgba(17, 19, 24, 0.8);
+  background: rgba(9, 13, 13, 0.82);
 }
 
 html {
@@ -103,8 +108,8 @@ body {
   border-radius: 50%;
   background: radial-gradient(
     circle at 30% 30%,
-    rgba(19, 91, 236, 0.15),
-    rgba(19, 91, 236, 0.05)
+    rgba(15, 118, 110, 0.15),
+    rgba(15, 118, 110, 0.05)
   );
   animation: bubble-rise linear infinite;
 }
@@ -112,8 +117,8 @@ body {
 .dark .bubble {
   background: radial-gradient(
     circle at 30% 30%,
-    rgba(59, 130, 246, 0.12),
-    rgba(59, 130, 246, 0.03)
+    rgba(45, 212, 191, 0.12),
+    rgba(45, 212, 191, 0.03)
   );
 }
 
@@ -179,26 +184,20 @@ body {
 }
 
 .aurora-bg {
-  background: linear-gradient(
-    -45deg,
-    rgba(19, 91, 236, 0.08),
-    rgba(139, 92, 246, 0.06),
-    rgba(6, 182, 212, 0.05),
-    rgba(19, 91, 236, 0.08)
-  );
-  background-size: 400% 400%;
-  animation: aurora 15s ease infinite;
+  background-image:
+    linear-gradient(112deg, transparent 0%, transparent 43%, rgba(15, 118, 110, 0.1) 43.5%, transparent 45%),
+    linear-gradient(154deg, transparent 0%, transparent 58%, rgba(239, 90, 61, 0.08) 58.5%, transparent 60%),
+    repeating-linear-gradient(0deg, rgba(15, 118, 110, 0.025) 0 1px, transparent 1px 18px);
+  background-size: 180% 180%, 150% 150%, 100% 100%;
+  animation: aurora 18s ease infinite;
 }
 
 .dark .aurora-bg {
-  background: linear-gradient(
-    -45deg,
-    rgba(19, 91, 236, 0.12),
-    rgba(139, 92, 246, 0.08),
-    rgba(6, 182, 212, 0.06),
-    rgba(19, 91, 236, 0.12)
-  );
-  background-size: 400% 400%;
+  background-image:
+    linear-gradient(112deg, transparent 0%, transparent 43%, rgba(45, 212, 191, 0.09) 43.5%, transparent 45%),
+    linear-gradient(154deg, transparent 0%, transparent 58%, rgba(249, 115, 91, 0.08) 58.5%, transparent 60%),
+    repeating-linear-gradient(0deg, rgba(45, 212, 191, 0.02) 0 1px, transparent 1px 18px);
+  background-size: 180% 180%, 150% 150%, 100% 100%;
   animation: aurora 15s ease infinite;
 }
 
@@ -213,16 +212,18 @@ body {
 
 .hero-grid {
   background-image:
-    linear-gradient(rgba(19, 91, 236, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(19, 91, 236, 0.06) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(15, 118, 110, 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 118, 110, 0.075) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 48%, rgba(239, 90, 61, 0.055) 49%, transparent 50%);
+  background-size: 72px 72px, 72px 72px, 210px 210px;
   animation: grid-pulse 8s ease-in-out infinite;
 }
 
 .dark .hero-grid {
   background-image:
-    linear-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(45, 212, 191, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.06) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 48%, rgba(249, 115, 91, 0.052) 49%, transparent 50%);
 }
 
 @keyframes text-glitch {
@@ -316,7 +317,7 @@ body {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(19, 91, 236, 0.08) 0%,
+    rgba(15, 118, 110, 0.08) 0%,
     transparent 70%
   );
   transform: translate(-50%, -50%);
@@ -329,7 +330,7 @@ body {
 .dark .cursor-glow {
   background: radial-gradient(
     circle,
-    rgba(59, 130, 246, 0.12) 0%,
+    rgba(45, 212, 191, 0.1) 0%,
     transparent 70%
   );
 }
@@ -423,12 +424,12 @@ body {
 }
 
 .chat-user-bubble {
-  background: linear-gradient(135deg, #135bec 0%, #2563eb 50%, #3b82f6 100%);
-  box-shadow: 0 2px 12px rgba(19, 91, 236, 0.25);
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 52%, #ef5a3d 100%);
+  box-shadow: 0 2px 12px rgba(15, 118, 110, 0.25);
 }
 
 .dark .chat-user-bubble {
-  box-shadow: 0 2px 16px rgba(19, 91, 236, 0.3);
+  box-shadow: 0 2px 16px rgba(45, 212, 191, 0.24);
 }
 
 .chat-input-wrapper::before {

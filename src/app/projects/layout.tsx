@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Projects | Tamer Akdeniz - AI & Full-Stack Development Portfolio',
+  title: 'Projects | Tamer Akdeniz - AI Product Build Archive',
   description:
-    "Explore Tamer Akdeniz's portfolio of AI applications, web development projects, mobile apps, and startup ventures.",
+    "Explore Tamer Akdeniz's build archive of AI applications, web products, mobile apps, and shipped experiments.",
   openGraph: {
-    title: 'Projects | Tamer Akdeniz - AI & Full-Stack Development Portfolio',
+    title: 'Projects | Tamer Akdeniz - AI Product Build Archive',
     description:
-      "Explore Tamer Akdeniz's portfolio of AI applications, web development projects, and startup ventures.",
+      "Explore Tamer Akdeniz's AI, web, mobile, and product systems.",
     url: 'https://tamerakdeniz.com/projects',
   },
 };

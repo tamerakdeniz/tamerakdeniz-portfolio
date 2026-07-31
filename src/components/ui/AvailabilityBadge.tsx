@@ -5,31 +5,31 @@ import { motion } from 'framer-motion';
 
 const statusConfig = {
   available: {
-    bg: 'bg-green-500/10',
-    border: 'border-green-500/20',
-    text: 'text-green-600 dark:text-green-400',
-    dot: 'bg-green-500',
+    bg: 'bg-teal-500/10',
+    border: 'border-teal-500/25',
+    text: 'text-teal-700 dark:text-teal-300',
+    dot: 'bg-teal-500',
     label: { en: 'Open to Work', tr: 'Çalışmaya Açık' },
   },
   'not-available': {
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/20',
-    text: 'text-red-600 dark:text-red-400',
-    dot: 'bg-red-500',
+    bg: 'bg-coral-500/10',
+    border: 'border-coral-500/25',
+    text: 'text-coral-600 dark:text-coral-300',
+    dot: 'bg-coral-500',
     label: { en: 'Not available', tr: 'Müsait değil' },
   },
   working: {
-    bg: 'bg-gray-500/10',
-    border: 'border-gray-500/20',
-    text: 'text-gray-600 dark:text-gray-400',
-    dot: 'bg-gray-500',
+    bg: 'bg-slate-500/10',
+    border: 'border-slate-500/20',
+    text: 'text-slate-600 dark:text-slate-400',
+    dot: 'bg-slate-500',
     label: { en: 'Actively working', tr: 'Aktif olarak çalışıyor' },
   },
   'open-to-offers': {
-    bg: 'bg-yellow-500/10',
-    border: 'border-yellow-500/20',
-    text: 'text-yellow-600 dark:text-yellow-400',
-    dot: 'bg-yellow-500',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/25',
+    text: 'text-amber-700 dark:text-amber-300',
+    dot: 'bg-amber-500',
     label: { en: 'Open to offers', tr: 'Tekliflere açık' },
   },
 };
@@ -49,7 +49,7 @@ export function AvailabilityBadge() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${config.bg} border ${config.border} ${config.text} text-xs font-bold uppercase tracking-wide`}
+      className={`inline-flex items-center gap-2 rounded-md px-3 py-1 ${config.bg} border ${config.border} ${config.text} text-xs font-black uppercase tracking-[0.14em]`}
     >
       <span className="relative flex h-2 w-2">
         <span

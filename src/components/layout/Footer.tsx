@@ -40,10 +40,18 @@ export function Footer() {
   ];
 
   return (
-    <footer className="relative border-t border-gray-200/80 dark:border-[#282e39]/80 bg-white/50 dark:bg-background-dark/50 backdrop-blur-sm py-5 shrink-0 overflow-hidden">
-      <div className="absolute inset-0 aurora-bg opacity-30 pointer-events-none" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col items-center gap-3">
+    <footer className="relative shrink-0 overflow-hidden border-t border-slate-900/10 bg-[#f6f8f2]/80 py-6 backdrop-blur-sm dark:border-white/10 dark:bg-background-dark/80">
+      <div className="pointer-events-none absolute inset-0 aurora-bg opacity-45" />
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-coral-600 dark:text-coral-300">
+              Tamer Akdeniz
+            </p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">
+              © {new Date().getFullYear()} {t('footer-copyright')}
+            </p>
+          </div>
           <div className="flex justify-center gap-2">
             {socials.map((s, i) => (
               <motion.a
@@ -51,7 +59,7 @@ export function Footer() {
                 href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 bg-gray-50/80 dark:bg-slate-800/50 rounded-full flex items-center justify-center border border-gray-200/80 dark:border-slate-700/80 hover:bg-primary hover:text-white hover:border-primary transition-all text-slate-600 dark:text-slate-400"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-900/10 bg-white/70 text-slate-600 transition-all hover:border-teal-500/35 hover:bg-slate-950 hover:text-white dark:border-white/10 dark:bg-white/[0.045] dark:text-slate-400 dark:hover:bg-teal-300 dark:hover:text-slate-950"
                 aria-label={s.label}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -63,18 +71,12 @@ export function Footer() {
               </motion.a>
             ))}
           </div>
-          <div className="text-center">
-            <p className="text-slate-500 dark:text-slate-500 text-xs">
-              © {new Date().getFullYear()}{' '}
-              {t('footer-copyright')}
-            </p>
-            <Link
-              href="/admin"
-              className="text-[10px] text-slate-400/60 hover:text-primary mt-1 inline-block cursor-pointer transition-colors"
-            >
-              {t('admin-link')}
-            </Link>
-          </div>
+          <Link
+            href="/admin"
+            className="rounded-md border border-slate-900/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 transition-colors hover:border-coral-500/35 hover:text-coral-600 dark:border-white/10 dark:text-slate-500 dark:hover:text-coral-300"
+          >
+            {t('admin-link')}
+          </Link>
         </div>
       </div>
     </footer>

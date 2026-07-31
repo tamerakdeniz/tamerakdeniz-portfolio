@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About | Tamer Akdeniz - AI-Focused Software Developer',
+  title: 'About | Tamer Akdeniz - AI Product Systems',
   description:
-    'Learn more about Tamer Akdeniz - an AI-focused software developer with expertise in building intelligent applications, LLM integrations, and full-stack solutions.',
+    'Learn how Tamer Akdeniz approaches AI product systems through deep research, full-stack execution, and shipped software.',
   openGraph: {
-    title: 'About | Tamer Akdeniz - AI-Focused Software Developer',
+    title: 'About | Tamer Akdeniz - AI Product Systems',
     description:
-      'Learn more about Tamer Akdeniz - an AI-focused software developer with expertise in building intelligent applications.',
+      'A closer look at Tamer Akdeniz and his approach to AI-powered products.',
     url: 'https://tamerakdeniz.com/about',
     type: 'profile',
   },

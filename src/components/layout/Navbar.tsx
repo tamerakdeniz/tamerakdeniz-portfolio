@@ -20,19 +20,13 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="relative text-sm font-medium transition-colors group py-1"
+      className={`rounded-md px-3 py-2 text-sm font-bold transition-all ${
+        active
+          ? 'bg-slate-950 text-white shadow-[0_12px_32px_rgba(15,23,42,0.18)] dark:bg-teal-300 dark:text-slate-950'
+          : 'text-slate-600 hover:bg-slate-900/[0.055] hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/[0.06] dark:hover:text-white'
+      }`}
     >
-      <span className={active ? 'text-primary' : 'text-slate-600 dark:text-slate-300 group-hover:text-primary'}>
-        {label}
-      </span>
-      <motion.div
-        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
-        initial={false}
-        animate={{ scaleX: active ? 1 : 0, opacity: active ? 1 : 0 }}
-        whileHover={{ scaleX: 1, opacity: 0.5 }}
-        transition={{ duration: 0.2 }}
-        style={{ originX: 0.5 }}
-      />
+      {label}
     </Link>
   );
 }
@@ -47,16 +41,9 @@ function NavButton({
   return (
     <button
       onClick={onClick}
-      className="relative text-sm font-medium transition-colors group py-1 text-slate-600 dark:text-slate-300 hover:text-primary"
+      className="rounded-md px-3 py-2 text-sm font-bold text-slate-600 transition-all hover:bg-coral-500/10 hover:text-coral-600 dark:text-slate-300 dark:hover:text-coral-300"
     >
-      <span>{label}</span>
-      <motion.div
-        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
-        initial={{ scaleX: 0, opacity: 0 }}
-        whileHover={{ scaleX: 1, opacity: 0.5 }}
-        transition={{ duration: 0.2 }}
-        style={{ originX: 0.5 }}
-      />
+      {label}
     </button>
   );
 }
@@ -65,7 +52,6 @@ export function Navbar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isHome = pathname === '/';
 
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
@@ -86,34 +72,34 @@ export function Navbar() {
   };
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isHome
-          ? 'glass md:bg-transparent md:backdrop-blur-none border-b border-gray-200/80 dark:border-[#282e39]/80 md:border-transparent'
-          : 'glass border-b border-gray-200/80 dark:border-[#282e39]/80'
-      }`}
-    >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 sm:h-20 md:h-16">
-          <Link
-            href="/"
-            className="flex flex-col items-center gap-1 md:flex-row md:items-center md:gap-3 group"
-          >
-            <motion.div whileHover={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 0.5 }}>
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-900/10 bg-[#f6f8f2]/86 backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-[#090d0d]/88">
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-3">
+          <Link href="/" className="group flex min-w-0 items-center gap-3">
+            <motion.div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-900/10 bg-white/75 shadow-sm dark:border-white/10 dark:bg-white/[0.045]"
+              whileHover={{ rotate: [0, -6, 6, 0] }}
+              transition={{ duration: 0.45 }}
+            >
               <Image
                 src="/img/logo-nobg.png"
-                alt="Logo"
-                width={40}
-                height={40}
-                className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 object-contain dark:brightness-0 dark:invert transition-all"
+                alt="Tamer Akdeniz logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain transition-all dark:brightness-0 dark:invert"
               />
             </motion.div>
-            <h2 className="text-slate-900 dark:text-white text-sm md:text-lg font-bold tracking-tight group-hover:text-primary transition-colors">
-              Tamer Akdeniz
-            </h2>
+            <div className="min-w-0">
+              <h2 className="truncate text-sm font-black tracking-normal text-slate-950 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300 sm:text-base">
+                Tamer Akdeniz
+              </h2>
+              <p className="hidden text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-500 sm:block">
+                AI product systems
+              </p>
+            </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden items-center gap-1 rounded-lg border border-slate-900/10 bg-white/60 p-1 backdrop-blur dark:border-white/10 dark:bg-white/[0.035] md:flex">
             {navLinks.map((link) => (
               <NavLink
                 key={link.key}
@@ -122,14 +108,15 @@ export function Navbar() {
                 active={isActive(link.href)}
               />
             ))}
+            <div className="mx-1 h-6 w-px bg-slate-900/10 dark:bg-white/10" />
             <NavButton label={t('nav-cv')} onClick={() => setCvModalOpen(true)} />
             <NavButton label={t('nav-contact')} onClick={() => setContactModalOpen(true)} />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
             <Link
               href="/admin"
-              className="flex items-center justify-center w-8 h-8 rounded-full text-slate-400/50 dark:text-slate-600/50 hover:text-slate-500 dark:hover:text-slate-500 hover:bg-gray-100 dark:hover:bg-[#282e39]/50 transition-all"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-900/10 bg-white/55 text-slate-400 transition-all hover:border-teal-500/30 hover:text-teal-700 dark:border-white/10 dark:bg-white/[0.035] dark:text-slate-500 dark:hover:text-teal-300"
               aria-label="Admin"
             >
               <span className="material-symbols-outlined text-[18px]">settings</span>
@@ -137,63 +124,64 @@ export function Navbar() {
 
             <motion.button
               onClick={toggleLanguage}
-              className="relative w-16 h-8 rounded-full bg-gray-200 dark:bg-[#282e39] transition-colors cursor-pointer"
+              className="relative h-9 w-16 cursor-pointer rounded-lg border border-slate-900/10 bg-white/55 transition-colors dark:border-white/10 dark:bg-white/[0.035]"
               aria-label="Toggle language"
               whileTap={{ scale: 0.95 }}
             >
               <span
-                className={`absolute left-2 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-slate-600 dark:text-slate-300 z-10 transition-opacity ${
+                className={`absolute left-2 top-1/2 z-10 -translate-y-1/2 text-[10px] font-black text-slate-500 transition-opacity ${
                   language === 'tr' ? 'opacity-0' : 'opacity-100'
                 }`}
               >
                 TR
               </span>
               <span
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-slate-600 dark:text-slate-300 z-10 transition-opacity ${
+                className={`absolute right-2 top-1/2 z-10 -translate-y-1/2 text-[10px] font-black text-slate-500 transition-opacity ${
                   language === 'en' ? 'opacity-0' : 'opacity-100'
                 }`}
               >
                 EN
               </span>
               <motion.span
-                className="absolute top-1/2 -translate-y-1/2 w-7 h-7 bg-white dark:bg-slate-700 rounded-full shadow-md z-20 flex items-center justify-center"
-                animate={{ left: language === 'tr' ? '2px' : '34px' }}
+                className="absolute top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md bg-slate-950 text-white shadow-md dark:bg-teal-300 dark:text-slate-950"
+                animate={{ left: language === 'tr' ? '3px' : '33px' }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                <span className="material-symbols-outlined text-[18px] text-primary">language</span>
+                <span className="material-symbols-outlined text-[17px]">language</span>
               </motion.span>
             </motion.button>
 
             <motion.button
               onClick={toggleTheme}
-              className="relative w-16 h-8 rounded-full bg-gray-200 dark:bg-[#282e39] transition-colors cursor-pointer"
+              className="relative h-9 w-16 cursor-pointer rounded-lg border border-slate-900/10 bg-white/55 transition-colors dark:border-white/10 dark:bg-white/[0.035]"
               aria-label="Toggle theme"
               whileTap={{ scale: 0.95 }}
             >
               <span
-                className={`material-symbols-outlined absolute left-1.5 top-1/2 -translate-y-1/2 text-[18px] text-amber-500 z-10 pointer-events-none transition-opacity ${
+                className={`material-symbols-outlined pointer-events-none absolute left-1.5 top-1/2 z-10 -translate-y-1/2 text-[18px] text-amber-500 transition-opacity ${
                   theme === 'dark' ? 'opacity-30' : 'opacity-100'
                 }`}
               >
                 light_mode
               </span>
               <span
-                className={`material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 dark:text-blue-400 z-10 pointer-events-none transition-opacity ${
+                className={`material-symbols-outlined pointer-events-none absolute right-1.5 top-1/2 z-10 -translate-y-1/2 text-[18px] text-teal-600 transition-opacity dark:text-teal-300 ${
                   theme === 'light' ? 'opacity-30' : 'opacity-100'
                 }`}
               >
                 dark_mode
               </span>
               <motion.span
-                className="absolute top-1/2 -translate-y-1/2 w-7 h-7 bg-white dark:bg-slate-700 rounded-full shadow-md z-20"
-                animate={{ left: theme === 'light' ? '2px' : '34px' }}
+                className="absolute top-1/2 z-20 h-7 w-7 -translate-y-1/2 rounded-md bg-slate-950 shadow-md dark:bg-teal-300"
+                animate={{ left: theme === 'light' ? '3px' : '33px' }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               />
             </motion.button>
 
             <motion.button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden flex items-center justify-center size-10 rounded-xl hover:bg-gray-200 dark:hover:bg-[#282e39] transition-colors text-slate-600 dark:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-900/10 bg-white/55 text-slate-700 transition-colors hover:bg-white dark:border-white/10 dark:bg-white/[0.035] dark:text-white md:hidden"
+              aria-label="Toggle navigation"
               whileTap={{ scale: 0.9 }}
             >
               <motion.span
@@ -211,13 +199,13 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            className="md:hidden border-t border-gray-200 dark:border-[#282e39] bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl overflow-hidden"
+            className="overflow-hidden border-t border-slate-900/10 bg-[#f6f8f2]/96 backdrop-blur-xl dark:border-white/10 dark:bg-[#090d0d]/96 md:hidden"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="px-4 py-4 space-y-1">
+            <div className="space-y-1 px-4 py-4">
               {navLinks.map((link, i) => (
                 <motion.div
                   key={link.key}
@@ -228,10 +216,10 @@ export function Navbar() {
                   <Link
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`block px-4 py-3 rounded-xl transition-all ${
+                    className={`block rounded-lg px-4 py-3 text-sm font-bold transition-all ${
                       isActive(link.href)
-                        ? 'text-primary font-medium bg-primary/5'
-                        : 'hover:bg-gray-100 dark:hover:bg-[#282e39]'
+                        ? 'bg-slate-950 text-white dark:bg-teal-300 dark:text-slate-950'
+                        : 'text-slate-700 hover:bg-slate-900/[0.055] dark:text-slate-300 dark:hover:bg-white/[0.06]'
                     }`}
                   >
                     {link.label}
@@ -244,8 +232,11 @@ export function Navbar() {
                 transition={{ delay: 0.15 }}
               >
                 <button
-                  onClick={() => { setMobileOpen(false); setCvModalOpen(true); }}
-                  className="w-full text-left block px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[#282e39] transition-all"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setCvModalOpen(true);
+                  }}
+                  className="block w-full rounded-lg px-4 py-3 text-left text-sm font-bold text-slate-700 transition-all hover:bg-coral-500/10 hover:text-coral-600 dark:text-slate-300 dark:hover:text-coral-300"
                 >
                   {t('nav-cv')}
                 </button>
@@ -256,8 +247,11 @@ export function Navbar() {
                 transition={{ delay: 0.2 }}
               >
                 <button
-                  onClick={() => { setMobileOpen(false); setContactModalOpen(true); }}
-                  className="w-full text-left block px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[#282e39] transition-all"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setContactModalOpen(true);
+                  }}
+                  className="block w-full rounded-lg px-4 py-3 text-left text-sm font-bold text-slate-700 transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:text-slate-300 dark:hover:text-teal-300"
                 >
                   {t('nav-contact')}
                 </button>
