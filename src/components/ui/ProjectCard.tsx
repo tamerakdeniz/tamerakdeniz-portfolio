@@ -43,7 +43,6 @@ export function ProjectCard({
       className="group relative grid h-full overflow-hidden rounded-lg border border-slate-900/10 bg-white/75 shadow-[0_22px_70px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-all hover:border-teal-500/35 hover:bg-white dark:border-white/10 dark:bg-white/[0.045] dark:hover:border-teal-300/25"
       style={{ display: 'grid', gridTemplateRows: 'auto 1fr' }}
     >
-      <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-teal-500 via-coral-400 to-amber-300 opacity-80" />
       <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-black/35">
         {project.image ? (
           <CachedImage
@@ -63,7 +62,8 @@ export function ProjectCard({
           Build {String(index + 1).padStart(2, '0')}
         </div>
       </div>
-      <div className="flex flex-col p-5 pl-6">
+      <div className="relative flex flex-col p-5 pl-6">
+        <div className="absolute bottom-0 left-0 top-0 w-1 bg-gradient-to-b from-teal-500 via-coral-400 to-amber-300 opacity-80" />
         <div className="mb-4 flex flex-wrap gap-2">
           {categories.map((cat) => (
             <span
