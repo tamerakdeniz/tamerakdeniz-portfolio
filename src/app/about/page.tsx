@@ -72,58 +72,42 @@ export default function AboutPage() {
       <PageBackground intensity="subtle" />
       <div className="relative z-10 min-h-screen py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <section className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-stretch">
-            <motion.aside
-              className="relative min-h-[420px] overflow-hidden rounded-lg border border-slate-900/10 bg-slate-950 shadow-[0_30px_90px_rgba(15,23,42,0.18)] dark:border-white/10"
-              initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              transition={{ duration: 0.65 }}
-            >
-              <CachedImage
-                src={avatarUrl}
-                alt={avatarText}
-                loading="eager"
-                fetchPriority="high"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,13,13,0.12),rgba(9,13,13,0.82)),linear-gradient(90deg,rgba(9,13,13,0.72),transparent_62%)]" />
-              <div className="absolute left-4 top-4 rounded-md border border-white/15 bg-black/35 px-3 py-2 backdrop-blur">
-                <span className="block text-[10px] font-black uppercase tracking-[0.22em] text-teal-200">
-                  {language === 'tr' ? 'profil koordinatı' : 'profile coordinate'}
-                </span>
-                <span className="mt-1 block text-xs text-white/70">Istanbul / AI systems</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-coral-200">
-                  Tamer Akdeniz
-                </p>
-                <h1 className="mt-2 max-w-sm text-3xl font-black leading-tight tracking-normal text-white sm:text-4xl">
-                  {language === 'tr'
-                    ? 'Derine bakan, ürüne dönüştüren geliştirici.'
-                    : 'A developer who looks deeper and turns it into product.'}
-                </h1>
-              </div>
-            </motion.aside>
-
+          <section>
             <motion.div
-              className="rounded-lg border border-slate-900/10 bg-white/75 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.045] sm:p-8 lg:p-10"
+              className="relative overflow-hidden rounded-lg border border-slate-900/10 bg-white/75 p-6 text-center shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.045] sm:p-8 lg:p-10"
               initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{ duration: 0.65, delay: 0.1 }}
             >
-              <div className="mb-5 h-1 w-16 bg-gradient-to-r from-teal-500 via-coral-400 to-amber-300" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-[linear-gradient(180deg,rgba(20,184,166,0.13),transparent)] dark:bg-[linear-gradient(180deg,rgba(20,184,166,0.08),transparent)]" />
+              <div className="relative mx-auto mb-5 h-28 w-28 rotate-2 overflow-hidden rounded-[1.65rem] border border-white/35 bg-slate-950 shadow-[0_20px_55px_rgba(15,23,42,0.22)] sm:h-32 sm:w-32">
+                <CachedImage
+                  src={avatarUrl}
+                  alt={avatarText}
+                  loading="eager"
+                  fetchPriority="high"
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(9,13,13,0.22))]" />
+              </div>
+              <div className="relative mx-auto mb-5 h-1 w-16 bg-gradient-to-r from-teal-500 via-coral-400 to-amber-300" />
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-coral-600 dark:text-coral-300">
                 {t('about-title')}
               </p>
-              <h2 className="mt-3 text-4xl font-black tracking-normal text-slate-950 dark:text-white md:text-6xl">
+              <h2 className="relative mt-3 text-4xl font-black tracking-normal text-slate-950 dark:text-white md:text-6xl">
                 {title}
               </h2>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-400 sm:text-lg">
+              <p className="relative mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-400 sm:text-lg">
                 {t('about-subtitle')}
+              </p>
+              <p className="relative mx-auto mt-3 max-w-2xl text-sm font-bold text-teal-700 dark:text-teal-300">
+                {language === 'tr'
+                  ? 'Derine bakan, ürüne dönüştüren geliştirici.'
+                  : 'A developer who looks deeper and turns it into product.'}
               </p>
 
               {paragraphs.length > 0 && (
-                <div className="mt-8 grid gap-4">
+                <div className="relative mx-auto mt-8 grid max-w-4xl gap-4 text-left">
                   {paragraphs.map((p: string, i: number) => (
                     <motion.p
                       key={i}
@@ -138,7 +122,7 @@ export default function AboutPage() {
                 </div>
               )}
 
-              <div className="mt-8 grid gap-3 md:grid-cols-3">
+              <div className="relative mt-8 grid gap-3 text-left md:grid-cols-3">
                 {principles.map(([number, heading, body], index) => (
                   <motion.div
                     key={heading}
@@ -240,8 +224,8 @@ export default function AboutPage() {
             </div>
           </section>
 
-          <section className="mt-16 grid gap-8 lg:grid-cols-[0.34fr_0.66fr]">
-            <div>
+          <section className="mt-16">
+            <div className="mx-auto max-w-3xl text-center">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-coral-600 dark:text-coral-300">
                 {language === 'tr' ? 'zaman kaydı' : 'time log'}
               </p>
@@ -254,7 +238,8 @@ export default function AboutPage() {
                   : 'Education, work, and certificates read as one production line.'}
               </p>
             </div>
-            <div>
+            <div className="relative mt-10">
+              <div className="absolute bottom-0 left-[7px] top-2 w-px bg-gradient-to-b from-teal-500/40 via-coral-400/28 to-transparent lg:left-1/2 lg:-translate-x-1/2" />
               {sortedTimeline.map((item, i) => (
                 <TimelineItem key={item.id || i} item={item} index={i} />
               ))}

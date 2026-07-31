@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -296,43 +295,6 @@ export function HeroSection() {
         ? ['LLM entegrasyonu', 'ürün mimarisi', 'hızlı prototip', 'otomasyon']
         : ['LLM integration', 'product architecture', 'rapid prototyping', 'automation'];
 
-  const modes =
-    language === 'tr'
-      ? [
-          {
-            icon: 'travel_explore',
-            title: 'Derine iner',
-            text: 'Belirsizliği net ürün kararlarına dönüştürür.',
-          },
-          {
-            icon: 'architecture',
-            title: 'Sistemi kurar',
-            text: 'Frontend, backend ve AI katmanını aynı akışta bağlar.',
-          },
-          {
-            icon: 'rocket_launch',
-            title: 'Yayına taşır',
-            text: 'Fikirden çalışan ürüne kadar sorumluluk alır.',
-          },
-        ]
-      : [
-          {
-            icon: 'travel_explore',
-            title: 'Goes below surface',
-            text: 'Turns ambiguity into crisp product decisions.',
-          },
-          {
-            icon: 'architecture',
-            title: 'Builds the system',
-            text: 'Connects frontend, backend, and AI layers in one flow.',
-          },
-          {
-            icon: 'rocket_launch',
-            title: 'Ships to users',
-            text: 'Owns the path from raw idea to working product.',
-          },
-        ];
-
   const fallbackSignals =
     language === 'tr'
       ? [
@@ -521,116 +483,51 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="grid min-w-0 gap-4 lg:grid-rows-[minmax(290px,0.9fr)_minmax(260px,0.75fr)]">
+          <div className="grid min-w-0 content-center gap-4">
             <motion.div
-              className="relative min-h-[320px] overflow-hidden rounded-lg border border-white/20 bg-slate-950 shadow-[0_30px_90px_rgba(15,23,42,0.18)] dark:border-white/10"
-              initial={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
+              className="relative h-[430px] overflow-hidden rounded-lg border border-slate-900/10 bg-white/75 p-4 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0d1111]/88 lg:h-[470px]"
+              initial={{ opacity: 0, scale: 0.97, filter: 'blur(8px)' }}
               animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              transition={{ delay: 0.35, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: 0.45, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Image
-                src="/img/underwaterme.jpg"
-                alt="Tamer Akdeniz underwater profile"
-                fill
-                priority
-                sizes="(min-width: 1024px) 46vw, 100vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,13,13,0.72),rgba(9,13,13,0.1)_55%,rgba(9,13,13,0.42)),linear-gradient(0deg,rgba(9,13,13,0.78),transparent_58%)]" />
-              <div className="absolute left-4 top-4 rounded-md border border-white/15 bg-black/30 px-3 py-2 backdrop-blur">
-                <span className="block text-[10px] font-black uppercase tracking-[0.22em] text-teal-200">
-                  {language === 'tr' ? 'profil izi' : 'profile signal'}
-                </span>
-                <span className="mt-1 block text-xs text-white/75">
-                  {language === 'tr' ? 'yüzeyin altına bakan geliştirici' : 'the developer below the surface'}
-                </span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
-                <p className="max-w-md text-2xl font-black leading-tight text-white sm:text-3xl">
-                  {language === 'tr'
-                    ? 'Derinlik merak, ürün disiplin ister.'
-                    : 'Depth takes curiosity. Product takes discipline.'}
-                </p>
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  {modes.map((mode) => (
-                    <div
-                      key={mode.title}
-                      className="rounded-md border border-white/10 bg-white/[0.08] p-3 backdrop-blur"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-coral-200">
-                        {mode.icon}
-                      </span>
-                      <h2 className="mt-2 text-xs font-bold text-white">{mode.title}</h2>
-                      <p className="mt-1 hidden text-[10px] leading-4 text-white/60 sm:block">
-                        {mode.text}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(20,184,166,0.14),transparent_38%),linear-gradient(315deg,rgba(239,90,61,0.1),transparent_36%)]" />
+              <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-teal-500 via-coral-400 to-amber-300" />
+              <div className="relative h-full">
+                <TamerChat />
               </div>
             </motion.div>
 
-            <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr] lg:grid-cols-2">
-              <motion.div
-                className="rounded-lg border border-slate-900/10 bg-white/70 p-3 dark:border-white/10 dark:bg-white/[0.035]"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.55 }}
-              >
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <h2 className="text-xs font-black uppercase tracking-[0.18em] text-slate-600 dark:text-slate-400">
-                    {language === 'tr' ? 'son üretim izleri' : 'recent build signals'}
-                  </h2>
-                  <Link
-                    href="/projects"
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-300"
-                    aria-label={language === 'tr' ? 'Projeleri aç' : 'Open projects'}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-                  </Link>
-                </div>
-                <div className="space-y-2">
-                  {projectSignals.map((item, index) => (
-                    <ProjectSignal
-                      key={`${item.title}-${index}`}
-                      item={item}
-                      index={index}
-                      language={language}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="h-[310px] rounded-lg border border-slate-900/10 bg-white/70 p-3 shadow-[0_24px_70px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[#0d1111]/80"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.95, duration: 0.55 }}
-              >
-                <TamerChat />
-              </motion.div>
-            </div>
+            <motion.div
+              className="rounded-lg border border-slate-900/10 bg-white/70 p-3 dark:border-white/10 dark:bg-white/[0.035]"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.85, duration: 0.55 }}
+            >
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-slate-600 dark:text-slate-400">
+                  {language === 'tr' ? 'son üretim izleri' : 'recent build signals'}
+                </h2>
+                <Link
+                  href="/projects"
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-300"
+                  aria-label={language === 'tr' ? 'Projeleri aç' : 'Open projects'}
+                >
+                  <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {projectSignals.map((item, index) => (
+                  <ProjectSignal
+                    key={`${item.title}-${index}`}
+                    item={item}
+                    index={index}
+                    language={language}
+                  />
+                ))}
+              </div>
+            </motion.div>
           </div>
         </div>
-
-        <motion.div
-          className="mt-6 grid gap-3 border-t border-slate-900/10 pt-4 dark:border-white/10 sm:grid-cols-3"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.25, duration: 0.5 }}
-        >
-          {modes.map((mode) => (
-            <div key={mode.title} className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-400">
-              <span className="material-symbols-outlined mt-0.5 text-[18px] text-teal-700 dark:text-teal-300">
-                {mode.icon}
-              </span>
-              <div>
-                <h2 className="font-bold text-slate-900 dark:text-white">{mode.title}</h2>
-                <p className="mt-1 leading-6">{mode.text}</p>
-              </div>
-            </div>
-          ))}
-        </motion.div>
       </div>
     </section>
   );
