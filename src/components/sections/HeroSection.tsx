@@ -361,7 +361,7 @@ export function HeroSection() {
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-7xl flex-col px-4 py-8 sm:px-6 lg:px-8 lg:py-6">
-        <div className="grid flex-1 items-center gap-6 lg:grid-cols-[minmax(0,1.04fr)_minmax(380px,0.96fr)] lg:gap-8">
+        <div className="grid flex-1 items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(340px,410px)] lg:gap-8">
           <div className="min-w-0">
             <motion.div
               className="flex flex-wrap items-center gap-3"
@@ -483,9 +483,9 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="grid min-w-0 content-center gap-4">
+          <div className="grid w-full min-w-0 content-center gap-4 lg:max-w-[410px] lg:justify-self-end">
             <motion.div
-              className="relative h-[430px] overflow-hidden rounded-lg border border-slate-900/10 bg-white/75 p-4 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0d1111]/88 lg:h-[470px]"
+              className="relative h-[390px] overflow-hidden rounded-lg border border-slate-900/10 bg-white/75 p-4 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0d1111]/88 lg:h-[430px]"
               initial={{ opacity: 0, scale: 0.97, filter: 'blur(8px)' }}
               animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
               transition={{ delay: 0.45, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}

@@ -50,7 +50,7 @@ export function TimelineItem({
         />
 
         <div className="rounded-lg border border-slate-900/10 bg-white/75 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.07)] backdrop-blur-sm transition-all duration-300 hover:border-teal-500/30 dark:border-white/10 dark:bg-white/[0.045] dark:hover:border-teal-300/25">
-          <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="mb-3 flex flex-row items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-md border border-teal-500/20 bg-teal-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-teal-700 dark:text-teal-300">
@@ -64,7 +64,7 @@ export function TimelineItem({
                 {title}
               </h4>
             </div>
-            <span className="font-mono text-sm text-slate-500 dark:text-slate-500">
+            <span className="shrink-0 whitespace-nowrap pt-1 font-mono text-[11px] text-slate-500 dark:text-slate-500 sm:text-xs">
               {period}
             </span>
           </div>

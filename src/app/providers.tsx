@@ -19,7 +19,22 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
   const hydrated = useRef(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
+    const scrollTop = () => window.scrollTo(0, 0);
+    scrollTop();
+    const frame1 = window.requestAnimationFrame(() => {
+      scrollTop();
+      window.requestAnimationFrame(scrollTop);
+    });
+    const timeout = window.setTimeout(scrollTop, 80);
+
+    return () => {
+      window.cancelAnimationFrame(frame1);
+      window.clearTimeout(timeout);
+    };
   }, [pathname]);
 
   useEffect(() => {
