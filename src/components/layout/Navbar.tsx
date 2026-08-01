@@ -73,11 +73,11 @@ export function Navbar() {
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-900/10 bg-[#f6f8f2]/86 backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-[#090d0d]/88">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-3">
-          <Link href="/" className="group flex min-w-0 items-center gap-3">
+      <nav className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-1.5 sm:gap-3">
+          <Link href="/" className="group flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <motion.div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-900/10 bg-white/75 shadow-sm dark:border-white/10 dark:bg-white/[0.045]"
+              className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-900/10 bg-white/75 shadow-sm dark:border-white/10 dark:bg-white/[0.045] min-[370px]:flex"
               whileHover={{ rotate: [0, -6, 6, 0] }}
               transition={{ duration: 0.45 }}
             >
@@ -90,7 +90,7 @@ export function Navbar() {
               />
             </motion.div>
             <div className="min-w-0">
-              <h2 className="truncate text-sm font-black tracking-normal text-slate-950 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300 sm:text-base">
+              <h2 className="whitespace-nowrap text-sm font-black tracking-normal text-slate-950 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300 sm:text-base">
                 Tamer Akdeniz
               </h2>
               <p className="hidden text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-500 sm:block">
@@ -99,7 +99,7 @@ export function Navbar() {
             </div>
           </Link>
 
-          <div className="hidden items-center gap-1 rounded-lg border border-slate-900/10 bg-white/60 p-1 backdrop-blur dark:border-white/10 dark:bg-white/[0.035] md:flex">
+          <div className="hidden items-center gap-1 rounded-lg border border-slate-900/10 bg-white/60 p-1 backdrop-blur dark:border-white/10 dark:bg-white/[0.035] lg:flex">
             {navLinks.map((link) => (
               <NavLink
                 key={link.key}
@@ -113,10 +113,10 @@ export function Navbar() {
             <NavButton label={t('nav-contact')} onClick={() => setContactModalOpen(true)} />
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <Link
               href="/admin"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-900/10 bg-white/55 text-slate-400 transition-all hover:border-teal-500/30 hover:text-teal-700 dark:border-white/10 dark:bg-white/[0.035] dark:text-slate-500 dark:hover:text-teal-300"
+              className="hidden h-9 w-9 items-center justify-center rounded-lg border border-slate-900/10 bg-white/55 text-slate-400 transition-all hover:border-teal-500/30 hover:text-teal-700 dark:border-white/10 dark:bg-white/[0.035] dark:text-slate-500 dark:hover:text-teal-300 lg:flex"
               aria-label="Admin"
             >
               <span className="material-symbols-outlined text-[18px]">settings</span>
@@ -180,7 +180,7 @@ export function Navbar() {
 
             <motion.button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-900/10 bg-white/55 text-slate-700 transition-colors hover:bg-white dark:border-white/10 dark:bg-white/[0.035] dark:text-white md:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-900/10 bg-white/55 text-slate-700 transition-colors hover:bg-white dark:border-white/10 dark:bg-white/[0.035] dark:text-white lg:hidden"
               aria-label="Toggle navigation"
               whileTap={{ scale: 0.9 }}
             >
@@ -199,7 +199,7 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            className="overflow-hidden border-t border-slate-900/10 bg-[#f6f8f2]/96 backdrop-blur-xl dark:border-white/10 dark:bg-[#090d0d]/96 md:hidden"
+            className="overflow-hidden border-t border-slate-900/10 bg-[#f6f8f2]/96 backdrop-blur-xl dark:border-white/10 dark:bg-[#090d0d]/96 lg:hidden"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}

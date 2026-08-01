@@ -8,7 +8,6 @@ import { SkillCard } from '@/components/ui/SkillCard';
 import { TimelineItem } from '@/components/ui/TimelineItem';
 import { useAppStore, selectAboutEntries, selectSkills, selectTimeline } from '@/store';
 import { PageBackground } from '@/components/ui/InteractiveEffects';
-import { CachedImage } from '@/components/ui/CachedImage';
 
 const skillCategories = [
   'all', 'mobile', 'frontend', 'backend', 'database', 'devops', 'ai', 'tools', 'other',
@@ -80,11 +79,12 @@ export default function AboutPage() {
               transition={{ duration: 0.65, delay: 0.1 }}
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-[linear-gradient(180deg,rgba(20,184,166,0.13),transparent)] dark:bg-[linear-gradient(180deg,rgba(20,184,166,0.08),transparent)]" />
-              <div className="relative mx-auto mb-5 h-28 w-28 rotate-2 overflow-hidden rounded-[1.65rem] border border-white/35 bg-slate-950 shadow-[0_20px_55px_rgba(15,23,42,0.22)] sm:h-32 sm:w-32">
-                <CachedImage
+              <div className="relative mx-auto mb-5 h-28 w-28 rotate-2 overflow-hidden rounded-[1.65rem] border border-white/35 bg-slate-100 shadow-[0_20px_55px_rgba(15,23,42,0.22)] dark:bg-white/[0.06] sm:h-32 sm:w-32">
+                <img
                   src={avatarUrl}
                   alt={avatarText}
                   loading="eager"
+                  decoding="async"
                   fetchPriority="high"
                   className="h-full w-full object-cover"
                 />
