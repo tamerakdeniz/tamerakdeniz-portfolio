@@ -17,6 +17,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        has: [{ type: 'query', key: 'view', value: 'recruiter' }],
+        destination: '/resume',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

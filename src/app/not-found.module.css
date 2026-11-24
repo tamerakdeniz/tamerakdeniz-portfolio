@@ -1,0 +1,39 @@
+.lost {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 88svh;
+  display: flex;
+  align-items: center;
+  padding: calc(var(--header-h) + 48px) 0 96px;
+  background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(22, 43, 54, 0.9), transparent 70%), var(--trench);
+}
+
+.field {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+.code {
+  margin: 0 0 24px;
+  color: var(--signal);
+}
+
+.h {
+  max-width: 11ch;
+}
+
+.body {
+  margin: 28px 0 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 32px;
+  margin-top: 40px;
+}

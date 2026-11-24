@@ -15,6 +15,12 @@ export interface Project {
   image: string;
   order?: number;
   published: boolean;
+  /** Optional case-study fields; rendered only when present in the database. */
+  slug?: string;
+  role?: LocalizedString;
+  status?: string;
+  year?: string;
+  sections?: { heading: LocalizedString; body: LocalizedString }[];
 }
 
 export interface AboutEntry {

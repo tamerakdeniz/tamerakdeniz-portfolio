@@ -1,0 +1,62 @@
+.intro {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: calc(var(--header-h) + clamp(48px, 8vw, 112px)) 0 clamp(128px, 14vw, 200px);
+  background:
+    radial-gradient(ellipse 60% 70% at 80% 0%, rgba(69, 140, 140, 0.16), transparent 70%),
+    var(--abyss);
+}
+
+.band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -20px;
+  z-index: -1;
+}
+
+.eyebrow {
+  margin: 0 0 clamp(28px, 4vw, 48px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.eyebrow a {
+  color: var(--paper);
+}
+
+.grid {
+  row-gap: 28px;
+  align-items: end;
+}
+
+.h {
+  grid-column: 1 / -1;
+  font-size: clamp(3rem, 9vw, 8.5rem);
+  max-width: 12ch;
+  text-wrap: balance;
+}
+
+.lede {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.aside {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  .h {
+    grid-column: 1 / 9;
+  }
+  .lede {
+    grid-column: 9 / 13;
+    padding-bottom: 0.6em;
+  }
+  .aside {
+    grid-column: 1 / -1;
+  }
+}

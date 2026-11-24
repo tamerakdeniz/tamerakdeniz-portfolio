@@ -13,11 +13,9 @@ export function AdminDashboardSection() {
   const timeline = useAppStore(selectTimeline);
   const isFirebaseConnected = useAppStore((s) => s.isFirebaseConnected);
   const [contactCount, setContactCount] = useState(0);
-  const [activityLog, setActivityLog] = useState<ActivityEntry[]>([]);
-
-  useEffect(() => {
-    setActivityLog(getActivityLog());
-  }, []);
+  const [activityLog, setActivityLog] = useState<ActivityEntry[]>(() =>
+    typeof window === 'undefined' ? [] : getActivityLog()
+  );
 
   useEffect(() => {
     try {

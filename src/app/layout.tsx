@@ -1,43 +1,56 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
+import { IBM_Plex_Mono, Instrument_Serif, Space_Grotesk } from 'next/font/google';
 import '@/styles/globals.css';
-import { Providers } from './providers';
+import '@/styles/tokens.css';
+import { BOOT_SCRIPT } from '@/lib/lang-boot';
+import { OWNER } from '@/lib/content/portfolio';
 
-const inter = Inter({
+const display = Space_Grotesk({
   subsets: ['latin', 'latin-ext'],
-  variable: '--font-inter',
+  variable: '--font-display-family',
   display: 'swap',
 });
 
+const serif = Instrument_Serif({
+  subsets: ['latin', 'latin-ext'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-serif-family',
+  display: 'swap',
+});
+
+const mono = IBM_Plex_Mono({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500'],
+  variable: '--font-mono-family',
+  display: 'swap',
+});
+
+const description =
+  'Mustafa Tamer Akdeniz is a software developer who builds software, explores ideas, and turns complex problems into useful products.';
+
 export const metadata: Metadata = {
-  title: 'Tamer Akdeniz | Deep Work for AI Product Systems',
-  description:
-    'Tamer Akdeniz builds AI-powered product systems from unclear ideas to working software, combining deep research, full-stack execution, and LLM integration.',
-  keywords: [
-    'Tamer Akdeniz',
-    'AI Developer',
-    'Software Developer',
-    'Full-Stack Developer',
-    'LLM Integration',
-    'Machine Learning',
-    'Web Development',
-  ],
-  authors: [{ name: 'Tamer Akdeniz' }],
-  metadataBase: new URL('https://tamerakdeniz.com'),
+  metadataBase: new URL(OWNER.siteUrl),
+  title: {
+    default: `${OWNER.fullName} — Software Developer`,
+    template: `%s — ${OWNER.fullName}`,
+  },
+  description,
+  authors: [{ name: OWNER.fullName, url: OWNER.siteUrl }],
+  creator: OWNER.fullName,
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
-    url: 'https://tamerakdeniz.com',
-    title: 'Tamer Akdeniz | AI Product Systems',
-    description:
-      'AI-powered product systems built with deep research, full-stack execution, and LLM integration.',
-    images: [{ url: '/img/underwaterme.jpg', width: 1200, height: 630 }],
-    siteName: 'Tamer Akdeniz Portfolio',
+    url: OWNER.siteUrl,
+    siteName: OWNER.fullName,
+    title: `${OWNER.fullName} — Software Developer`,
+    description,
+    images: [{ url: '/img/underwaterme.jpg', alt: `${OWNER.fullName} scuba diving` }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tamer Akdeniz | AI Product Systems',
-    description:
-      'AI-powered product systems built with deep research, full-stack execution, and LLM integration.',
+    title: `${OWNER.fullName} — Software Developer`,
+    description,
     images: ['/img/underwaterme.jpg'],
   },
   icons: {
@@ -46,42 +59,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const viewport: Viewport = {
+  themeColor: '#080f16',
+  colorScheme: 'dark light',
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${display.variable} ${serif.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-          rel="stylesheet"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                var theme = localStorage.getItem('portfolio_theme') || 'dark';
-                if (theme === 'dark') {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
-                if ('scrollRestoration' in history) {
-                  history.scrollRestoration = 'manual';
-                }
-                window.scrollTo(0, 0);
-              })();
-            `,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: BOOT_SCRIPT }} />
       </head>
-      <body
-        className={`${inter.variable} font-[family-name:var(--font-inter)] bg-background-light dark:bg-background-dark text-slate-900 dark:text-white transition-colors duration-300`}
-      >
-        <Providers>{children}</Providers>
-      </body>
+      <body className="site">{children}</body>
     </html>
   );
 }

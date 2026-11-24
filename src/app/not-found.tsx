@@ -1,52 +1,52 @@
-'use client';
-
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import { Layout } from '@/components/layout/Layout';
-import { PageBackground } from '@/components/ui/InteractiveEffects';
+import { COPY } from '@/lib/content/copy';
+import { getPortfolio } from '@/lib/content/get-portfolio';
+import { PortfolioShell } from '@/components/portfolio/PortfolioShell';
+import { ContourBand } from '@/components/portfolio/ContourField';
+import { T } from '@/components/portfolio/T';
+import s from './not-found.module.css';
 
-export default function NotFound() {
-  const { t } = useTranslation();
+export const metadata: Metadata = {
+  title: 'Uncharted water',
+  robots: { index: false },
+};
 
+export default async function NotFound() {
+  const portfolio = await getPortfolio();
   return (
-    <Layout>
-      <PageBackground intensity="subtle" />
-      <div className="flex-1 flex items-center justify-center min-h-[calc(100vh-10rem)] relative z-10">
-        <div className="text-center px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', duration: 0.8 }}
-            className="mb-8"
-          >
-            <h1 className="text-[120px] md:text-[180px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-cyan-400">
-              404
-            </h1>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="bg-white/80 dark:bg-surface-dark/80 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-gray-200/80 dark:border-slate-800/80 max-w-md mx-auto"
-          >
-            <h2 className="text-2xl font-bold mb-3">{t('404-title')}</h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
-              {t('404-description')}
-            </p>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-blue-700 transition-all hover:shadow-lg hover:shadow-primary/25 relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                <span className="material-symbols-outlined relative">home</span>
-                <span className="relative">{t('404-home')}</span>
-              </Link>
-            </motion.div>
-          </motion.div>
+    <PortfolioShell portfolio={portfolio}>
+      <section className={`surface-dark ${s.lost}`} aria-labelledby="lost-title">
+        <ContourBand seed={404} count={26} height={520} amplitude={34} compress={1.04} tone="tidal" opacity={0.26} className={s.field} draw={false} />
+        <div className="wrap">
+          <p className={`${s.code} meta tabular`} data-enter>
+            404 <span aria-hidden="true">·</span> ?? m
+          </p>
+          <h1 id="lost-title" className={`display ${s.h}`} data-enter style={{ '--i': 1 } as React.CSSProperties}>
+            <span className="serif">
+              <T v={COPY.notFound.title} />
+            </span>
+          </h1>
+          <p className={`lede muted ${s.body}`} data-enter style={{ '--i': 2 } as React.CSSProperties}>
+            <T v={COPY.notFound.body} />
+          </p>
+          <div className={s.actions} data-enter style={{ '--i': 3 } as React.CSSProperties}>
+            <Link className="btn btn-primary" href="/">
+              <span className="arrow arrow-up" aria-hidden="true">
+                ↑
+              </span>
+              <T v={COPY.notFound.home} />
+            </Link>
+            <Link className="tlink hit" href="/projects">
+              <T v={COPY.notFound.archive} />
+              <span className="arrow" aria-hidden="true">
+                {' '}
+                →
+              </span>
+            </Link>
+          </div>
         </div>
-      </div>
-    </Layout>
+      </section>
+    </PortfolioShell>
   );
 }

@@ -1,0 +1,215 @@
+.section {
+  padding: clamp(48px, 7vw, 96px) 0 var(--chapter-pad);
+}
+
+.filter {
+  display: grid;
+  gap: 16px;
+  margin-bottom: clamp(32px, 5vw, 56px);
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line-light);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line-light);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition:
+    border-color 160ms var(--ease-out),
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out);
+}
+
+.chip:hover {
+  border-color: var(--ink);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.chipCount {
+  font-family: var(--font-mono-stack);
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.showing {
+  margin: 0;
+  color: var(--muted-light);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px var(--gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(96px, 30%) 1fr;
+  gap: 16px;
+  align-items: start;
+  align-content: start;
+}
+
+.plate {
+  transition: transform 300ms var(--ease-out);
+}
+
+.cardBody {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--ink);
+}
+
+.cardMeta {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  color: var(--muted-light);
+}
+
+.kind {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.cardLink {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.cardLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.cardLink:focus-visible {
+  outline: none;
+}
+
+.card:has(.cardLink:focus-visible) {
+  outline: 2px solid var(--focus-light);
+  outline-offset: 6px;
+}
+
+.cardSub {
+  margin: 0;
+  font-family: var(--font-serif-stack);
+  font-style: italic;
+  font-size: 1.125rem;
+  line-height: 1.3;
+  color: var(--muted-light);
+}
+
+.cardStack {
+  margin: 6px 0 0;
+  color: var(--ink);
+}
+
+.cardAccess {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0 0;
+  color: var(--muted-light);
+}
+
+.go {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  color: var(--ink);
+  transition: transform 200ms var(--ease-out);
+}
+
+.card:hover .go {
+  transform: translateX(4px);
+}
+
+.card:hover .cardLink {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+@media (hover: hover) {
+  .card:hover .plate {
+    transform: translateY(-4px);
+  }
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 56px;
+  }
+  .card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .card:nth-child(3n + 2) {
+    margin-top: 48px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .card:nth-child(3n + 2) {
+    margin-top: 0;
+  }
+  .card:nth-child(4n + 2),
+  .card:nth-child(4n + 4) {
+    margin-top: 48px;
+  }
+}
+
+.grid:not([data-filter='all']) > .card {
+  margin-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate,
+  .go {
+    transition: none;
+  }
+}

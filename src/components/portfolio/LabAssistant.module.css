@@ -1,0 +1,156 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-dark);
+  background: color-mix(in srgb, var(--abyss) 80%, transparent);
+  border-radius: var(--radius);
+}
+
+.log {
+  height: clamp(260px, 38vh, 380px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.empty {
+  display: grid;
+  gap: 12px;
+  align-content: end;
+  height: 100%;
+}
+
+.empty p {
+  margin: 0;
+  color: var(--muted-dark);
+}
+
+.suggestions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line-dark);
+}
+
+.suggestion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-dark);
+  background: none;
+  color: var(--paper);
+  font: inherit;
+  font-size: 0.9375rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestion:hover {
+  color: var(--signal);
+}
+
+.msg {
+  display: grid;
+  gap: 4px;
+  max-width: 62ch;
+}
+
+.user {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.who {
+  font-size: 0.625rem;
+  color: var(--muted-dark);
+}
+
+.text {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.text p,
+.text ul {
+  margin: 0;
+}
+
+.text p + p,
+.text p + ul,
+.text ul + p {
+  margin-top: 0.6em;
+}
+
+.text ul {
+  padding-left: 1.1em;
+}
+
+.user .text {
+  padding: 8px 12px;
+  border: 1px solid var(--line-dark);
+  background: var(--ocean);
+  border-radius: var(--radius);
+}
+
+.bot .text {
+  padding-left: 12px;
+  border-left: 1px solid var(--tidal);
+}
+
+.thinking {
+  margin: 0;
+  color: var(--muted-dark);
+}
+
+.form {
+  display: flex;
+  border-top: 1px solid var(--line-dark);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
+  color: var(--paper);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.input::placeholder {
+  color: var(--muted-dark);
+}
+
+.input:disabled {
+  opacity: 0.6;
+}
+
+.send {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border: 0;
+  border-left: 1px solid var(--line-dark);
+  background: var(--signal);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.send:disabled {
+  background: transparent;
+  color: var(--muted-dark);
+  cursor: not-allowed;
+}
