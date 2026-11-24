@@ -73,7 +73,7 @@
 
 .plateCol {
   grid-column: 1 / -1;
-  max-width: 420px;
+  max-width: 640px;
   width: 100%;
 }
 
@@ -258,10 +258,10 @@
 
 @media (min-width: 768px) {
   .titleBlock {
-    grid-column: 1 / 6;
+    grid-column: 1 / 5;
   }
   .plateCol {
-    grid-column: 6 / 9;
+    grid-column: 5 / 9;
     justify-self: end;
   }
   .factsRow {
@@ -287,10 +287,11 @@
 
 @media (min-width: 1024px) {
   .titleBlock {
-    grid-column: 1 / 9;
+    grid-column: 1 / 7;
   }
   .plateCol {
-    grid-column: 9 / 13;
+    grid-column: 7 / 13;
+    max-width: none;
   }
   .label {
     grid-column: 1 / 4;

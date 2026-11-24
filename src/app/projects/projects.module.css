@@ -1,0 +1,4 @@
+.section {
+  padding: clamp(48px, 7vw, 96px) 0 var(--chapter-pad);
+  background: var(--abyss);
+}

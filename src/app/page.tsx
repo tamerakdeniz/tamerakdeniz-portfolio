@@ -1,13 +1,13 @@
 import { getPortfolio } from '@/lib/content/get-portfolio';
 import { OWNER } from '@/lib/content/portfolio';
 import { PortfolioShell } from '@/components/portfolio/PortfolioShell';
-import { EditorialHero } from '@/components/portfolio/EditorialHero';
-import { HumanSpread } from '@/components/portfolio/HumanSpread';
-import { FeaturedWork } from '@/components/portfolio/FeaturedWork';
-import { LabIndex } from '@/components/portfolio/LabIndex';
-import { EngineeringPillars } from '@/components/portfolio/EngineeringPillars';
-import { JourneyLog } from '@/components/portfolio/JourneyLog';
-import { ContactHorizon } from '@/components/portfolio/ContactHorizon';
+import { DescentHero } from '@/components/portfolio/DescentHero';
+import { FieldJournal } from '@/components/portfolio/FieldJournal';
+import { WorkPlates } from '@/components/portfolio/WorkPlates';
+import { LabChapter } from '@/components/portfolio/LabChapter';
+import { EngineeringChapter } from '@/components/portfolio/EngineeringChapter';
+import { ExpeditionLog } from '@/components/portfolio/ExpeditionLog';
+import { ContactSignal } from '@/components/portfolio/ContactSignal';
 import { JsonLd } from '@/components/portfolio/JsonLd';
 
 export const revalidate = 60;
@@ -30,13 +30,13 @@ export default async function HomePage() {
           sameAs,
         }}
       />
-      <EditorialHero portfolio={portfolio} />
-      <HumanSpread portfolio={portfolio} />
-      <FeaturedWork portfolio={portfolio} />
-      <LabIndex portfolio={portfolio} />
-      <EngineeringPillars portfolio={portfolio} />
-      <JourneyLog portfolio={portfolio} />
-      <ContactHorizon portfolio={portfolio} />
+      <DescentHero portfolio={portfolio} />
+      <FieldJournal portfolio={portfolio} />
+      <WorkPlates portfolio={portfolio} />
+      <LabChapter portfolio={portfolio} />
+      <EngineeringChapter portfolio={portfolio} />
+      <ExpeditionLog portfolio={portfolio} />
+      <ContactSignal portfolio={portfolio} />
     </PortfolioShell>
   );
 }

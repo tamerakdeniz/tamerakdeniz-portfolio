@@ -1,0 +1,268 @@
+.journey {
+  position: relative;
+}
+
+.head {
+  display: grid;
+  gap: 28px;
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+
+.intro {
+  margin: 0;
+  max-width: 48ch;
+}
+
+.layout {
+  display: grid;
+  gap: 40px;
+}
+
+/* ── Dive computer ────────────────────────────────────────── */
+
+.computer {
+  min-width: 0;
+}
+
+.screen {
+  display: grid;
+  gap: 18px;
+  padding: clamp(18px, 2vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(181, 245, 210, 0.07), transparent 60%),
+    rgba(5, 10, 15, 0.72);
+  box-shadow: inset 0 0 0 4px rgba(5, 10, 15, 0.6);
+}
+
+.screenTop,
+.screenFoot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+.year {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  margin: 0;
+  font-family: var(--font-mono-stack);
+  font-size: clamp(3.4rem, 7vw, 6.6rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: var(--signal);
+}
+
+.yearTo {
+  font-size: 0.42em;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.now {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  min-height: 3.6em;
+}
+
+.nowTitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.nowOrg {
+  font-size: 0.9rem;
+  color: var(--fg-muted);
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.tick {
+  stroke: var(--paper);
+  stroke-opacity: 0.12;
+}
+
+.tickLabel,
+.laneLabel {
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  fill: var(--muted-dark);
+}
+
+.bar,
+.barOn {
+  rx: 2px;
+  cursor: pointer;
+  transition:
+    fill 220ms var(--ease-out),
+    fill-opacity 220ms var(--ease-out);
+}
+
+.bar {
+  fill: var(--paper);
+  fill-opacity: 0.26;
+}
+
+.bar:hover {
+  fill-opacity: 0.5;
+}
+
+.barOn {
+  fill: var(--signal);
+}
+
+.arrowDown {
+  color: var(--signal);
+}
+
+/* ── Log ──────────────────────────────────────────────────── */
+
+.log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  gap: 10px;
+  padding: 32px 0 36px;
+  border-top: 1px solid var(--line);
+  transition: opacity 320ms var(--ease-out);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+.no {
+  color: var(--accent);
+}
+
+.type {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.type[data-type='work'] {
+  border-color: color-mix(in srgb, var(--signal) 50%, transparent);
+  color: var(--fg);
+}
+
+.entryTitle {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.org {
+  margin: 0;
+  font-family: var(--font-serif-stack);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--fg);
+}
+
+.desc {
+  max-width: 62ch;
+  color: var(--fg-muted);
+}
+
+.desc p {
+  margin: 0;
+}
+
+.more {
+  margin-top: 10px;
+}
+
+.more summary {
+  cursor: pointer;
+  color: var(--fg);
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.more p {
+  margin-top: 8px;
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+  margin-top: 48px;
+}
+
+@media (min-width: 1024px) {
+  .head {
+    grid-template-columns: 7fr 4fr;
+    align-items: end;
+    column-gap: var(--gutter);
+  }
+
+  .head > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(40px, 5vw, 96px);
+    align-items: start;
+  }
+
+  .side {
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+  }
+
+  .entry {
+    padding: 44px 0 52px;
+  }
+
+  .entry[data-armed]:not([data-active]) {
+    opacity: 0.72;
+  }
+
+  .entry[data-armed]:not([data-active]):hover,
+  .entry[data-armed]:focus-within {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .screenFoot {
+    display: none;
+  }
+}

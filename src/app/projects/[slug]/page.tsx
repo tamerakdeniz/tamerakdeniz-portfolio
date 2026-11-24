@@ -6,7 +6,7 @@ import { getPortfolio } from '@/lib/content/get-portfolio';
 import { OWNER, type Loc, type PortfolioProject } from '@/lib/content/portfolio';
 import { stackStrata } from '@/lib/content/strata';
 import { PortfolioShell } from '@/components/portfolio/PortfolioShell';
-import { ProjectPlate } from '@/components/portfolio/ProjectPlate';
+import { PlateFigure } from '@/components/portfolio/PlateFigure';
 import { ExternalLinks, KindText } from '@/components/portfolio/ProjectBits';
 import { ContourBand } from '@/components/portfolio/ContourField';
 import { JsonLd } from '@/components/portfolio/JsonLd';
@@ -158,7 +158,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
                 )}
               </div>
               <div className={s.plateCol} data-enter style={{ '--i': 3 } as React.CSSProperties}>
-                <ProjectPlate project={project} shape="square" priority figure="P" />
+                <PlateFigure project={project} priority sizes="(min-width: 1024px) 20vw, 50vw" />
               </div>
             </div>
 

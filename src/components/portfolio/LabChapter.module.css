@@ -1,0 +1,40 @@
+.lab {
+  background: linear-gradient(180deg, transparent, rgba(5, 10, 15, 0.55) 18%, rgba(5, 10, 15, 0.55) 82%, transparent);
+}
+
+.head {
+  display: grid;
+  gap: 28px;
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+
+.title {
+  margin: 0;
+  max-width: 14ch;
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+
+.intro {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  max-width: 48ch;
+}
+
+.intro p {
+  margin: 0;
+}
+
+@media (min-width: 1024px) {
+  .head {
+    grid-template-columns: 7fr 4fr;
+    align-items: end;
+    column-gap: var(--gutter);
+  }
+  .head > :first-child {
+    grid-column: 1 / -1;
+  }
+}

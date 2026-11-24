@@ -1,0 +1,145 @@
+.figure {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  min-width: 0;
+  container: plate / inline-size;
+}
+
+.art {
+  --plate-line: color-mix(in srgb, var(--fg) 22%, transparent);
+  position: relative;
+  aspect-ratio: 16 / 10;
+  width: var(--art-w, 100%);
+  justify-self: center;
+  border: 1px solid var(--plate-line);
+  color: var(--fg);
+}
+
+.art[data-field='night'] {
+  background:
+    radial-gradient(90% 80% at 50% 50%, rgba(46, 96, 170, 0.3), transparent 70%),
+    #08121d;
+}
+
+.art[data-field='paper'] {
+  background: var(--paper);
+}
+
+.art[data-field='violet'] {
+  --fg-muted: #cfc8f5;
+  background:
+    radial-gradient(80% 90% at 30% 30%, rgba(124, 98, 255, 0.4), transparent 70%),
+    #23136e;
+}
+
+.art[data-field='ink'] {
+  background:
+    radial-gradient(70% 70% at 50% 50%, rgba(69, 140, 140, 0.18), transparent 70%),
+    var(--abyss);
+}
+
+.print {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.55);
+}
+
+.art[data-print='round'] .print {
+  left: 50%;
+  top: 50%;
+  width: 26%;
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+
+.art[data-print='square'] .print {
+  left: 50%;
+  top: 50%;
+  width: 22%;
+  border-radius: 18%;
+  translate: -50% -50%;
+}
+
+.art[data-print='corner'] .print {
+  right: 6%;
+  bottom: 9%;
+  width: 20%;
+  border-radius: 14%;
+  outline: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.art[data-print='solo'] .print {
+  left: 50%;
+  top: 50%;
+  width: 36%;
+  border-radius: 6px;
+  translate: -50% -50%;
+}
+
+.initial {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif-stack);
+  font-style: italic;
+  font-size: clamp(3rem, 12cqi, 8rem);
+}
+
+/* Registration marks in the frame corners. */
+.reg::before,
+.reg::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--fg);
+  border-style: solid;
+  opacity: 0.6;
+}
+
+.reg::before {
+  left: -1px;
+  top: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.reg::after {
+  right: -1px;
+  bottom: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.legend {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend li::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  vertical-align: 1px;
+  background: var(--c, currentColor);
+}
+
+.caption {
+  justify-self: center;
+  width: var(--art-w, 100%);
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+@container plate (max-width: 560px) {
+  .legend {
+    display: flex;
+  }
+}

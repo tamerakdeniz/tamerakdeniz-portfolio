@@ -1,0 +1,118 @@
+.eng {
+  position: relative;
+}
+
+.head {
+  display: grid;
+  gap: 28px;
+  padding-bottom: clamp(40px, 6vw, 72px);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+
+.intro {
+  margin: 0;
+  max-width: 48ch;
+}
+
+.pillarsHead {
+  display: grid;
+  gap: 14px;
+  margin-top: clamp(72px, 9vw, 128px);
+  padding-top: 24px;
+  border-top: 1px solid var(--ink);
+}
+
+.pillarsHead p {
+  margin: 0;
+  max-width: 60ch;
+}
+
+.pillarsTitle {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.pillars {
+  display: grid;
+  gap: 40px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pillar {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.num {
+  color: var(--fg-muted);
+}
+
+.ptitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.pbody {
+  margin: 0;
+}
+
+.tech {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+.related {
+  display: grid;
+  gap: 8px;
+}
+
+.related p {
+  margin: 0;
+}
+
+.related ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 1024px) {
+  .head {
+    grid-template-columns: 7fr 4fr;
+    align-items: end;
+    column-gap: var(--gutter);
+  }
+  .head > :first-child {
+    grid-column: 1 / -1;
+  }
+  .pillarsHead {
+    grid-template-columns: 7fr 4fr;
+    align-items: end;
+    column-gap: var(--gutter);
+  }
+  .pillars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--gutter);
+    column-gap: clamp(24px, 3vw, 48px);
+  }
+}

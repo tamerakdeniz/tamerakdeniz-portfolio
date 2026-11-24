@@ -1,0 +1,32 @@
+.sub {
+  position: relative;
+  display: block;
+}
+
+/* Both copies overhang by 0.12em so italic and accented glyphs are not clipped at the box edge. */
+.under {
+  display: block;
+  padding-inline: 0.12em;
+  margin-inline: -0.12em;
+  color: var(--paper);
+  clip-path: inset(var(--cut, var(--cut0)) 0 0 0);
+}
+
+.over {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -0.12em;
+  right: -0.12em;
+  padding-inline: 0.12em;
+  color: var(--ink);
+  clip-path: inset(0 0 calc(100% - var(--cut, var(--cut0))) 0);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-fx='on'] .sub[data-cut-shift] {
+    transform: translate3d(0, calc(var(--rise, 0px) * var(--shift) * -1), 0);
+  }
+}

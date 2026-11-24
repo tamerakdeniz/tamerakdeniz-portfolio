@@ -62,6 +62,35 @@ export const COPY = {
     primary: l('Primary', 'Ana menü'),
     chapters: l('Chapters', 'Bölümler'),
     language: l('Language', 'Dil'),
+    index: l('Index', 'Dizin'),
+    indexTitle: l('Expedition index', 'Keşif dizini'),
+    openIndex: l('Open the expedition index', 'Keşif dizinini açın'),
+    closeIndex: l('Close the index', 'Dizini kapatın'),
+    here: l('You are here', 'Buradasınız'),
+    expedition: l('The expedition', 'Keşif'),
+    backToExpedition: l('Back to the expedition', 'Keşfe dönün'),
+    askArchive: l('Ask the archive — AI experiment', 'Arşive sorun — yapay zekâ deneyi'),
+    elsewhere: l('Also on this site', 'Sitede ayrıca'),
+    rail: l('Depth', 'Derinlik'),
+  },
+  chapterNotes: {
+    surface: l('Who I am, the work and the CV, at a glance.', 'Kim olduğum, işlerim ve özgeçmişim, tek bakışta.'),
+    about: l('A field journal: diving, building, learning.', 'Bir saha defteri: dalış, üretmek, öğrenmek.'),
+    work: l('Three projects, up close.', 'Yakından üç proje.'),
+    lab: l('Every other experiment — and an assistant you can question.', 'Diğer tüm deneyler ve soru sorabileceğiniz bir asistan.'),
+    engineering: l('How this site is built, drawn from its own code.', 'Bu sitenin nasıl kurulduğu, kendi kodundan çizildi.'),
+    journey: l('Education and work, in a dive log.', 'Eğitim ve iş, bir dalış kaydında.'),
+    contact: l('Back to the horizon — and a way to reach me.', 'Ufka dönüş ve bana ulaşmanın yolu.'),
+  },
+  cv: {
+    title: l('Curriculum vitae', 'Özgeçmiş'),
+    download: l('Download PDF', 'PDF indir'),
+    openTab: l('Open in a new tab', 'Yeni sekmede açın'),
+    mobile: l(
+      'PDF previews are unreliable on phones. Download the file or open it in a new tab.',
+      'Telefonlarda PDF önizlemesi güvenilir değil. Dosyayı indirin ya da yeni sekmede açın.'
+    ),
+    close: l('Close', 'Kapat'),
   },
   hero: {
     titleA: l('Beyond', 'Yüzeyin'),
@@ -73,7 +102,8 @@ export const COPY = {
     ),
     explore: l('Explore selected work', 'Seçili işleri keşfet'),
     viewCv: l('View CV', 'Özgeçmişi gör'),
-    scroll: l('Scroll to explore', 'Keşfetmek için kaydırın'),
+    scroll: l('Scroll to descend', 'İnmek için kaydırın'),
+    descending: l('Descending to', 'İniş:'),
     figure: l('Fig. 00 — A contour map of curiosity', 'Şekil 00 — Merakın eş yükselti haritası'),
   },
   human: {
@@ -85,6 +115,15 @@ export const COPY = {
       'Şekil 1.1 — Klavyeden uzakta: eğitmen olarak da sürdürdüğüm tüplü dalış.'
     ),
     portraitCaption: l('Fig. 1.2 — Tamer Akdeniz.', 'Şekil 1.2 — Tamer Akdeniz.'),
+    journal: l('Field journal', 'Saha defteri'),
+    page: l('p. 01', 's. 01'),
+    diverNote: l('me, off the keyboard — I also teach diving', 'klavyeden uzakta ben — dalış eğitmenliği de yapıyorum'),
+    portraitNote: l('Tamer, Istanbul', 'Tamer, İstanbul'),
+    diverAlt: l(
+      'Tamer Akdeniz scuba diving, seen from below against open blue water',
+      'Tamer Akdeniz tüplü dalışta, açık mavi suda aşağıdan görünüyor'
+    ),
+    portraitAlt: l('Portrait of Tamer Akdeniz', 'Tamer Akdeniz’in portresi'),
     parallel: l(
       'Diving and software ask for the same habits: prepare before you go down, stay responsible for the people relying on you, and come back up with what you learned.',
       'Dalış ve yazılım aynı alışkanlıkları ister: inmeden önce hazırlanmak, size güvenenlere karşı sorumlu kalmak ve öğrendiklerinizle yüzeye dönmek.'
@@ -106,6 +145,13 @@ export const COPY = {
     source: l('Source code', 'Kaynak kod'),
     demo: l('Demo', 'Demo'),
     markCaption: l('Project mark', 'Proje logosu'),
+    plate: l('Plate', 'Levha'),
+    conceptual: l(
+      'Conceptual plate drawn from the project brief, with the project mark as supplied. Not an interface screenshot.',
+      'Proje tanımından çizilmiş kavramsal levha; proje logosu olduğu gibi kullanıldı. Arayüz ekran görüntüsü değildir.'
+    ),
+    markOnly: l('Project mark, shown as supplied.', 'Proje logosu, olduğu gibi.'),
+    scrollHint: l('Scroll to turn the plate', 'Levhayı çevirmek için kaydırın'),
   },
   lab: {
     titleA: l('Ideas in', 'Hareket hâlindeki'),
@@ -122,6 +168,13 @@ export const COPY = {
     accessLive: l('Live', 'Canlı'),
     accessSource: l('Source', 'Kaynak'),
     archive: l('Open the full archive with filters', 'Filtreli tüm arşivi açın'),
+    askRow: l('Ask the archive', 'Arşive sorun'),
+    askSub: l('AI experiment — answers only from this site', 'Yapay zekâ deneyi — yalnızca bu siteden yanıtlar'),
+    specimen: l('Specimen', 'Örnek'),
+    open: l('Open the project file', 'Proje dosyasını açın'),
+    hint: l('Hover a row, or use ↑ ↓, to inspect it.', 'İncelemek için bir satırın üzerine gelin ya da ↑ ↓ kullanın.'),
+    rowsLabel: l('Projects and the assistant', 'Projeler ve asistan'),
+    projectsLabel: l('Projects', 'Projeler'),
     assistantTitle: l('Ask the archive', 'Arşive sorun'),
     assistantBody: l(
       'An experiment running on this site: a Gemini-backed assistant that answers only from the content you can read here. It can be wrong — the pages remain the source of truth.',
@@ -136,6 +189,14 @@ export const COPY = {
       'Sürekli geri döndüğüm üç alan. Teknolojiler yalnızca yayınlanmış projelerimde ya da deneyimimde yer aldığı ölçüde listeleniyor; her başlık arkasındaki işe bağlanıyor.'
     ),
     related: l('Seen in', 'Görüldüğü yer'),
+    mapTitle: l('Fig. 4.1 — This site, as built', 'Şekil 4.1 — Bu site, kurulduğu hâliyle'),
+    mapIntro: l(
+      'Drawn from this repository, not from a template. Select a part to see what it does, what it talks to, and where it lives in the code.',
+      'Bir şablondan değil, bu depodan çizildi. Bir parçayı seçin: ne yaptığını, kiminle konuştuğunu ve kodda nerede durduğunu görün.'
+    ),
+    connects: l('Talks to', 'Bağlantıları'),
+    inCode: l('In the code', 'Kodda'),
+    pillarsTitle: l('Three areas I keep returning to', 'Sürekli geri döndüğüm üç alan'),
     loopCaption: l(
       'Fig. 4.1 — A conceptual loop: how I like to work, not a claim about every project.',
       'Şekil 4.1 — Kavramsal bir döngü: çalışmayı sevdiğim biçim, her proje için bir iddia değil.'
@@ -156,6 +217,10 @@ export const COPY = {
       'Eğitim, programlar ve iş deneyimi, kendi sıralamamla. Bazıları zaman olarak örtüşüyor; gerçekte de öyle oldu.'
     ),
     now: l('Now', 'Bugün'),
+    computer: l('Dive log', 'Dalış kaydı'),
+    entry: l('Entry', 'Kayıt'),
+    deeper: l('Scroll deeper to go further back', 'Daha geriye gitmek için derine inin'),
+    chart: l('Education and work over time', 'Zaman içinde eğitim ve iş'),
     more: l('Read more', 'Devamını okuyun'),
     downloadCv: l('Download CV (PDF)', 'Özgeçmişi indirin (PDF)'),
     linkedin: l('Experience on LinkedIn', 'LinkedIn’deki deneyim'),
@@ -167,6 +232,10 @@ export const COPY = {
     emailLabel: l('Write to me', 'Bana yazın'),
     elsewhere: l('Elsewhere', 'Diğer kanallar'),
     back: l('Back to the surface', 'Yüzeye dönün'),
+    ascend: l('Return to the surface', 'Yüzeye çıkın'),
+    copy: l('Copy address', 'Adresi kopyalayın'),
+    copied: l('Copied', 'Kopyalandı'),
+    reach: l('Reach me', 'Bana ulaşın'),
     formToggle: l('Or leave a message here', 'Ya da buradan mesaj bırakın'),
     formTitle: l('Leave a message', 'Mesaj bırakın'),
     name: l('Name', 'Ad'),

@@ -1,0 +1,313 @@
+/* ── 01 The Human: a field journal adrift in the water column ── */
+
+.human {
+  position: relative;
+  padding-block: clamp(48px, 8vw, 120px) clamp(80px, 12vw, 180px);
+  scroll-margin-top: var(--header-h);
+}
+
+.standalone {
+  padding-top: clamp(32px, 5vw, 64px);
+}
+
+.mark {
+  margin-bottom: clamp(28px, 4vw, 56px);
+}
+
+.sheet {
+  position: relative;
+  display: grid;
+  gap: 40px;
+  padding: clamp(24px, 4vw, 64px) clamp(20px, 4vw, 64px) clamp(32px, 5vw, 72px);
+  background:
+    repeating-linear-gradient(180deg, transparent 0 31px, rgba(69, 140, 140, 0.12) 31px 32px) 0 96px / 100% calc(100% - 96px) no-repeat,
+    var(--paper);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 40px 80px -30px rgba(0, 0, 0, 0.65),
+    0 8px 24px rgba(0, 0, 0, 0.25);
+  transform-origin: 50% 0;
+}
+
+.running {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 clamp(20px, 3vw, 36px);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-light);
+  color: var(--muted-light);
+}
+
+.greeting {
+  margin: 0 0 10px;
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  color: #1f5f8a;
+  transform: rotate(-2deg);
+  transform-origin: 0 50%;
+}
+
+.title {
+  max-width: 13ch;
+  margin-bottom: clamp(24px, 3vw, 40px);
+}
+
+.body {
+  display: grid;
+  gap: 1em;
+}
+
+.lead {
+  margin: 0;
+  font-size: var(--fs-lede);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  max-width: 34ch;
+  text-wrap: pretty;
+}
+
+.prose {
+  color: var(--muted-light);
+  max-width: 56ch;
+}
+
+.parallel {
+  margin: clamp(28px, 4vw, 44px) 0 0;
+  padding-left: 20px;
+  border-left: 2px solid var(--ink);
+  max-width: 40ch;
+}
+
+.parallel p {
+  margin: 0;
+  font-size: 1.32rem;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+}
+
+.more {
+  display: inline-block;
+  margin-top: 28px;
+}
+
+/* Right page: prints taped in, with handwritten notes. */
+.pageR {
+  position: relative;
+  display: grid;
+  gap: 48px;
+  align-content: start;
+}
+
+.print {
+  position: relative;
+  margin: 0;
+  padding: 10px 10px 14px;
+  background: #fbfaf6;
+  box-shadow:
+    0 1px 2px rgba(20, 32, 39, 0.18),
+    0 18px 34px -18px rgba(20, 32, 39, 0.5);
+}
+
+.frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--ocean);
+}
+
+.frameSquare {
+  aspect-ratio: 1;
+}
+
+.img {
+  object-fit: cover;
+  object-position: 50% 38%;
+}
+
+.caption {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted-light);
+  max-width: 42ch;
+}
+
+.tape {
+  position: absolute;
+  z-index: 2;
+  top: -12px;
+  left: 50%;
+  width: 96px;
+  height: 26px;
+  margin-left: -48px;
+  background: rgba(226, 225, 217, 0.82);
+  box-shadow: 0 1px 2px rgba(20, 32, 39, 0.12);
+  transform: rotate(-4deg);
+  clip-path: polygon(3% 0, 97% 4%, 100% 92%, 0 100%);
+}
+
+.tapeB {
+  left: 18%;
+  transform: rotate(6deg);
+}
+
+.diver {
+  position: relative;
+  transform: rotate(1.4deg);
+}
+
+.portrait {
+  position: relative;
+  width: min(62%, 300px);
+  margin-left: auto;
+  transform: rotate(-3deg);
+}
+
+.note {
+  position: relative;
+  margin: 14px 0 0;
+  font-size: clamp(1.45rem, 2.1vw, 1.8rem);
+  color: #1f5f8a;
+  max-width: 18ch;
+}
+
+.noteDiver {
+  margin-left: 30%;
+  transform: rotate(-2.5deg);
+}
+
+.notePortrait {
+  position: absolute;
+  right: calc(100% + 12px);
+  bottom: 18%;
+  width: 11ch;
+  text-align: right;
+  transform: rotate(-4deg);
+  margin: 0;
+}
+
+.scribble {
+  position: absolute;
+  width: 84px;
+  height: 56px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.noteDiver .scribble {
+  left: -92px;
+  top: -44px;
+}
+
+.notePortrait .scribble {
+  right: -88px;
+  top: -40px;
+  transform: scaleX(-1) rotate(10deg);
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .portrait {
+    width: 70%;
+  }
+  .notePortrait {
+    position: static;
+    width: auto;
+    text-align: left;
+    margin-top: 10px;
+  }
+  .noteDiver {
+    margin-left: 18%;
+  }
+  .noteDiver .scribble {
+    left: -70px;
+    width: 64px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sheet {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0;
+    padding: 0;
+    width: calc(100% + 2 * clamp(0px, 2vw, 32px));
+    margin-inline: calc(-1 * clamp(0px, 2vw, 32px));
+  }
+
+  /* The gutter: a soft fold between the two pages. */
+  .sheet::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 64px;
+    margin-left: -32px;
+    background: linear-gradient(90deg, transparent, rgba(20, 32, 39, 0.1) 46%, rgba(20, 32, 39, 0.16) 50%, rgba(20, 32, 39, 0.1) 54%, transparent);
+    pointer-events: none;
+  }
+
+  .pageL {
+    padding: clamp(40px, 4vw, 72px) clamp(48px, 5vw, 88px) clamp(56px, 5vw, 88px) clamp(40px, 4vw, 72px);
+  }
+
+  .pageR {
+    padding: clamp(72px, 7vw, 120px) clamp(40px, 4vw, 72px) clamp(56px, 5vw, 88px) clamp(56px, 5vw, 96px);
+  }
+
+  .notePortrait .scribble {
+    display: block;
+  }
+}
+
+/* ── Motion: the sheet settles as it rises; prints drift at their own rate ── */
+
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-fx='on']) .sheet {
+    transform: translate3d(0, calc((0.5 - var(--p, 0.5)) * 9vh), 0) rotate(calc(-1.6deg + var(--p, 0.5) * 1.6deg));
+  }
+
+  @media (min-width: 1024px) {
+    :global(html[data-fx='on']) .diver .print {
+      transform: translate3d(0, calc((0.5 - var(--p, 0.5)) * -70px), 0);
+    }
+
+    :global(html[data-fx='on']) .portrait .print {
+      transform: translate3d(0, calc((0.5 - var(--p, 0.5)) * -150px), 0);
+    }
+  }
+
+  [data-armed] .note {
+    opacity: 0;
+    transform: translateY(8px) rotate(-3deg);
+    transition:
+      opacity 700ms var(--ease-out) 380ms,
+      transform 700ms var(--ease-out) 380ms;
+  }
+
+  [data-armed][data-inview] .note {
+    opacity: 1;
+    transform: rotate(-2.5deg);
+  }
+
+  [data-armed] .scribble path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1100ms var(--ease-out) 200ms;
+  }
+
+  [data-armed][data-inview] .scribble path {
+    stroke-dashoffset: 0;
+  }
+}
+
+:global(html[data-motion='off']) [data-armed] .note,
+:global(html[data-motion='off']) [data-armed] .scribble path {
+  opacity: 1;
+  transform: none;
+  stroke-dashoffset: 0;
+  transition: none;
+}

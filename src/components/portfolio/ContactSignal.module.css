@@ -1,0 +1,243 @@
+.contact {
+  min-height: 100svh;
+  padding-bottom: clamp(48px, 7vw, 96px);
+}
+
+.stage {
+  display: grid;
+  justify-items: center;
+  gap: clamp(22px, 3vw, 36px);
+  padding-top: clamp(64px, 10vw, 160px);
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+.lede {
+  margin: 0;
+  max-width: 40ch;
+  color: var(--fg-muted);
+  font-size: var(--fs-lede);
+}
+
+/* ── The signal: the address as the largest thing on the page ── */
+
+.signal {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  width: 100%;
+  padding-block: clamp(16px, 3vw, 40px);
+}
+
+.label {
+  margin: 0;
+  color: var(--accent);
+}
+
+.address {
+  display: inline-block;
+  max-width: 100%;
+  color: var(--fg);
+  font-size: clamp(1.7rem, 7.6vw, 8.6rem);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-size: 0% 3px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  padding-bottom: 0.08em;
+  transition: background-size 420ms var(--ease-out);
+}
+
+.address:hover,
+.address:focus-visible {
+  background-size: 100% 3px;
+}
+
+.at {
+  font-family: var(--font-serif-stack);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  padding-inline: 0.02em;
+}
+
+.signalTools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 24px;
+}
+
+.copy {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-family: var(--font-mono-stack);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 180ms var(--ease-out),
+    background-color 180ms var(--ease-out),
+    color 180ms var(--ease-out);
+}
+
+.copy:hover {
+  border-color: var(--fg);
+}
+
+.copy[data-copied] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.where {
+  color: var(--fg-muted);
+}
+
+/* ── Channels ─────────────────────────────────────────────── */
+
+.channels ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px clamp(18px, 3vw, 44px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.channels a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  color: var(--fg);
+  font-size: clamp(1.1rem, 1.6vw, 1.45rem);
+  text-decoration: none;
+}
+
+.channels a:hover {
+  color: var(--accent);
+}
+
+/* ── Form ─────────────────────────────────────────────────── */
+
+.formBox {
+  width: min(100%, 720px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 60px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.plus {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.plus::before,
+.plus::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: currentColor;
+  transition: transform 200ms var(--ease-out);
+}
+
+.plus::after {
+  transform: rotate(90deg);
+}
+
+.formBox[open] .plus::after {
+  transform: rotate(0deg);
+}
+
+.formInner {
+  padding: 8px 0 32px;
+}
+
+/* ── Ascent ───────────────────────────────────────────────── */
+
+.ascend {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: clamp(24px, 5vw, 72px);
+  padding: 8px 22px 8px 8px;
+  color: var(--fg);
+  text-decoration: none;
+  text-align: left;
+}
+
+.ascendRing {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  color: var(--accent);
+  font-size: 1.4rem;
+  transition:
+    background-color 220ms var(--ease-out),
+    color 220ms var(--ease-out),
+    transform 320ms var(--ease-out);
+}
+
+.ascend:hover .ascendRing,
+.ascend:focus-visible .ascendRing {
+  background: var(--accent);
+  color: var(--accent-ink);
+  transform: translateY(-4px);
+}
+
+.ascendText {
+  display: grid;
+  gap: 4px;
+  font-size: 1.15rem;
+}
+
+.ascendDepth {
+  color: var(--fg-muted);
+}
+

@@ -58,6 +58,13 @@
   color: var(--fg-muted);
 }
 
+/* Clearance for the floating Index thumb control on phones. */
+@media (max-width: 767px) {
+  .footer {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (min-width: 1024px) {
   .inner {
     grid-template-columns: auto 1fr;

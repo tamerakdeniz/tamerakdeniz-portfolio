@@ -1,0 +1,329 @@
+.root {
+  --flow: #145c58;
+}
+
+.wide {
+  display: none;
+}
+
+.narrow {
+  display: grid;
+  gap: 28px;
+}
+
+.caption {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+/* ── Drawing ──────────────────────────────────────────────── */
+
+.board {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.map {
+  position: relative;
+  aspect-ratio: 1000 / 560;
+  border: 1px solid var(--line);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px);
+  background-size: 4% 7.14%;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.divider {
+  stroke: var(--ink);
+  stroke-opacity: 0.18;
+  stroke-dasharray: 2 6;
+}
+
+.edgeLine {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-opacity: 0.2;
+  transition: stroke-opacity 200ms var(--ease-out);
+}
+
+.edgeOn .edgeLine {
+  stroke-opacity: 0.9;
+  stroke-width: 1.6;
+}
+
+.edgeFlow {
+  fill: none;
+  stroke: var(--flow);
+  stroke-width: 3;
+  stroke-dasharray: 3 14;
+  stroke-linecap: round;
+}
+
+.edgeHead {
+  fill: var(--ink);
+}
+
+.edgeLabel {
+  font-family: var(--font-mono-stack);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+
+.zoneLabel {
+  position: absolute;
+  top: auto;
+  bottom: calc(100% + 10px);
+  margin: 0;
+  translate: -50% 0;
+  white-space: nowrap;
+  color: var(--fg-muted);
+}
+
+.nodes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nodeItem {
+  position: absolute;
+}
+
+.node {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 8px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: clamp(0.72rem, 0.92vw, 0.98rem);
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color 180ms var(--ease-out),
+    color 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out);
+}
+
+.node[data-zone='server'] {
+  font-family: var(--font-mono-stack);
+  font-size: clamp(0.66rem, 0.82vw, 0.86rem);
+  font-weight: 400;
+}
+
+.node[data-state='near'] {
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.node[data-state='on'] {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 6px 6px 0 color-mix(in srgb, var(--flow) 55%, transparent);
+}
+
+.node:hover:not([data-state='on']) {
+  background: var(--paper-deep);
+}
+
+/* ── Detail ───────────────────────────────────────────────── */
+
+.detail {
+  min-width: 0;
+}
+
+.detailInner {
+  display: grid;
+  gap: 16px;
+  position: sticky;
+  top: calc(var(--header-h) + 24px);
+}
+
+.zone {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+.detailName {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.detailBody {
+  margin: 0;
+  max-width: 52ch;
+}
+
+.detailBlock {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.detailBlock > p {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+.links,
+.files {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linkLabel {
+  color: var(--fg-muted);
+}
+
+.files li {
+  overflow-wrap: anywhere;
+}
+
+/* ── Narrow list ──────────────────────────────────────────── */
+
+.group {
+  display: grid;
+  gap: 10px;
+}
+
+.groupName {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+.cards {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+}
+
+.card {
+  border-bottom: 1px solid var(--line);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summaryName {
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.summaryMark {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.summaryMark::before,
+.summaryMark::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 14px;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 200ms var(--ease-out);
+}
+
+.summaryMark::after {
+  transform: rotate(90deg);
+}
+
+details[open] .summaryMark::after {
+  transform: rotate(0deg);
+}
+
+.cardBody {
+  display: grid;
+  gap: 14px;
+  padding: 0 0 22px;
+}
+
+@media (min-width: 1024px) {
+  .wide {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    gap: clamp(32px, 4vw, 64px);
+    align-items: start;
+    padding-top: 32px;
+  }
+
+  .narrow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .edgeFlow {
+    animation: flow 900ms linear infinite;
+  }
+
+  .detailInner {
+    animation: settle 360ms var(--ease-out) both;
+  }
+}
+
+:global(html[data-motion='off']) .edgeFlow,
+:global(html[data-motion='off']) .detailInner {
+  animation: none;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -17;
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

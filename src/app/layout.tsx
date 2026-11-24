@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { IBM_Plex_Mono, Instrument_Serif, Space_Grotesk } from 'next/font/google';
+import { Caveat, IBM_Plex_Mono, Instrument_Serif, Space_Grotesk } from 'next/font/google';
 import '@/styles/globals.css';
 import '@/styles/tokens.css';
 import { BOOT_SCRIPT } from '@/lib/lang-boot';
@@ -23,6 +23,13 @@ const mono = IBM_Plex_Mono({
   subsets: ['latin', 'latin-ext'],
   weight: ['400', '500'],
   variable: '--font-mono-family',
+  display: 'swap',
+});
+
+const hand = Caveat({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['500', '600'],
+  variable: '--font-hand-family',
   display: 'swap',
 });
 
@@ -69,7 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${display.variable} ${serif.variable} ${mono.variable}`}
+      className={`${display.variable} ${serif.variable} ${mono.variable} ${hand.variable}`}
       suppressHydrationWarning
     >
       <head>

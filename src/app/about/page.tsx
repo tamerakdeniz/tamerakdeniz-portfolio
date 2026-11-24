@@ -5,9 +5,9 @@ import { getPortfolio } from '@/lib/content/get-portfolio';
 import { OWNER } from '@/lib/content/portfolio';
 import { PortfolioShell } from '@/components/portfolio/PortfolioShell';
 import { PageIntro } from '@/components/portfolio/PageIntro';
-import { HumanSpread } from '@/components/portfolio/HumanSpread';
+import { FieldJournal } from '@/components/portfolio/FieldJournal';
 import { Instruments } from '@/components/portfolio/Instruments';
-import { JourneyLog } from '@/components/portfolio/JourneyLog';
+import { ExpeditionLog } from '@/components/portfolio/ExpeditionLog';
 import { Horizon } from '@/components/portfolio/ContourField';
 import { T } from '@/components/portfolio/T';
 import s from './about.module.css';
@@ -51,9 +51,9 @@ export default async function AboutPage() {
         </p>
       </PageIntro>
 
-      <HumanSpread portfolio={portfolio} standalone />
+      <FieldJournal portfolio={portfolio} standalone />
       <Instruments skills={portfolio.skills} />
-      <JourneyLog portfolio={portfolio} />
+      <ExpeditionLog portfolio={portfolio} standalone />
 
       <section className={`surface-dark ${s.cta}`} aria-labelledby="about-cta">
         <Horizon className={s.horizon} />

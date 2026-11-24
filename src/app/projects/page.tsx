@@ -4,9 +4,9 @@ import { COPY } from '@/lib/content/copy';
 import { getPortfolio } from '@/lib/content/get-portfolio';
 import { PortfolioShell } from '@/components/portfolio/PortfolioShell';
 import { PageIntro } from '@/components/portfolio/PageIntro';
-import { ArchiveGrid } from '@/components/portfolio/ArchiveGrid';
+import { LabExplorer } from '@/components/portfolio/LabExplorer';
 import { T } from '@/components/portfolio/T';
-import s from '@/components/portfolio/Archive.module.css';
+import s from './projects.module.css';
 
 export const revalidate = 60;
 
@@ -37,10 +37,10 @@ export default async function ProjectsPage() {
         titleSerif={COPY.archive.titleSerif}
         intro={COPY.archive.intro}
       />
-      <section className={`surface-paper ${s.section}`} aria-label="Projects">
+      <section className={`surface-dark ${s.section}`} aria-label="Projects">
         <div className="wrap">
           {portfolio.projects.length > 0 ? (
-            <ArchiveGrid projects={portfolio.projects} />
+            <LabExplorer projects={portfolio.projects} headingLevel={2} listLabel={COPY.lab.projectsLabel} />
           ) : (
             <p className="lede">
               <T v={COPY.archive.empty} />

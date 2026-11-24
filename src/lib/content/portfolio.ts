@@ -53,6 +53,9 @@ export interface JourneyEntry {
   description: Loc;
   startYear: string | null;
   endYear: string | null;
+  /** Months since year 0 (year * 12 + month), parsed from the English period when possible. */
+  start: number | null;
+  end: number | null;
   ongoing: boolean;
 }
 
@@ -181,6 +184,27 @@ function buildProjects(raw: Project[]): PortfolioProject[] {
   });
 }
 
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+/** "Mar 2026", "April 2025", "2023" → months since year 0. */
+function parseMonth(text: string, endOfYear = false): number | null {
+  const match = text.match(/([a-zçğıöşü]+)?\.?\s*((?:19|20)\d{2})/i);
+  if (!match) return null;
+  const year = Number(match[2]);
+  const month = match[1] ? MONTHS.indexOf(match[1].slice(0, 3).toLowerCase()) : -1;
+  return year * 12 + (month >= 0 ? month : endOfYear ? 11 : 0);
+}
+
+export function parsePeriod(period: string, now = new Date()): { start: number | null; end: number | null } {
+  const [from, to] = period.split(/\s+[–—-]\s+|\s+to\s+/i);
+  const start = from ? parseMonth(from) : null;
+  let end: number | null = null;
+  if (to && /present|now|current|günümüz|devam/i.test(to)) end = now.getFullYear() * 12 + now.getMonth();
+  else if (to) end = parseMonth(to, true);
+  else end = start;
+  return { start, end };
+}
+
 function buildJourney(raw: TimelineEntry[]): JourneyEntry[] {
   return raw
     .filter((t) => t.published !== false)
@@ -198,6 +222,7 @@ function buildJourney(raw: TimelineEntry[]): JourneyEntry[] {
         description: loc(t.description) ?? { en: '', tr: '' },
         startYear: years[0] ?? null,
         endYear: ongoing ? null : (years[years.length - 1] ?? null),
+        ...parsePeriod(period.en),
         ongoing,
       };
     });

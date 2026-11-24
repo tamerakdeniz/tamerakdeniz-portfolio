@@ -1,0 +1,91 @@
+.plate {
+  position: relative;
+  display: block;
+  aspect-ratio: var(--aspect, 4 / 3);
+  overflow: hidden;
+  background: #fff;
+  isolation: isolate;
+}
+
+.plate[data-plate='white'] {
+  background: #ffffff;
+}
+
+.plate[data-plate='black'] {
+  background: #000000;
+}
+
+.plate[data-plate='ink'] {
+  background: var(--ink);
+}
+
+.plate[data-plate='paper'] {
+  background: var(--paper);
+}
+
+.plate[data-plate='mist'] {
+  background: #eef0f2;
+}
+
+.plate[data-plate='bleed'] {
+  background: var(--ocean);
+}
+
+.media {
+  position: absolute;
+  inset: var(--inset, 12%);
+}
+
+.plate[data-plate='bleed'] .media {
+  inset: 0;
+}
+
+.img {
+  object-fit: contain;
+}
+
+.photo .media,
+.photo .img {
+  inset: 0;
+}
+
+.photo .img {
+  object-fit: cover;
+  object-position: var(--focus, 50% 50%);
+}
+
+.plate[data-plate='bleed'] .img {
+  object-fit: cover;
+}
+
+.screenshot {
+  outline: 1px solid rgba(20, 32, 39, 0.18);
+  outline-offset: -1px;
+}
+
+.screenshot .media {
+  inset: 0;
+}
+
+.diagram {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif-stack);
+  font-style: italic;
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  color: var(--ink);
+}
+
+.plate[data-plate='black'] .fallback,
+.plate[data-plate='ink'] .fallback {
+  color: var(--paper);
+}
