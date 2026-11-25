@@ -130,13 +130,16 @@
 
 .lang {
   display: inline-flex;
-  margin-inline: 6px;
+  align-items: center;
+  margin-inline: 4px;
+  border: 1px solid var(--h-line, var(--line-dark));
+  border-radius: var(--radius);
 }
 
 .langBtn {
-  min-width: 36px;
+  min-width: 44px;
   min-height: 44px;
-  padding: 0 6px;
+  padding: 0 8px;
   background: none;
   border: 0;
   font-family: var(--font-mono-stack);
@@ -144,12 +147,45 @@
   letter-spacing: 0.08em;
   color: var(--h-muted, var(--fg-muted));
   cursor: pointer;
+  transition:
+    background-color 180ms var(--ease-out),
+    color 180ms var(--ease-out);
+}
+
+.langBtn + .langBtn {
+  border-left: 1px solid var(--h-line, var(--line-dark));
 }
 
 .langBtn[aria-pressed='true'] {
   color: var(--h-fg, var(--fg));
+  font-weight: 500;
+  background: color-mix(in srgb, var(--h-fg, var(--fg)) 14%, transparent);
   text-decoration: underline;
-  text-underline-offset: 6px;
+  text-underline-offset: 5px;
+}
+
+@media (max-width: 439px) {
+  .bar {
+    gap: 10px;
+  }
+  .modeTool {
+    display: none;
+  }
+  .tool {
+    padding-inline: 8px;
+  }
+  .lang {
+    margin-inline: 2px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .bar {
+    gap: 12px;
+  }
+  .tool {
+    padding-inline: 8px;
+  }
 }
 
 /* The index control: chapter number, chapter name and a two-line glyph. */

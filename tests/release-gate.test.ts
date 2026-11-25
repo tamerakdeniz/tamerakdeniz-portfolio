@@ -28,9 +28,18 @@ test('durable quota transition enforces client windows, daily totals and day res
  assert.equal(reserveAction(state,'new','chat',now),undefined);assert.equal(reserveAction(state,'new','chat',now+86400000)?.total,1);
  state=reserveAction(null,'same','contact',now)!;state=reserveAction(state,'same','contact',now)!;assert.equal(reserveAction(state,'same','contact',now),undefined);assert.equal(reserveAction(state,'same','contact',now+600000)?.total,3);
 });
-test('concept and mock media always carry bilingual disclosure', () => {
- assert.match(classifiedCaption({id:'m',kind:'cover',url:'/cover.webp',classification:'ai-concept',caption:{en:'Cover',tr:'Kapak'}})!.en,/not a product screenshot/);
- assert.match(classifiedCaption({id:'m',kind:'cover',url:'/cover.webp',classification:'simulated-demo'})!.tr,/Simüle/);
+test('conceptual covers suppress boilerplate AI notices while screenshots, diagrams and provenance stay honest', async () => {
+ const {CONCEPTUAL_PROVENANCE,isConceptualMedia}=await import('../src/lib/content/media-classification');
+ const {COPY}=await import('../src/lib/content/copy');
+ assert.equal(classifiedCaption({id:'m',kind:'cover',url:'/cover.webp',classification:'ai-concept',caption:{en:'Conceptual artwork; not a product screenshot.',tr:'Kavramsal görsel; ürün ekran görüntüsü değildir.'}}),undefined);
+ assert.equal(classifiedCaption({id:'m2',kind:'cover',url:'/cover.webp',classification:'editorial-illustration',caption:{en:'Editorial illustration — not a product screenshot',tr:'Editoryal illüstrasyon — ürün ekran görüntüsü değildir'}}),undefined);
+ assert.deepEqual(classifiedCaption({id:'m3',kind:'cover',url:'/cover.webp',classification:'ai-concept',caption:{en:'Lighting study for arena lobby',tr:'Arena lobisi ışık çalışması'}}),{en:'Lighting study for arena lobby',tr:'Arena lobisi ışık çalışması'});
+ assert.equal(isConceptualMedia({classification:'ai-concept'}),true);
+ assert.equal(isConceptualMedia({classification:'authentic-web'}),false);
+ assert.deepEqual(CONCEPTUAL_PROVENANCE,{en:'Concept art',tr:'Kavramsal görsel'});
+ assert.match(classifiedCaption({id:'m4',kind:'desktop',url:'/demo.webp',classification:'simulated-demo',caption:{en:'Sandbox flow',tr:'Deneme akışı'}})!.tr,/Simüle edilmiş gösterim\. Deneme akışı/);
+ assert.equal(classifiedCaption({id:'m5',kind:'diagram',url:'/arch.webp',classification:'architecture-diagram',caption:{en:'Architecture diagram. Event bus',tr:'Mimari diyagram. Olay veri yolu'}})!.en,'Architecture diagram. Event bus');
+ assert.equal('colophon' in COPY.footer,false);
 });
 test('synthetic exact start date stays bilingual and ongoing', () => {
  const period=timelinePeriod({id:'demo-school',published:true,type:'education',title:{en:'demo-school',tr:'demo-school'},company:{en:'demo-school',tr:'demo-school'},period:{en:'',tr:''},description:{en:'',tr:''},order:0,startDate:'2001-03',startDateExact:'2001-03-12',current:true}).period;assert.match(period.en,/12 Mar/);assert.match(period.tr,/12 Mar/);

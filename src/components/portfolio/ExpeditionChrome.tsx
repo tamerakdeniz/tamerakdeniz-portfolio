@@ -35,6 +35,7 @@ function LangToggle({ className }: { className?: string }) {
           onClick={() => setLang(code)}
         >
           {code.toUpperCase()}
+          <span className="sr-only"> — {code === 'en' ? 'English' : 'Türkçe'}</span>
         </button>
       ))}
     </div>
@@ -102,11 +103,13 @@ function ChapterPreview({ id, chrome }: { id: ChapterId; chrome: ChromeData }) {
 
 function IndexOverlay({
   home,
+  modeLink,
   chrome,
   active,
   onClose,
 }: {
   home: boolean;
+  modeLink: { href: string; label: { en: string; tr: string } };
   chrome: ChromeData;
   active: ChapterId | null;
   onClose: () => void;
@@ -234,8 +237,8 @@ function IndexOverlay({
             </Link>
           </li>
           <li>
-            <Link className="tlink hit" href="/resume" onClick={onClose}>
-              <T v={COPY.nav.recruiter} />
+            <Link className="tlink hit" href={modeLink.href} onClick={onClose}>
+              <T v={modeLink.label} />
             </Link>
           </li>
           <li>
@@ -417,7 +420,7 @@ export function ExpeditionChrome({ mode, chrome }: { mode: Mode; chrome: ChromeD
         railLight = rail ? onPaper(window.innerWidth - 36, window.innerHeight / 2, rail) : false;
       }
       const previewing = st.preview >= 0;
-      const tone = previewing ? 'deep' : st.water * window.innerHeight > 60 ? 'sky' : headerLight ? 'paper' : 'deep';
+      const tone = previewing ? 'deep' : st.waterPx > 60 ? 'sky' : headerLight ? 'paper' : 'deep';
       if (el.dataset.tone !== tone) el.dataset.tone = tone;
       const railTone = !previewing && railLight ? 'light' : 'deep';
       if (rail && rail.dataset.tone !== railTone) rail.dataset.tone = railTone;
@@ -488,7 +491,7 @@ export function ExpeditionChrome({ mode, chrome }: { mode: Mode; chrome: ChromeD
             </Link>
           )}
           <div className={s.tools}>
-            <Link className={s.tool} href={modeLink.href}>
+            <Link className={`${s.tool} ${s.modeTool}`} href={modeLink.href}>
               <span className={s.desktopOnly}>
                 <T v={modeLink.label} />
               </span>
@@ -502,7 +505,7 @@ export function ExpeditionChrome({ mode, chrome }: { mode: Mode; chrome: ChromeD
                 ↗
               </span>
             </a>
-            <LangToggle className={s.desktopOnly} />
+            <LangToggle />
             {indexButton(`${s.indexBtn} ${s.desktopOnly}`)}
           </div>
         </div>
@@ -511,7 +514,9 @@ export function ExpeditionChrome({ mode, chrome }: { mode: Mode; chrome: ChromeD
       {indexButton(`${s.thumb} ${s.mobileOnly}`)}
       {home && <Rail />}
 
-      {indexOpen && <IndexOverlay home={home} chrome={chrome} active={home ? active : null} onClose={closeIndex} />}
+      {indexOpen && (
+        <IndexOverlay home={home} modeLink={modeLink} chrome={chrome} active={home ? active : null} onClose={closeIndex} />
+      )}
       {cvOpen && <CvViewer chrome={chrome} onClose={closeCv} />}
       <CommandPalette chrome={chrome} />
     </>

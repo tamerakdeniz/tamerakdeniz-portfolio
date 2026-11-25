@@ -3,13 +3,13 @@
   display: block;
 }
 
-/* Both copies overhang by 0.12em so italic and accented glyphs are not clipped at the box edge. */
+/* Both copies overhang so italic, accented and descender glyphs are not clipped at line-height 0.8. */
 .under {
   display: block;
   padding-inline: 0.12em;
   margin-inline: -0.12em;
   color: var(--paper);
-  clip-path: inset(var(--cut, var(--cut0)) 0 0 0);
+  clip-path: inset(var(--cut, var(--cut0)) 0 -0.38em 0);
 }
 
 .over {
@@ -20,7 +20,7 @@
   right: -0.12em;
   padding-inline: 0.12em;
   color: var(--ink);
-  clip-path: inset(0 0 calc(100% - var(--cut, var(--cut0))) 0);
+  clip-path: inset(-0.35em 0 calc(100% - var(--cut, var(--cut0))) 0);
   pointer-events: none;
   user-select: none;
 }

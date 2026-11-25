@@ -8,8 +8,10 @@ export interface SceneState {
   depth: number;
   /** 0–1 progress through the hero descent. */
   hero: number;
-  /** Waterline as a fraction of the viewport height from the top (may go negative). */
+  /** Waterline as a fraction of the scene canvas height from the top (may go negative). */
   water: number;
+  /** Waterline in CSS pixels from the top of the viewport. */
+  waterPx: number;
   /** Scroll position in viewport heights. */
   scroll: number;
   /** Smoothed scroll velocity, viewport heights per frame. */
@@ -28,6 +30,7 @@ export const scene: SceneState = {
   depth: 0,
   hero: 0,
   water: 0.46,
+  waterPx: 360,
   scroll: 0,
   velocity: 0,
   preview: -1,

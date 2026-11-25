@@ -187,7 +187,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
                 )}
               </div>
               <div className={s.plateCol} data-enter style={{ '--i': 3 } as React.CSSProperties}>
-                <PlateFigure project={project} priority sizes="(min-width: 1024px) 20vw, 50vw" />
+                <PlateFigure project={project} priority showProvenance sizes="(min-width: 1024px) 20vw, 50vw" />
               </div>
             </div>
 

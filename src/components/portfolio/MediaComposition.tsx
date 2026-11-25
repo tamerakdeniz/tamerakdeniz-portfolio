@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { MotionVideo } from './MotionVideo';
+import { CONCEPTUAL_PROVENANCE, isConceptualMedia } from '@/lib/content/media-classification';
 import type { PortfolioMedia, PortfolioProject } from '@/lib/content/portfolio';
+import { T } from './T';
 import s from './MediaComposition.module.css';
 
 /**
@@ -121,7 +123,7 @@ const KIND: Record<PortfolioMedia['kind'], string> = {
 function Label({ media, index }: { media: PortfolioMedia; index: number }) {
   return (
     <span className={`${s.label} meta tabular`} aria-hidden="true">
-      Fig. {String(index).padStart(2, '0')} · {KIND[media.kind]}
+      Fig. {String(index).padStart(2, '0')} · {isConceptualMedia(media) ? <T v={CONCEPTUAL_PROVENANCE} /> : KIND[media.kind]}
     </span>
   );
 }

@@ -38,20 +38,22 @@ function Access({ project }: { project: PortfolioProject }) {
 }
 
 function Specimen({ project, warm }: { project: PortfolioProject; warm: boolean }) {
-  const shot = project.desktop[0] ?? project.cover ?? project.mobile[0] ?? project.diagrams[0] ?? null;
+  const lang = useLang();
+  const shot = project.cover ?? project.desktop[0] ?? project.mobile[0] ?? project.diagrams[0] ?? null;
+  const isCover = shot?.kind === 'cover';
   const pres = project.presentation;
   return (
     <div className={s.specimen}>
       <div className={s.mount}>
         <span className={s.sonar} aria-hidden="true" />
         <AssetPlate
-          kind={shot ? 'screenshot' : 'logo'}
+          kind={isCover ? 'cover' : shot ? 'screenshot' : 'logo'}
           src={shot?.url ?? project.image}
-          alt={shot ? shot.alt.en : `${project.name.en} — ${COPY.work.markCaption.en}`}
-          plate={shot ? 'ink' : pres.backplate}
-          inset={shot ? 0 : pres.inset}
-          focus={shot ? '50% 0%' : undefined}
-          aspect="4 / 3"
+          alt={shot ? pick(shot.alt, lang) : `${pick(project.name, lang)} — ${pick(COPY.work.markCaption, lang)}`}
+          plate={isCover ? 'bleed' : shot ? 'ink' : pres.backplate}
+          inset={shot ? 0 : Math.max(pres.inset, 0.16)}
+          focus={isCover ? '50% 50%' : shot?.kind === 'desktop' ? '50% 0%' : '50% 50%'}
+          aspect="16 / 10"
           sizes="(min-width: 1024px) 26vw, 80vw"
           eager={warm}
           fallback={project.name.en.slice(0, 1)}

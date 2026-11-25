@@ -1,9 +1,10 @@
 import { timelinePeriod } from './timeline';
-import { classifiedCaption } from './media-classification';
+import { classifiedCaption, MEDIA_CLASSIFICATIONS } from './media-classification';
 import type {
   Backplate,
   EngineeringPillar,
   LocalizedString,
+  MediaClassification,
   MediaKind,
   PlateArtKey,
   PlateField,
@@ -50,6 +51,7 @@ const FALLBACK_CONTACT = {
 export interface PortfolioMedia {
   id: string;
   kind: MediaKind;
+  classification: MediaClassification | null;
   url: string;
   alt: Loc;
   caption: Loc | null;
@@ -244,6 +246,7 @@ function buildMedia(p: Project, name: Loc): PortfolioMedia[] {
         item: {
           id: m.id || `${kind}-${i}`,
           kind,
+          classification: oneOf(m.classification, MEDIA_CLASSIFICATIONS) ?? null,
           url,
           alt: loc(m.alt) ?? mapLoc(name, (n) => `${n} — ${kind}`),
           caption: loc(classifiedCaption(m)),
@@ -293,7 +296,7 @@ function buildProjects(raw: Project[]): PortfolioProject[] {
     const legacyImage = safeUrl(p.image);
     const logo =
       of('logo')[0] ??
-      (legacyImage ? { id: 'legacy-image', kind: 'logo' as const, url: legacyImage, alt: name, caption: null, width: null, height: null } : null);
+      (legacyImage ? { id: 'legacy-image', kind: 'logo' as const, classification: 'logo' as const, url: legacyImage, alt: name, caption: null, width: null, height: null } : null);
     const cover = of('cover')[0] ?? null;
     const desktop = of('desktop');
     const mobile = of('mobile');

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { CONCEPTUAL_PROVENANCE, isConceptualMedia } from '@/lib/content/media-classification';
 import type { PortfolioMedia } from '@/lib/content/portfolio';
 import { T } from './T';
 import s from './ProjectGallery.module.css';
@@ -10,6 +11,7 @@ export function ProjectGallery({ media }: { media: PortfolioMedia[] }) {
     <ul className={s.gallery}>
       {media.map((m) => {
         const ratio = m.width && m.height ? `${m.width} / ${m.height}` : m.kind === 'mobile' ? '9 / 19' : '16 / 10';
+        const caption = m.caption ?? (isConceptualMedia(m) ? CONCEPTUAL_PROVENANCE : null);
         return (
           <li key={m.id} className={s.item} data-kind={m.kind}>
             <figure className={s.figure}>
@@ -22,9 +24,9 @@ export function ProjectGallery({ media }: { media: PortfolioMedia[] }) {
                   className={s.img}
                 />
               </span>
-              {m.caption && (
+              {caption && (
                 <figcaption className={`${s.caption} meta-plain`}>
-                  <T v={m.caption} />
+                  <T v={caption} />
                 </figcaption>
               )}
             </figure>

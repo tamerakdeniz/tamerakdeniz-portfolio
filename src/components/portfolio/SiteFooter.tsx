@@ -32,9 +32,6 @@ export function SiteFooter({ paper = false, ownerName }: { paper?: boolean; owne
             </Link>
           </li>
         </ul>
-        <p className={`${s.colophon} meta-plain`}>
-          <T v={COPY.footer.colophon} />
-        </p>
       </div>
     </footer>
   );

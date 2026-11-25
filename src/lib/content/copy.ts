@@ -264,10 +264,6 @@ export const COPY = {
   },
   footer: {
     rights: l('All rights reserved.', 'Tüm hakları saklıdır.'),
-    colophon: l(
-      'Set in Space Grotesk, Instrument Serif and IBM Plex Mono. Contours generated, not drawn.',
-      'Space Grotesk, Instrument Serif ve IBM Plex Mono ile dizildi. Eş yükselti çizgileri elle değil, kodla üretildi.'
-    ),
     admin: l('Admin', 'Yönetim'),
   },
   project: {

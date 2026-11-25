@@ -54,6 +54,21 @@
   object-position: var(--focus, 50% 50%);
 }
 
+.cover {
+  background: var(--abyss);
+  outline: 1px solid rgba(20, 32, 39, 0.18);
+  outline-offset: -1px;
+}
+
+.cover .media {
+  inset: 0;
+}
+
+.cover .img {
+  object-fit: cover;
+  object-position: var(--focus, 50% 50%);
+}
+
 .plate[data-plate='bleed'] .img {
   object-fit: cover;
 }

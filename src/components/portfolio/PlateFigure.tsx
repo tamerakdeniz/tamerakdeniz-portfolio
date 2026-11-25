@@ -1,6 +1,7 @@
 import { COPY } from '@/lib/content/copy';
 import type { PortfolioProject } from '@/lib/content/portfolio';
 import { compositionLead } from '@/lib/content/composition';
+import { CONCEPTUAL_PROVENANCE, isConceptualMedia } from '@/lib/content/media-classification';
 import { AssetPlate } from './AssetPlate';
 import { MediaComposition } from './MediaComposition';
 import { PLATE_ART } from './PlateArt';
@@ -16,11 +17,13 @@ import s from './PlateFigure.module.css';
 export function PlateFigure({
   project,
   priority = false,
+  showProvenance = false,
   sizes = '(min-width: 1024px) 14vw, 30vw',
   className,
 }: {
   project: PortfolioProject;
   priority?: boolean;
+  showProvenance?: boolean;
   sizes?: string;
   className?: string;
 }) {
@@ -29,7 +32,16 @@ export function PlateFigure({
   const art = !imagery && pres.art !== 'none' ? PLATE_ART[pres.art] : null;
   const field = imagery && pres.field === 'paper' ? 'ink' : pres.field;
   const surface = field === 'paper' ? 'surface-paper' : 'surface-dark';
-  const firstCaption = imagery ? compositionLead(project)?.caption : null;
+  const lead = imagery ? compositionLead(project) : null;
+  const conceptualLead = isConceptualMedia(lead);
+  const firstCaption = lead?.caption ?? null;
+  const caption = imagery
+    ? conceptualLead
+      ? firstCaption ?? (showProvenance ? CONCEPTUAL_PROVENANCE : null)
+      : firstCaption ?? COPY.work.imagery
+    : art
+      ? COPY.work.conceptual
+      : COPY.work.markOnly;
   const style = pres.accent ? ({ '--plate-accent': pres.accent } as React.CSSProperties) : undefined;
 
   return (
@@ -91,17 +103,11 @@ export function PlateFigure({
           ))}
         </ul>
       )}
-      <figcaption className={`${s.caption} meta-plain`}>
-        {imagery ? (
-          firstCaption ? (
-            <T v={firstCaption} />
-          ) : (
-            <T v={COPY.work.imagery} />
-          )
-        ) : (
-          <T v={art ? COPY.work.conceptual : COPY.work.markOnly} />
-        )}
-      </figcaption>
+      {caption && (
+        <figcaption className={`${s.caption} meta-plain`}>
+          <T v={caption} />
+        </figcaption>
+      )}
     </figure>
   );
 }

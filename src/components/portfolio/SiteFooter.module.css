@@ -53,11 +53,6 @@
   color: var(--fg);
 }
 
-.colophon {
-  margin: 0;
-  color: var(--fg-muted);
-}
-
 /* Clearance for the floating Index thumb control on phones. */
 @media (max-width: 767px) {
   .footer {
@@ -71,8 +66,5 @@
   }
   .links {
     justify-content: flex-end;
-  }
-  .colophon {
-    grid-column: 1 / -1;
   }
 }

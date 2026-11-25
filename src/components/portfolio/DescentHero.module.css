@@ -52,7 +52,7 @@ html[data-scene='on'] .stage {
   position: relative;
   display: block;
   font-family: var(--font-sans);
-  font-size: clamp(5.1rem, 24vw, 7.4rem);
+  font-size: clamp(4.1rem, 21vw, 7.4rem);
   line-height: 0.8;
   letter-spacing: -0.068em;
   font-weight: 500;
@@ -65,8 +65,8 @@ html[data-scene='on'] .stage {
   z-index: -1;
   left: -100vw;
   right: -100vw;
-  top: -100vh;
-  height: calc(100vh + var(--cut, 0.52em));
+  bottom: calc(100% - var(--cut, 0.52em));
+  height: 200lvh;
   background:
     linear-gradient(0deg, rgba(20, 32, 39, 0.75) 0 1.5px, transparent 1.5px),
     linear-gradient(180deg, var(--paper) 70%, var(--paper-deep) 100%);

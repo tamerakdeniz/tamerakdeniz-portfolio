@@ -28,6 +28,7 @@ interface Hero {
   el: HTMLElement;
   top: number;
   height: number;
+  stageHeight: number;
   marker: number;
   cuts: CutTarget[];
 }
@@ -48,11 +49,14 @@ export function ScrollDirector() {
     let scrubs: Scrub[] = [];
     let hero: Hero | null = null;
     let poster: HTMLElement | null = null;
+    let oceanLayer: HTMLElement | null = null;
     let vh = window.innerHeight;
+    let sceneHeight = vh;
     let frame = 0;
     let running = false;
     let lastY = window.scrollY;
     let fx = motionAllowed();
+    let cancelled = false;
     const pointerTarget = { x: scene.pointer.x, y: scene.pointer.y };
 
     const applyFx = () => {
@@ -62,7 +66,9 @@ export function ScrollDirector() {
     };
 
     const measure = () => {
-      vh = window.innerHeight;
+      vh = Math.max(1, window.innerHeight);
+      oceanLayer = document.querySelector<HTMLElement>('.ocean-layer');
+      sceneHeight = Math.max(1, oceanLayer?.clientHeight || vh);
       const sy = window.scrollY;
       chapters = CHAPTERS.flatMap((c) => {
         const el = document.getElementById(c.id);
@@ -85,15 +91,16 @@ export function ScrollDirector() {
       if (heroEl && stage && marker) {
         const hr = heroEl.getBoundingClientRect();
         const sr = stage.getBoundingClientRect();
+        const lifted = Number.parseFloat(heroEl.style.getPropertyValue('--rise')) || 0;
         hero = {
           el: heroEl,
           top: hr.top + sy,
           height: hr.height,
+          stageHeight: Math.max(1, sr.height),
           marker: marker.getBoundingClientRect().top - sr.top,
           cuts: Array.from(heroEl.querySelectorAll<HTMLElement>('[data-cut]')).map((el) => {
             const shift = Number(el.dataset.cutShift) || 0;
             /* Measured while possibly lifted: remove the current lift to get the resting offset. */
-            const lifted = Number.parseFloat(heroEl.style.getPropertyValue('--rise')) || 0;
             return { el, shift, offset: el.getBoundingClientRect().top - sr.top + lifted * shift };
           }),
         };
@@ -107,17 +114,26 @@ export function ScrollDirector() {
       scene.velocity += (delta - scene.velocity) * 0.2;
       scene.scroll = y / vh;
 
-      /* Hero: the stage is sticky, so the waterline rises with scroll while the stage is pinned. */
+      /*
+       * Hero: `.stage` uses `100svh` (`hero.stageHeight`), whereas `.ocean-layer` uses `100lvh`
+       * (`sceneHeight`). On Android Chrome with dynamic toolbars `100svh < 100lvh`; normalizing
+       * `scene.water` by `sceneHeight` keeps the WebGL waterline locked to the exact CSS `--cut`
+       * pixel coordinate at load and throughout toolbar resize.
+       */
       if (hero) {
-        const travel = Math.max(1, hero.height - vh);
-        const h = clamp((y - hero.top) / travel);
+        const sh = hero.stageHeight;
+        const travel = Math.max(1, hero.height - sh);
+        const h = fx ? clamp((y - hero.top) / travel) : 0;
         scene.hero = h;
-        const stageTop = Math.min(0, hero.top + hero.height - vh - y);
+        const stageTop =
+          y <= hero.top ? hero.top - y : fx ? Math.min(0, hero.top + hero.height - sh - y) : hero.top - y;
         const startWater = hero.marker;
-        const rise = fx ? (startWater + 0.08 * vh) / 0.34 : 0;
+        const rise = fx ? (startWater + 0.08 * sh) / 0.34 : 0;
         const waterInStage = startWater - h * rise;
-        const lift = fx ? h * vh : 0;
-        scene.water = (stageTop + waterInStage) / vh;
+        const lift = fx ? h * sh : 0;
+        const waterPx = stageTop + waterInStage;
+        scene.waterPx = waterPx;
+        scene.water = waterPx / sceneHeight;
         for (const c of hero.cuts) {
           const offset = c.offset - lift * c.shift;
           c.el.style.setProperty('--cut', `${(waterInStage - offset).toFixed(1)}px`);
@@ -125,6 +141,7 @@ export function ScrollDirector() {
         hero.el.style.setProperty('--hero', h.toFixed(4));
         hero.el.style.setProperty('--rise', `${lift.toFixed(1)}px`);
       } else {
+        scene.waterPx = -1000;
         scene.water = -1;
       }
 
@@ -165,6 +182,12 @@ export function ScrollDirector() {
       emitSceneFrame();
     };
 
+    const remeasure = () => {
+      if (cancelled) return;
+      measure();
+      update();
+    };
+
     const loop = () => {
       update();
       frame = running ? window.requestAnimationFrame(loop) : 0;
@@ -184,10 +207,11 @@ export function ScrollDirector() {
 
     const onScroll = () => {
       scene.lastInput = performance.now();
-      if (!running && !frame) frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        update();
-      });
+      if (!running && !frame)
+        frame = window.requestAnimationFrame(() => {
+          frame = 0;
+          update();
+        });
     };
 
     const onPointer = (e: PointerEvent) => {
@@ -203,10 +227,13 @@ export function ScrollDirector() {
 
     const onVisibility = () => {
       if (document.hidden) stop();
-      else if (fx) start();
+      else {
+        remeasure();
+        if (fx) start();
+      }
     };
 
-    const onMotionChange = () => {
+    const onAttrChange = () => {
       applyFx();
       measure();
       if (fx) start();
@@ -222,25 +249,40 @@ export function ScrollDirector() {
     update();
     if (fx) start();
 
-    const ro = new ResizeObserver(() => {
-      measure();
-      update();
-    });
+    const ro = new ResizeObserver(remeasure);
     ro.observe(document.body);
+    const stageEl = document.querySelector<HTMLElement>('[data-hero-stage]');
+    const layerEl = document.querySelector<HTMLElement>('.ocean-layer');
+    const titleEl = document.getElementById('hero-title');
+    if (stageEl) ro.observe(stageEl);
+    if (layerEl) ro.observe(layerEl);
+    if (titleEl) ro.observe(titleEl);
+
+    const fonts = document.fonts;
+    fonts?.ready?.then(remeasure).catch(() => {});
+    fonts?.addEventListener?.('loadingdone', remeasure);
+
+    const vv = window.visualViewport;
+    window.addEventListener('resize', remeasure, { passive: true });
+    vv?.addEventListener('resize', remeasure, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('pointermove', onPointer, { passive: true });
     window.addEventListener('pointerdown', onPointer, { passive: true });
     document.addEventListener('visibilitychange', onVisibility);
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    mq.addEventListener('change', onMotionChange);
-    const mo = new MutationObserver(onMotionChange);
-    mo.observe(root, { attributes: true, attributeFilter: ['data-motion'] });
+    mq.addEventListener('change', onAttrChange);
+    const mo = new MutationObserver(onAttrChange);
+    mo.observe(root, { attributes: true, attributeFilter: ['data-motion', 'lang'] });
 
     return () => {
+      cancelled = true;
       stop();
       ro.disconnect();
       mo.disconnect();
-      mq.removeEventListener('change', onMotionChange);
+      fonts?.removeEventListener?.('loadingdone', remeasure);
+      mq.removeEventListener('change', onAttrChange);
+      window.removeEventListener('resize', remeasure);
+      vv?.removeEventListener('resize', remeasure);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('pointermove', onPointer);
       window.removeEventListener('pointerdown', onPointer);
