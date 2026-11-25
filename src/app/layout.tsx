@@ -50,11 +50,14 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: { card: 'summary_large_image', title, description, images },
     icons: {
       icon: [
-        { url: '/favicon.ico', sizes: 'any' },
-        { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
-        { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+        { url: '/favicon-mta-transparent.ico', sizes: 'any', media: '(prefers-color-scheme: dark)' },
+        { url: '/favicon-mta-transparent-light.ico', sizes: 'any', media: '(prefers-color-scheme: light)' },
+        { url: '/favicon-mta-transparent-16x16.png', type: 'image/png', sizes: '16x16', media: '(prefers-color-scheme: dark)' },
+        { url: '/favicon-mta-transparent-32x32.png', type: 'image/png', sizes: '32x32', media: '(prefers-color-scheme: dark)' },
+        { url: '/favicon-mta-transparent-light-16x16.png', type: 'image/png', sizes: '16x16', media: '(prefers-color-scheme: light)' },
+        { url: '/favicon-mta-transparent-light-32x32.png', type: 'image/png', sizes: '32x32', media: '(prefers-color-scheme: light)' },
       ],
-      shortcut: '/favicon.ico',
+      shortcut: '/favicon-mta-transparent.ico',
       apple: [{ url: '/apple-touch-icon.png', type: 'image/png', sizes: '180x180' }],
     },
     manifest: '/site.webmanifest',
