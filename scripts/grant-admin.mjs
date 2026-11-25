@@ -2,6 +2,7 @@ import { targetClient, targetOptions } from './firebase-target.mjs';
 try {
   const options = targetOptions({ uid: { type: 'string' }, email: { type: 'string' }, 'confirm-email': { type: 'string' }, revoke: { type: 'boolean' } });
   if (!options.uid || !options.email) throw new Error('Specify BOTH --uid USER_ID and --email EXPECTED_EMAIL');
+  if (options.uid === 'portfolio-intake-server') throw new Error('Reserved server identity cannot be provisioned as a human admin');
   const client = targetClient(options);
   const result = await client.auth('lookup', { localId: [options.uid] });
   const user = result.users?.find((u) => u.localId === options.uid);

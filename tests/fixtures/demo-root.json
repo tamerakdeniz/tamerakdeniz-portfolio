@@ -1,0 +1,177 @@
+{
+  "siteData": {
+    "projects": [
+      {
+        "id": "demo-project-4",
+        "slug": "demo-project-4",
+        "title": {
+          "en": "Demonstration Project 4",
+          "tr": "Gösterim Projesi 4"
+        },
+        "description": {
+          "en": "Synthetic demonstration data; not a real project or personal claim.",
+          "tr": "Sentetik gösterim verisi; gerçek proje veya kişisel iddia değildir."
+        },
+        "category": [
+          "web"
+        ],
+        "techStack": [
+          "TypeScript"
+        ],
+        "githubUrl": "https://example.com/demo-source",
+        "demoUrl": "",
+        "image": "/demo/placeholder.svg",
+        "published": true,
+        "featured": false,
+        "featuredOrder": 3,
+        "order": 3,
+        "presentation": {
+          "variant": "minimal"
+        },
+        "sections": [
+          {
+            "heading": {
+              "en": "Demonstration only",
+              "tr": "Yalnızca gösterim"
+            },
+            "body": {
+              "en": "This record exercises the bilingual CMS.",
+              "tr": "Bu kayıt iki dilli CMS işlevlerini gösterir."
+            }
+          }
+        ],
+        "media": [
+          {
+            "id": "demo-cover-4",
+            "kind": "cover",
+            "url": "/demo/placeholder.svg",
+            "classification": "simulated-demo",
+            "verification": "simulated",
+            "source": "Synthetic local fixture",
+            "alt": {
+              "en": "Synthetic geometric placeholder",
+              "tr": "Sentetik geometrik yer tutucu"
+            },
+            "caption": {
+              "en": "Demonstration only",
+              "tr": "Yalnızca gösterim"
+            },
+            "width": 1200,
+            "height": 760
+          }
+        ]
+      },
+      {
+        "id": "demo-hidden",
+        "slug": "demo-hidden",
+        "title": {
+          "en": "Synthetic hidden record",
+          "tr": "Sentetik gizli kayıt"
+        },
+        "description": {
+          "en": "Private demo description",
+          "tr": "Özel gösterim açıklaması"
+        },
+        "published": false,
+        "image": "",
+        "category": [
+          "web"
+        ],
+        "techStack": [],
+        "githubUrl": "",
+        "demoUrl": ""
+      }
+    ],
+    "skills": [
+      {
+        "id": "demo-skill",
+        "name": "TypeScript",
+        "category": [
+          "programming"
+        ],
+        "published": true,
+        "order": 0
+      }
+    ],
+    "timeline": [],
+    "aboutEntries": [
+      {
+        "id": "demo-about",
+        "title": {
+          "en": "Demonstration profile",
+          "tr": "Gösterim profili"
+        },
+        "content": {
+          "en": "Synthetic biography for interface verification.",
+          "tr": "Arayüz doğrulaması için sentetik biyografi."
+        },
+        "avatar": {
+          "text": "DE",
+          "imageUrl": "/demo/placeholder.svg"
+        }
+      }
+    ],
+    "activeAboutId": "demo-about",
+    "cvFiles": [
+      {
+        "id": "demo-cv",
+        "name": "demonstration-resume.pdf",
+        "dataUrl": "/demo/resume.pdf",
+        "language": "en"
+      }
+    ],
+    "activeCvId": "demo-cv",
+    "contactInfo": {
+      "email": "demo@example.test",
+      "location": {
+        "en": "Demonstration location",
+        "tr": "Gösterim konumu"
+      },
+      "social": {}
+    },
+    "homeHero": {
+      "title": {
+        "en": "Synthetic Preview",
+        "tr": "Sentetik Önizleme"
+      },
+      "description": {
+        "en": "Demonstration data only. No personal portfolio content.",
+        "tr": "Yalnızca gösterim verileri. Kişisel portfolyo içeriği içermez."
+      },
+      "moreLabel": {
+        "en": "About",
+        "tr": "Hakkında"
+      }
+    },
+    "availability": {
+      "status": "not-available",
+      "customLabel": {
+        "en": "Demonstration",
+        "tr": "Gösterim"
+      }
+    },
+    "profile": {
+      "fullName": "Demo Example",
+      "shortName": "Demo",
+      "role": {
+        "en": "Demonstration profile",
+        "tr": "Gösterim profili"
+      },
+      "fieldPhoto": {
+        "url": "/demo/placeholder.svg",
+        "alt": {
+          "en": "Synthetic placeholder",
+          "tr": "Sentetik yer tutucu"
+        },
+        "caption": {
+          "en": "Demonstration only",
+          "tr": "Yalnızca gösterim"
+        }
+      }
+    },
+    "display": {
+      "featuredCount": 3
+    }
+  },
+  "siteDrafts": {}
+}

@@ -92,7 +92,7 @@ export function CommandPalette({ chrome }: { chrome: ChromeData }) {
       {
         id: 'action-cv',
         group: COPY.palette.actions,
-        label: tr(COPY.palette.openCv),
+        label: tr(COPY.palette.openCv) + (lang === 'tr' && !chrome.cvVariants?.tr && chrome.cvLanguage === 'en' ? ' (İngilizce)' : ''),
         run: () => {
           close();
           window.open(chrome.cvVariants?.[lang]?.viewUrl ?? chrome.cvUrl, '_blank', 'noopener');

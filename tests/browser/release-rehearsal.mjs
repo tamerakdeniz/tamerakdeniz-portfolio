@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import { readFile, writeFile, readdir, mkdir } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { targetClient } from '../../scripts/firebase-target.mjs';
+import { planLegacyDrafts } from '../../scripts/legacy-draft-plan.mjs';
+const client=targetClient({environment:'emulator',project:'demo-portfolio'});
+const run=(script,...args)=>execFileSync(process.execPath,[`scripts/${script}.mjs`,'--environment','emulator','--project','demo-portfolio',...args],{encoding:'utf8'});
+await mkdir('artifacts/release-gate',{recursive:true});
+const source=JSON.parse(await readFile('tests/fixtures/demo-root.json','utf8'));
+source.contactSubmissions={preserved:{message:'Synthetic preserved inbox'}};
+await client.db('','PUT',source);
+await mkdir('artifacts/release-gate/migration-backups',{recursive:true});
+console.log(run('migrate-public-drafts','--apply','--backup-dir','artifacts/release-gate/migration-backups'));
+assert.equal(planLegacyDrafts((await client.snapshot()).value).changed,false);
+assert.match(run('migrate-public-drafts','--dry-run'),/"changed": false/);
+const backup=(await readdir('artifacts/release-gate/migration-backups')).sort().at(-1);
+await client.db('contactSubmissions/new','PUT',{message:'New synthetic inbox message'});
+console.log(run('migrate-public-drafts','--rollback',`artifacts/release-gate/migration-backups/${backup}`,'--apply'));
+assert.equal((await client.db('contactSubmissions/new')).message,'New synthetic inbox message');
+console.log(run('migrate-public-drafts','--apply'));
+const stale=await client.snapshot();await client.db('contactSubmissions/new2','PUT',{message:'Concurrent write'});
+await assert.rejects(client.replaceSnapshot(stale.value,stale.etag),/Concurrent write/);
+console.log(run('apply-confirmed-content','--file','tests/fixtures/demo-proposal.json','--apply'));
+console.log(run('import-content','--file','tests/fixtures/demo-candidates.json','--apply'));
+console.log(run('import-content','--file','tests/fixtures/demo-candidates.json','--apply'));
+const root=(await client.snapshot()).value;
+const proposal=JSON.parse(await readFile('tests/fixtures/demo-proposal.json','utf8'));
+// Only the isolated emulator publishes candidates to exercise final editorial behavior.
+for(const collection of ['projects','timeline']){
+ const selected=collection==='projects'?proposal.featuredPlan.orderedProjectIds:['demo-education'];
+ const candidates=Object.values(root.siteDrafts[collection]||{});
+ const publish=candidates.filter(p=>selected.includes(p.id));
+ root.siteData[collection]=[...Object.values(root.siteData[collection]||{}).filter(Boolean),...publish.map(p=>({...p,published:true}))];
+ root.siteDrafts[collection]=candidates.filter(p=>!selected.includes(p.id));
+}
+await client.db('','PUT',root);
+console.log(run('apply-confirmed-content','--file','tests/fixtures/demo-proposal.json','--activate-featured','--apply'));
+const final=(await client.snapshot()).value;
+assert.deepEqual(Object.values(final.siteData.projects).filter(p=>p.featured).sort((a,b)=>a.featuredOrder-b.featuredOrder).map(p=>p.id),proposal.featuredPlan.orderedProjectIds);
+assert.equal(final.siteData.cvFiles.find(p=>p.id===final.siteData.activeCvId).dataUrl,source.siteData.cvFiles.find(p=>p.id===source.siteData.activeCvId).dataUrl);
+await writeFile('artifacts/release-gate/reviewed-emulator-root.json',JSON.stringify(final),{mode:0o600});
+console.log('PASS atomic migration, idempotency, rollback preserving inbox, concurrent-write rejection, confirmed merge, repeat import, featured activation and CV preservation');

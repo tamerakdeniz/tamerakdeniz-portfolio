@@ -1,6 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
-import { databaseRestUrl } from '@/lib/firebase-config';
+import { databaseRestUrl, SNAPSHOT_PREVIEW } from '@/lib/firebase-config';
+import snapshot from '../../../content/preview-snapshot.json';
 import type { SiteData } from '@/types';
 
 export const SITE_DATA_REVALIDATE_SECONDS = 60;
@@ -13,6 +14,7 @@ export const SITE_DATA_TAG = 'site-data';
  * Production failures throw so ISR retains its last good render; development can fall back.
  */
 export const getSiteData = cache(async (): Promise<SiteData | null> => {
+  if (SNAPSHOT_PREVIEW) return snapshot as unknown as SiteData;
   const url = databaseRestUrl('siteData');
   if (!url) return null;
 

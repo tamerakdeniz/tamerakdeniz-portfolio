@@ -10,6 +10,7 @@ export function chromeFrom(portfolio: Portfolio): ChromeData {
   const years = portfolio.journey.flatMap((j) => [j.startYear, j.endYear ?? String(new Date().getFullYear())]);
   const numeric = years.filter((y): y is string => !!y).map(Number);
   return {
+    cvLanguage: portfolio.cv.language,
     cvVariants: portfolio.cv.variants,
     cvUrl: portfolio.cv.viewUrl,
     cvDownloadUrl: portfolio.cv.downloadUrl,

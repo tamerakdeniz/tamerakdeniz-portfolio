@@ -1,16 +1,17 @@
-// Synthetic fixtures and reviewed candidate media are published ONLY in the demo emulator.
+// Synthetic fixtures are published ONLY in the demo emulator.
 import assert from 'node:assert/strict';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 const url = (path) => `http://127.0.0.1:9000/${path}.json?ns=demo-portfolio-default-rtdb`;
 const db = async (path, method = 'GET', body) => { const r = await fetch(url(path), { method, headers: { Authorization: 'Bearer owner', 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) }); assert.equal(r.status, 200); return r.json(); };
 const pub = await db('siteData'); const drafts = await db('siteDrafts');
 const projects = Object.values(drafts?.projects || {});
-const candidates = projects.filter((p) => ['akar','callwhisper'].includes(p.id)).map((p,i) => ({ ...p, published: true, featured: true, featuredOrder: i+1, order: i }));
-assert.equal(candidates.length, 2, 'Import candidates before preparing regression');
-const media = projects.find((p) => p.media?.some((m) => m.kind === 'mobile'))?.media || [];
+const demo=JSON.parse(await readFile('content/preview-snapshot.json','utf8'));
+const candidates=demo.projects.slice(0,2);
+const media=['mobile','desktop'].map(kind=>({...demo.projects[0].media[0],id:`demo-${kind}`,kind,width:kind==='mobile'?390:1200,height:kind==='mobile'?844:760}));
+await mkdir('artifacts',{recursive:true});
 const synthetic = (i, fields = {}) => ({ id: `regression-${i}`, slug: `regression-${i}`, title: { en: `Synthetic Presentation ${i}`, tr: i === 5 ? 'Çok Uzun Türkçe Başlıklı Sentetik Mobil Uygulama Sunumu' : `Sentetik Sunum ${i}` }, description: { en: 'Synthetic layout verification fixture, not a real portfolio claim.', tr: 'Gerçek bir portfolyo iddiası olmayan sentetik düzen doğrulama kaydı. Uzun Türkçe açıklama ve karakterler: İı Şş Ğğ Çç Öö Üü.' }, category: ['web'], techStack: ['TypeScript'], githubUrl: '', demoUrl: '', image: '', published: true, featured: true, featuredOrder: i + 1, order: i, ...fields });
 const all = [...[6, 7, 8, 9].map((i) => synthetic(i, { featured: false })), ...candidates, synthetic(2), synthetic(3, { image: '/img/logo-nobg.png', presentation: { variant: 'minimal' } }), synthetic(4, { media: media.filter((m) => m.kind === 'mobile'), presentation: { variant: 'mobile' } }), synthetic(5, { media: media.filter((m) => m.kind === 'desktop'), presentation: { variant: 'editorial' } })];
-await db('', 'PATCH', { 'siteData/projects': all, 'siteData/display': { featuredCount: 6 }, 'siteDrafts/projects': projects.filter((p) => !['akar','callwhisper'].includes(p.id)) });
+await db('', 'PATCH', { 'siteData/projects': all, 'siteData/display': { featuredCount: 6 }, 'siteDrafts/projects': projects });
 const login = await fetch('http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-emulator-key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'admin@example.test', password: 'Emulator-only-123!', returnSecureToken: true }) });
 const token = (await login.json()).idToken;
 assert.ok(token);

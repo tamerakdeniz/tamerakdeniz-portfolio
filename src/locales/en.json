@@ -346,5 +346,12 @@
   "admin-loading": "Loading content…",
   "admin-confirm": "Confirm",
   "admin-availability-label": "Custom availability label (optional)",
-  "admin-label-location-tr": "Location (TR)"
+  "admin-label-location-tr": "Location (TR)",
+  "admin-media-public-notice": "Portfolio media may be publicly accessible immediately after upload, even while the project is a private draft. Upload only non-confidential portfolio images, videos or public CVs. Never upload credentials, backups, administrative files or private personal data.",
+  "admin-timeline-exact-start": "Exact start date (if confirmed)",
+  "admin-media-classification": "Asset classification",
+  "admin-media-unclassified": "Unclassified legacy media",
+  "admin-media-source": "Source / provenance",
+  "admin-media-attribution": "Attribution",
+  "admin-media-verification": "Verification"
 }

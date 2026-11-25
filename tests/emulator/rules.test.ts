@@ -49,9 +49,9 @@ describe('Realtime Database rules', () => {
     assert.equal((await db('GET', 'siteData/projects/0/id')).body, 'a');
   });
 
-  it('accepts one well-formed anonymous submission and throttles the next', async () => {
+  it('denies direct anonymous submissions; only protected server intake can create messages', async () => {
     const first = await db('PATCH', '', submission(newId()));
-    assert.equal(first.status, 200, JSON.stringify(first.body));
+    assert.equal(first.status, 401, JSON.stringify(first.body));
     const second = await db('PATCH', '', submission(newId()));
     assert.equal(second.status, 401, 'second submission inside the throttle window');
   });
@@ -87,7 +87,7 @@ describe('Realtime Database rules', () => {
   it('prevents cooldown deletion, standalone lockout, and batched submissions', async () => {
     assert.equal((await db('PUT', 'contactMeta/lastAt', sv)).status, 401);
     const first = newId();
-    assert.equal((await db('PATCH', '', submission(first))).status, 200);
+    assert.equal((await db('PATCH', '', submission(first))).status, 401);
     assert.equal((await db('DELETE', 'contactMeta/lastAt')).status, 401);
     assert.equal((await db('DELETE', 'contactMeta')).status, 401);
     assert.equal((await db('PATCH', '', { ...submission(newId()), 'contactMeta/lastAt': null })).status, 401);
@@ -103,7 +103,7 @@ describe('Realtime Database rules', () => {
 
   it('never lets visitors read, edit or delete submissions', async () => {
     const id = newId();
-    await db('PATCH', '', submission(id));
+    await db('PATCH', '', submission(id), 'owner');
     assert.equal((await db('GET', 'contactSubmissions')).status, 401);
     assert.equal((await db('GET', 'contactSubmissions', undefined, USER)).status, 401);
     assert.equal((await db('PUT', `contactSubmissions/${id}/read`, true)).status, 401);
@@ -130,10 +130,12 @@ describe('Storage rules', () => {
   });
 
   it('rejects disallowed types, oversized files and paths outside portfolio/', async () => {
-    assert.equal((await upload(`portfolio/x/${Date.now()}.svg`, PNG, 'image/svg+xml', ADMIN)).status, 403);
-    assert.equal((await upload(`portfolio/x/${Date.now()}.html`, PNG, 'text/html', ADMIN)).status, 403);
+    assert.equal((await upload(`portfolio/projects/rules/${Date.now()}.svg`, PNG, 'image/svg+xml', ADMIN)).status, 403);
+    assert.equal((await upload(`portfolio/projects/rules/${Date.now()}.html`, PNG, 'text/html', ADMIN)).status, 403);
     const big = new Uint8Array(10 * 1024 * 1024 + 1);
-    assert.equal((await upload(`portfolio/x/${Date.now()}.png`, big, 'image/png', ADMIN)).status, 403);
+    assert.equal((await upload(`portfolio/projects/rules/${Date.now()}.png`, big, 'image/png', ADMIN)).status, 403);
+    assert.equal((await upload(`portfolio/backups/${Date.now()}.png`, PNG, 'image/png', ADMIN)).status, 403);
+    assert.equal((await upload(`portfolio/admin/${Date.now()}.pdf`, PNG, 'application/pdf', ADMIN)).status, 403);
     assert.equal((await upload(`elsewhere/${Date.now()}.png`, PNG, 'image/png', ADMIN)).status, 403);
   });
 

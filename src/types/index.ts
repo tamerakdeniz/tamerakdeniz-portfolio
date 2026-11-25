@@ -9,8 +9,13 @@ export interface LocalizedString {
  */
 
 export type MediaKind = 'cover' | 'logo' | 'desktop' | 'mobile' | 'diagram' | 'video';
+export type MediaClassification = 'authentic-web' | 'authentic-native' | 'simulated-demo' | 'ai-concept' | 'editorial-illustration' | 'architecture-diagram' | 'logo' | 'video';
 
 export interface ProjectMedia {
+  classification?: MediaClassification;
+  source?: string;
+  attribution?: string;
+  verification?: 'verified' | 'simulated' | 'conceptual' | 'unverified';
   id: string;
   kind: MediaKind;
   /** Download URL (Firebase Storage) or a site-relative path. */
@@ -114,6 +119,8 @@ export interface TimelineEntry {
   description: LocalizedString;
   /** Optional structured dates (YYYY-MM); the period text is parsed when absent. */
   startDate?: string;
+  /** Optional confirmed day; month-only records remain compatible. */
+  startDateExact?: string;
   endDate?: string;
   current?: boolean;
   url?: string;

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store';
 import { loginAdmin, logActivity, logoutAdmin } from '@/lib/firebase';
 import { AdminDashboard } from '@/admin/components/AdminDashboard';
+import { SNAPSHOT_PREVIEW } from '@/lib/firebase-config';
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -35,6 +36,8 @@ export default function AdminPage() {
       setLoading(false);
     }
   };
+
+  if (SNAPSHOT_PREVIEW) return <main className="min-h-screen p-8"><p role="status">{t('admin-preview-read-only')}</p></main>;
 
   if (checking && !authUser) {
     return (

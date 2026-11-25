@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { isAdminUser, onAuthChange, subscribeToSiteData } from '@/lib/firebase';
 import { useAppStore } from '@/store';
 import type { SiteData } from '@/types';
+import { SNAPSHOT_PREVIEW } from '@/lib/firebase-config';
 
 /**
  * Admin content sync. Content is read only after the admin claim is confirmed, and only
@@ -17,6 +18,7 @@ export function useFirebaseSync() {
   const setAuthUser = useAppStore((s) => s.setAuthUser);
 
   useEffect(() => {
+    if (SNAPSHOT_PREVIEW) return;
     let unsubData: (() => void) | null = null;
     let generation = 0;
 

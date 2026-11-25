@@ -4,6 +4,7 @@
  */
 
 export const USE_EMULATORS = process.env.NEXT_PUBLIC_FIREBASE_USE_EMULATORS === '1';
+export const SNAPSHOT_PREVIEW = process.env.NEXT_PUBLIC_PORTFOLIO_SNAPSHOT === '1';
 
 export const EMULATOR_HOSTS = {
   auth: process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099',
@@ -48,4 +49,4 @@ export const DEPLOY_ENV = process.env.NEXT_PUBLIC_VERCEL_ENV || (process.env.NOD
  * Writes from previews are refused in the UI unless explicitly allowed.
  */
 export const PREVIEW_WRITES_BLOCKED =
-  DEPLOY_ENV === 'preview' && process.env.NEXT_PUBLIC_ALLOW_PREVIEW_WRITES !== '1';
+  SNAPSHOT_PREVIEW || (DEPLOY_ENV === 'preview' && process.env.NEXT_PUBLIC_ALLOW_PREVIEW_WRITES !== '1');

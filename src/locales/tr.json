@@ -346,5 +346,12 @@
   "admin-loading": "İçerik yükleniyor…",
   "admin-confirm": "Onayla",
   "admin-availability-label": "Özel uygunluk etiketi (isteğe bağlı)",
-  "admin-label-location-tr": "Konum (TR)"
+  "admin-label-location-tr": "Konum (TR)",
+  "admin-media-public-notice": "Portfolyo medyası, proje özel taslak durumundayken bile yüklendiği anda herkese açık olabilir. Yalnızca gizli olmayan portfolyo görselleri, videoları veya herkese açık özgeçmişler yükleyin. Kimlik bilgileri, yedekler, yönetim dosyaları veya özel kişisel veriler yüklemeyin.",
+  "admin-timeline-exact-start": "Kesin başlangıç tarihi (doğrulanmışsa)",
+  "admin-media-classification": "Görsel sınıflandırması",
+  "admin-media-unclassified": "Sınıflandırılmamış eski medya",
+  "admin-media-source": "Kaynak / köken",
+  "admin-media-attribution": "Atıf",
+  "admin-media-verification": "Doğrulama"
 }

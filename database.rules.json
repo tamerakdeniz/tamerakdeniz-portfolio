@@ -5,7 +5,7 @@
       ".write": "auth != null && auth.token.admin === true",
       "projects": {
         "$id": {
-          ".validate": "newData.child('published').val() !== false"
+          ".validate": "newData.child('published').val() === true"
         }
       },
       "skills": {
@@ -26,7 +26,7 @@
     "contactSubmissions": {
       ".read": "auth != null && auth.token.admin === true",
       "$id": {
-        ".write": "(auth != null && auth.token.admin === true) || (!data.exists() && newData.exists() && $id.matches(/^[0-9]{13}(-[a-z0-9]{4,12})?$/) && newData.child('id').val() === $id && newData.child('read').val() === false && newData.child('createdAt').val() === now && newData.parent().parent().child('contactMeta/lastAt').val() === now && newData.parent().parent().child('contactMeta/lastId').val() === $id)",
+        ".write": "auth != null && (auth.token.admin === true || (auth.uid === 'portfolio-intake-server' && !data.exists() && newData.exists() && newData.child('createdAt').val() === now && newData.child('read').val() === false && newData.child('id').val() === $id))",
         ".validate": "newData.hasChildren(['name', 'email', 'subject', 'message', 'timestamp'])",
         "id": {
           ".validate": "newData.isString() && newData.val().length <= 32"
@@ -61,16 +61,8 @@
       }
     },
     "contactMeta": {
-      ".write": "newData.hasChildren(['lastAt', 'lastId']) && newData.child('lastAt').val() === now && (!data.child('lastAt').exists() || now - data.child('lastAt').val() >= 20000) && newData.child('lastId').isString() && !root.child('contactSubmissions').child(newData.child('lastId').val()).exists() && newData.parent().child('contactSubmissions').child(newData.child('lastId').val()).child('createdAt').val() === now",
-      "lastAt": {
-        ".validate": "newData.isNumber()"
-      },
-      "lastId": {
-        ".validate": "newData.isString() && newData.val().matches(/^[0-9]{13}(-[a-z0-9]{4,12})?$/)"
-      },
-      "$other": {
-        ".validate": false
-      }
+      ".read": false,
+      ".write": false
     },
     "adminPasswordHash": {
       ".read": "auth != null && auth.token.admin === true",
@@ -83,6 +75,10 @@
     "$other": {
       ".read": false,
       ".write": false
+    },
+    "_serverLimits": {
+      ".read": "auth != null && auth.uid === 'portfolio-intake-server'",
+      ".write": "auth != null && auth.uid === 'portfolio-intake-server'"
     }
   }
 }

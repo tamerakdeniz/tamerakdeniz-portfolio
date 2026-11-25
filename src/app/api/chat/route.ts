@@ -4,6 +4,7 @@ import { checkChatRateLimit, getClientIp } from '@/lib/chat-rate-limit';
 import { generateChatWithModelFallback } from '@/lib/gemini-chat';
 import { getPortfolio } from '@/lib/content/get-portfolio';
 import { buildAssistantContext, sanitizeHistory } from '@/lib/content/assistant-context';
+import { ActionDenied, guardPublicAction } from '@/lib/public-action-guard';
 
 export const maxDuration = 60;
 
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
   const declared = Number(req.headers.get('content-length') ?? 0);
   if (declared > MAX_BODY_BYTES) return fail('payload_too_large', 413);
 
-  let body: { message?: unknown; history?: unknown; language?: unknown };
+  let body: { message?: unknown; history?: unknown; language?: unknown; challengeToken?: unknown };
   try {
     const parsed = await readBoundedJson(req, MAX_BODY_BYTES);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return fail('invalid_request', 400);
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    await guardPublicAction(req, body.challengeToken, 'chat');
     const lang = body.language === 'tr' ? 'tr' : 'en';
     const portfolio = await getPortfolio();
     const systemText = SYSTEM_PROMPT.replaceAll('{NAME}', portfolio.profile.shortName)
@@ -90,6 +92,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ reply }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error: unknown) {
+    if (error instanceof ActionDenied) return fail(error.message, error.status, error.status === 429 ? { retryAfterSec: 60 } : {});
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error('[chat] request failed');
 

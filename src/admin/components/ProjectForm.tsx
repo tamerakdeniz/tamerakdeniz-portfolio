@@ -24,7 +24,7 @@ const BACKPLATES: Backplate[] = ['white', 'black', 'ink', 'paper', 'mist', 'blee
 const FIELDS: PlateField[] = ['ink', 'night', 'paper', 'violet'];
 const ARTS: PlateArtKey[] = ['none', 'timer', 'day', 'route'];
 const HEX = /^#[0-9a-f]{6}$/i;
-const URL_OK = (u: string) => !u.trim() || /^https?:\/\//i.test(u.trim());
+const URL_OK = (u?: string) => !u?.trim() || /^https?:\/\//i.test(u.trim());
 
 type Visibility = 'draft' | 'published' | 'archived';
 

@@ -316,7 +316,7 @@ function CvViewer({ chrome, onClose }: { chrome: ChromeData; onClose: () => void
       <div ref={ref} className={`${s.cv} surface-paper`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className={s.cvBar}>
           <h2 id={titleId} className={s.cvTitle}>
-            <span className="meta muted">PDF</span> <T v={COPY.cv.title} />
+            <span className="meta muted">PDF</span> <T v={COPY.cv.title} />{language === 'tr' && !document && chrome.cvLanguage === 'en' ? ' (İngilizce)' : ''}
           </h2>
           <div className={s.cvActions}>
             <a className="btn btn-primary" href={cvDownloadUrl} download={cvFileName}>

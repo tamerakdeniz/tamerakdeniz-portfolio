@@ -16,7 +16,7 @@ const legacyPath = `portfolio/projects/test/legacy-${stamp}.png`;
 assert.equal((await upload(orphanPath, PNG, 'image/png', ADMIN)).status, 200);
 assert.equal((await upload(legacyPath, PNG, 'image/png', ADMIN)).status, 200);
 const drafts = await db('siteDrafts/projects');
-const source = list(drafts).find((p) => p.media?.length >= 2 && p.id !== 'akar' && p.id !== 'callwhisper');
+const source = list(drafts).find((p) => p.media?.length >= 2);
 assert.ok(source);
 const shared = { ...source, id: `shared-${stamp}`, title: { en: `Shared media ${stamp}`, tr: `Ortak medya ${stamp}` }, slug: `shared-${stamp}`, published: false, media: [source.media[0]] };
 await db('siteDrafts/projects', 'PUT', [...list(drafts), shared]);

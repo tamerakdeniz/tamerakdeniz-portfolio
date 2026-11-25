@@ -17,6 +17,7 @@ async function guard(ctx, log) {
     }
     return route.continue();
   });
+  await ctx.route('**/api/contact', (route) => { log.push({ method: route.request().method(), url: route.request().url(), body: route.request().postData() }); return route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }); });
   await ctx.route('**/api/chat', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ reply: 'Mocked reply: Tamer built Qirushio, Screen Timer and Pathyvo.' }) })
   );
@@ -173,7 +174,7 @@ const focusInfo = (page) =>
     await page.locator('#contact button[type=submit]').click();
     await page.waitForTimeout(1500);
     const sent = await page.evaluate(() => document.querySelector('#contact form')?.parentElement?.textContent || '');
-    ok('Mocked submit uses atomic PATCH with submission and cooldown metadata', writes.length === 1 && /contactSubmissions/.test(writes[0].body) && /contactMeta\/lastId/.test(writes[0].body) && writes[0].method === 'PATCH', JSON.stringify(writes.map((w) => w.method + ' ' + w.url.replace(/^https:\/\/[^/]+/, '<db>'))));
+    ok('Mocked submit uses protected contact endpoint', writes.length === 1 && writes[0].url.endsWith('/api/contact') && JSON.parse(writes[0].body).challengeToken === 'emulator-test-token' && writes[0].method === 'POST', JSON.stringify(writes.map((w) => w.method + ' ' + w.url.replace(/^https:\/\/[^/]+/, '<db>'))));
     ok('Success message rendered', /sent|thank|gönderildi|teşekkür|received|aldım/i.test(sent), sent.slice(-160));
     await page.screenshot({ path: `${out}/contact-02-sent.png` });
 

@@ -255,7 +255,10 @@ export function AdminTimelineSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label={t('admin-timeline-start')}>
-          {(id) => <input id={id} type="month" value={form.startDate ?? ''} onChange={(e) => setForm({ ...form, startDate: e.target.value || undefined })} className={inputClass} />}
+          {(id) => <input id={id} type="month" value={form.startDate ?? ''} onChange={(e) => setForm({ ...form, startDate: e.target.value || undefined, startDateExact: undefined })} className={inputClass} />}
+        </Field>
+        <Field label={t('admin-timeline-exact-start')}>
+          {(id) => <input id={id} type="date" value={form.startDateExact ?? ''} onChange={(e) => setForm({ ...form, startDateExact: e.target.value || undefined, startDate: e.target.value ? e.target.value.slice(0, 7) : form.startDate })} className={inputClass} />}
         </Field>
         <Field label={t('admin-timeline-end')}>
           {(id) => <input id={id} type="month" disabled={!!form.current} min={form.startDate} value={form.endDate ?? ''} onChange={(e) => setForm({ ...form, endDate: e.target.value || undefined })} className={inputClass} />}

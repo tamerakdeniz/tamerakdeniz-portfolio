@@ -78,6 +78,7 @@ export function MediaUpload({
   const busy = progress !== null;
   return (
     <div className="space-y-1">
+      <p className="text-xs text-amber-700 dark:text-amber-300" role="note">{t('admin-media-public-notice')}</p>
       <div className="flex flex-wrap items-center gap-2">
         <label className={`${buttonClass} cursor-pointer inline-flex items-center gap-1 ${busy || disabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <span className="material-symbols-outlined text-base">upload</span>

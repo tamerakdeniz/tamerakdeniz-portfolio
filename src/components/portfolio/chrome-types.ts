@@ -3,6 +3,7 @@ import type { Loc } from '@/lib/content/portfolio';
 /** The slice of content the header, index, CV viewer and command palette need on every page. */
 export interface ChromeData {
   cvVariants?: import('@/lib/content/portfolio').Portfolio['cv']['variants'];
+  cvLanguage?: 'en' | 'tr';
   cvUrl: string;
   cvDownloadUrl: string;
   cvFileName: string;

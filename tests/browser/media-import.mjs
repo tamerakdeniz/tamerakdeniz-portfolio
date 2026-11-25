@@ -1,0 +1,26 @@
+// Self-contained synthetic local-emulator media test.
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import assert from 'node:assert/strict';
+import sharp from 'sharp';
+import {targetClient} from '../../scripts/firebase-target.mjs';
+const client=targetClient({environment:'emulator',project:'demo-portfolio'});
+const original=JSON.parse(await readFile('tests/fixtures/demo-candidates.json','utf8')).projects[0];
+const id=`media-import-${Date.now()}`;
+const candidate={...original,id,slug:id,featured:false,media:[]};
+await mkdir('artifacts/release-gate',{recursive:true});
+const file='artifacts/release-gate/synthetic-media.png';
+await sharp({create:{width:640,height:400,channels:3,background:'#456789'}}).png().toFile(file);
+const source={mediaId:'demo-import',file,kind:'desktop',contentType:'image/png',width:640,height:400,classification:'simulated-demo',verification:'simulated',source:'Synthetic local test swatch',alt:{en:'Synthetic swatch',tr:'Sentetik örnek'},caption:{en:'Demonstration only',tr:'Yalnızca gösterim'}};
+const asset={...source,projectId:id};
+await mkdir('artifacts/release-gate',{recursive:true});
+const content='artifacts/release-gate/media-import-content.json';const manifest='artifacts/release-gate/media-import-manifest.json';
+await writeFile(content,JSON.stringify({version:1,projects:[candidate]}),{mode:0o600});await writeFile(manifest,JSON.stringify([asset]),{mode:0o600});
+const args=['scripts/import-content.mjs','--environment','emulator','--project','demo-portfolio','--file',content,'--media-manifest',manifest,'--apply'];
+for(let i=0;i<2;i++)execFileSync(process.execPath,args,{stdio:'pipe'});
+const records=Object.values(await client.db('siteDrafts/projects'));const record=records.find(p=>p.id===id);
+assert.equal(record.media.length,1);assert.equal(record.media[0].classification,source.classification);assert.equal(record.media[0].source,source.source);assert.equal(record.media[0].verification,source.verification);assert.equal((await fetch(record.media[0].url)).status,200);
+record.media[0].caption.en='Synthetic admin edit';await client.db('siteDrafts/projects','PUT',records);
+assert.throws(()=>execFileSync(process.execPath,args,{stdio:'pipe'}),/Existing media changed/);
+assert.equal(Object.values(await client.db('siteDrafts/projects')).find(p=>p.id===id).media[0].caption.en,'Synthetic admin edit');
+console.log('PASS optimized media import/reimport, provenance retention and edited-metadata refusal');

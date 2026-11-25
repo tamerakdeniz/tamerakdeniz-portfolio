@@ -1,0 +1,38 @@
+{
+  "rules": {
+    "siteData": {
+      ".read": true,
+      ".write": "auth != null && auth.token.admin === true"
+    },
+    "siteDrafts": {
+      ".read": "auth != null && auth.token.admin === true",
+      ".write": "auth != null && auth.token.admin === true"
+    },
+    "contactSubmissions": {
+      ".read": "auth != null && auth.token.admin === true",
+      "$id": {
+        ".write": "(auth != null && (auth.token.admin === true || auth.uid === 'portfolio-intake-server')) || (!data.exists() && newData.exists())"
+      }
+    },
+    "contactMeta": {
+      ".read": false,
+      ".write": false
+    },
+    "adminPasswordHash": {
+      ".read": "auth != null && auth.token.admin === true",
+      ".write": "auth != null && auth.token.admin === true"
+    },
+    "activityLog": {
+      ".read": "auth != null && auth.token.admin === true",
+      ".write": "auth != null && auth.token.admin === true"
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    },
+    "_serverLimits": {
+      ".read": "auth != null && auth.uid === 'portfolio-intake-server'",
+      ".write": "auth != null && auth.uid === 'portfolio-intake-server'"
+    }
+  }
+}

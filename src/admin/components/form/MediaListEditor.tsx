@@ -1,5 +1,6 @@
 'use client';
 
+import { MEDIA_CLASSIFICATIONS } from '@/lib/content/media-classification';
 import { useTranslation } from 'react-i18next';
 import type { MediaKind, ProjectMedia } from '@/types';
 import { buttonClass, inputClass, LocField } from './fields';
@@ -123,6 +124,19 @@ export function MediaListEditor({
                   {t('admin-media-remove')}
                 </button>
               </div>
+              <label className="block text-sm">{t('admin-media-classification')}
+                <select className={inputClass} value={m.classification || ''} onChange={(e) => patch(m.id, { classification: e.target.value as ProjectMedia['classification'] })}>
+                  <option value="">{t('admin-media-unclassified')}</option>
+                  {MEDIA_CLASSIFICATIONS.map((value) => <option key={value} value={value}>{value}</option>)}
+                </select>
+              </label>
+              <label className="block text-sm">{t('admin-media-source')}<input className={inputClass} value={m.source || ''} onChange={(e) => patch(m.id, { source: e.target.value })} /></label>
+              <label className="block text-sm">{t('admin-media-attribution')}<input className={inputClass} value={m.attribution || ''} onChange={(e) => patch(m.id, { attribution: e.target.value })} /></label>
+              <label className="block text-sm">{t('admin-media-verification')}
+                <select className={inputClass} value={m.verification || 'unverified'} onChange={(e) => patch(m.id, { verification: e.target.value as ProjectMedia['verification'] })}>
+                  {['verified','simulated','conceptual','unverified'].map((value) => <option key={value}>{value}</option>)}
+                </select>
+              </label>
               <LocField
                 label={t('admin-media-alt')}
                 value={m.alt}

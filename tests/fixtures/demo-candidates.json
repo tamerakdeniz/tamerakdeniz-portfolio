@@ -1,0 +1,212 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "id": "demo-project-1",
+      "slug": "demo-project-1",
+      "title": {
+        "en": "Demonstration Project 1",
+        "tr": "Gösterim Projesi 1"
+      },
+      "description": {
+        "en": "Synthetic demonstration data; not a real project or personal claim.",
+        "tr": "Sentetik gösterim verisi; gerçek proje veya kişisel iddia değildir."
+      },
+      "category": [
+        "web"
+      ],
+      "techStack": [
+        "TypeScript"
+      ],
+      "githubUrl": "https://example.com/demo-source",
+      "demoUrl": "",
+      "image": "/demo/placeholder.svg",
+      "published": false,
+      "featured": true,
+      "featuredOrder": 0,
+      "order": 0,
+      "presentation": {
+        "variant": "minimal"
+      },
+      "sections": [
+        {
+          "heading": {
+            "en": "Demonstration only",
+            "tr": "Yalnızca gösterim"
+          },
+          "body": {
+            "en": "This record exercises the bilingual CMS.",
+            "tr": "Bu kayıt iki dilli CMS işlevlerini gösterir."
+          }
+        }
+      ],
+      "media": [
+        {
+          "id": "demo-cover-1",
+          "kind": "cover",
+          "url": "/demo/placeholder.svg",
+          "classification": "simulated-demo",
+          "verification": "simulated",
+          "source": "Synthetic local fixture",
+          "alt": {
+            "en": "Synthetic geometric placeholder",
+            "tr": "Sentetik geometrik yer tutucu"
+          },
+          "caption": {
+            "en": "Demonstration only",
+            "tr": "Yalnızca gösterim"
+          },
+          "width": 1200,
+          "height": 760
+        }
+      ]
+    },
+    {
+      "id": "demo-project-2",
+      "slug": "demo-project-2",
+      "title": {
+        "en": "Demonstration Project 2",
+        "tr": "Gösterim Projesi 2"
+      },
+      "description": {
+        "en": "Synthetic demonstration data; not a real project or personal claim.",
+        "tr": "Sentetik gösterim verisi; gerçek proje veya kişisel iddia değildir."
+      },
+      "category": [
+        "web"
+      ],
+      "techStack": [
+        "TypeScript"
+      ],
+      "githubUrl": "https://example.com/demo-source",
+      "demoUrl": "",
+      "image": "/demo/placeholder.svg",
+      "published": false,
+      "featured": true,
+      "featuredOrder": 1,
+      "order": 1,
+      "presentation": {
+        "variant": "minimal"
+      },
+      "sections": [
+        {
+          "heading": {
+            "en": "Demonstration only",
+            "tr": "Yalnızca gösterim"
+          },
+          "body": {
+            "en": "This record exercises the bilingual CMS.",
+            "tr": "Bu kayıt iki dilli CMS işlevlerini gösterir."
+          }
+        }
+      ],
+      "media": [
+        {
+          "id": "demo-cover-2",
+          "kind": "cover",
+          "url": "/demo/placeholder.svg",
+          "classification": "simulated-demo",
+          "verification": "simulated",
+          "source": "Synthetic local fixture",
+          "alt": {
+            "en": "Synthetic geometric placeholder",
+            "tr": "Sentetik geometrik yer tutucu"
+          },
+          "caption": {
+            "en": "Demonstration only",
+            "tr": "Yalnızca gösterim"
+          },
+          "width": 1200,
+          "height": 760
+        }
+      ]
+    },
+    {
+      "id": "demo-project-3",
+      "slug": "demo-project-3",
+      "title": {
+        "en": "Demonstration Project 3",
+        "tr": "Gösterim Projesi 3"
+      },
+      "description": {
+        "en": "Synthetic demonstration data; not a real project or personal claim.",
+        "tr": "Sentetik gösterim verisi; gerçek proje veya kişisel iddia değildir."
+      },
+      "category": [
+        "web"
+      ],
+      "techStack": [
+        "TypeScript"
+      ],
+      "githubUrl": "https://example.com/demo-source",
+      "demoUrl": "",
+      "image": "/demo/placeholder.svg",
+      "published": false,
+      "featured": true,
+      "featuredOrder": 2,
+      "order": 2,
+      "presentation": {
+        "variant": "minimal"
+      },
+      "sections": [
+        {
+          "heading": {
+            "en": "Demonstration only",
+            "tr": "Yalnızca gösterim"
+          },
+          "body": {
+            "en": "This record exercises the bilingual CMS.",
+            "tr": "Bu kayıt iki dilli CMS işlevlerini gösterir."
+          }
+        }
+      ],
+      "media": [
+        {
+          "id": "demo-cover-3",
+          "kind": "cover",
+          "url": "/demo/placeholder.svg",
+          "classification": "simulated-demo",
+          "verification": "simulated",
+          "source": "Synthetic local fixture",
+          "alt": {
+            "en": "Synthetic geometric placeholder",
+            "tr": "Sentetik geometrik yer tutucu"
+          },
+          "caption": {
+            "en": "Demonstration only",
+            "tr": "Yalnızca gösterim"
+          },
+          "width": 1200,
+          "height": 760
+        }
+      ]
+    }
+  ],
+  "timeline": [
+    {
+      "id": "demo-education",
+      "type": "education",
+      "title": {
+        "en": "Demonstration Studies",
+        "tr": "Gösterim Eğitimi"
+      },
+      "company": {
+        "en": "Example Academy",
+        "tr": "Örnek Akademi"
+      },
+      "period": {
+        "en": "",
+        "tr": ""
+      },
+      "description": {
+        "en": "Synthetic ongoing course",
+        "tr": "Sentetik devam eden ders"
+      },
+      "startDate": "2001-03",
+      "startDateExact": "2001-03-12",
+      "current": true,
+      "published": false,
+      "order": 0
+    }
+  ]
+}

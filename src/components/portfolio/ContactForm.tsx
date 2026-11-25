@@ -4,7 +4,8 @@ import { useId, useRef, useState } from 'react';
 import { COPY } from '@/lib/content/copy';
 import { pick } from '@/lib/content/portfolio';
 import { useLang } from '@/lib/lang';
-import { databaseRestUrl, PREVIEW_WRITES_BLOCKED } from '@/lib/firebase-config';
+import { PREVIEW_WRITES_BLOCKED, USE_EMULATORS } from '@/lib/firebase-config';
+import { HumanCheck } from './HumanCheck';
 import s from './ContactForm.module.css';
 
 type Field = 'name' | 'email' | 'subject' | 'message';
@@ -13,28 +14,19 @@ type Status = 'idle' | 'sending' | 'sent' | 'error' | 'busy' | 'preview';
 const LIMITS: Record<Field, number> = { name: 120, email: 200, subject: 200, message: 5000 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const SERVER_TIME = { '.sv': 'timestamp' };
-
 class SubmitError extends Error {}
 
 /**
- * Creates `contactSubmissions/{id}` — the path and shape the admin inbox reads — in one
- * multi-path update with `contactMeta/lastAt`. The database rules accept a submission only
- * together with that server timestamp, at most one every 20 seconds site-wide.
+ * The protected server endpoint verifies the challenge and reserves durable quotas before
+ * writing the existing admin inbox. Anonymous direct RTDB writes are denied by rules.
  */
-async function submit(entry: Record<string, unknown>, id: string) {
-  const url = databaseRestUrl('');
-  if (!url) throw new SubmitError('error');
-  const res = await fetch(url, {
-    method: 'PATCH',
+async function submit(entry: Record<string, unknown>, challengeToken: string) {
+  const res = await fetch('/api/contact', {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      [`contactSubmissions/${id}`]: { ...entry, createdAt: SERVER_TIME },
-      'contactMeta/lastAt': SERVER_TIME,
-      'contactMeta/lastId': id,
-    }),
+    body: JSON.stringify({ ...entry, challengeToken }),
   });
-  if (res.status === 401 || res.status === 403) throw new SubmitError('busy');
+  if (res.status === 429) throw new SubmitError('busy');
   if (!res.ok) throw new SubmitError('error');
 }
 
@@ -44,6 +36,8 @@ export function ContactForm({ email }: { email: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [status, setStatus] = useState<Status>('idle');
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
+  const [challengeToken, setChallengeToken] = useState('');
+  const [challengeRound, setChallengeRound] = useState(0);
 
   const label = (f: Field) => pick(COPY.contact[f], lang);
 
@@ -88,11 +82,9 @@ export function ContactForm({ email }: { email: string }) {
     }
 
     setStatus('sending');
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8).padEnd(4, '0')}`;
     try {
       await submit(
         {
-          id,
           name: data.name.trim(),
           email: data.email.trim(),
           subject: data.subject.trim(),
@@ -100,12 +92,15 @@ export function ContactForm({ email }: { email: string }) {
           timestamp: new Date().toISOString(),
           read: false,
         },
-        id
+        USE_EMULATORS ? 'emulator-test-token' : challengeToken
       );
       setStatus('sent');
       form.reset();
     } catch (err) {
       setStatus(err instanceof SubmitError && err.message === 'busy' ? 'busy' : 'error');
+    } finally {
+      setChallengeToken('');
+      setChallengeRound((r) => r + 1);
     }
   };
 
@@ -154,6 +149,7 @@ export function ContactForm({ email }: { email: string }) {
         </label>
       </div>
       <div className={s.submitRow}>
+        <HumanCheck key={challengeRound} action="contact" onToken={setChallengeToken} />
         <button type="submit" className="btn btn-primary" disabled={status === 'sending'}>
           {pick(status === 'sending' ? COPY.contact.sending : COPY.contact.send, lang)}
           <span className="arrow" aria-hidden="true">

@@ -1,4 +1,5 @@
 import { timelinePeriod } from './timeline';
+import { classifiedCaption } from './media-classification';
 import type {
   Backplate,
   EngineeringPillar,
@@ -142,7 +143,7 @@ export interface Portfolio {
     social: { github?: string; linkedin?: string; instagram?: string; upwork?: string };
   };
   availability: { status: string; label: Loc } | null;
-  cv: { viewUrl: string; downloadUrl: string; fileName: string; variants?: Partial<Record<Lang, { viewUrl: string; downloadUrl: string; fileName: string }>> };
+  cv: { viewUrl: string; downloadUrl: string; fileName: string; language?: 'en' | 'tr'; variants?: Partial<Record<Lang, { viewUrl: string; downloadUrl: string; fileName: string }>> };
   /** Published and listed, in admin order. */
   projects: PortfolioProject[];
   /** Selected projects for the home page (see `selectFeatured`). */
@@ -245,7 +246,7 @@ function buildMedia(p: Project, name: Loc): PortfolioMedia[] {
           kind,
           url,
           alt: loc(m.alt) ?? mapLoc(name, (n) => `${n} — ${kind}`),
-          caption: loc(m.caption),
+          caption: loc(classifiedCaption(m)),
           width: positive(m.width),
           height: positive(m.height),
         },
@@ -531,7 +532,7 @@ export function buildPortfolio(data: SiteData | null): Portfolio {
         : FALLBACK_CONTACT.social,
     },
     availability: status && availabilityLabel ? { status, label: availabilityLabel } : null,
-    cv: { viewUrl: cvUrl, downloadUrl: getCvDownloadHref(cvUrl, cvName), fileName: cvName, variants: cvVariants },
+    cv: { viewUrl: cvUrl, downloadUrl: getCvDownloadHref(cvUrl, cvName), fileName: cvName, language: activeCv?.language, variants: cvVariants },
     projects,
     featured,
     archive: projects.filter((p) => !featuredIds.has(p.id)),

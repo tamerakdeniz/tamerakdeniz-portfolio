@@ -1,13 +1,16 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
+import { digest } from './legacy-draft-plan.mjs';
 import { targetClient, targetOptions } from './firebase-target.mjs';
 
 const list = (value) => value ? Object.values(value).filter(Boolean) : [];
+const classifications = ['authentic-web','authentic-native','simulated-demo','ai-concept','editorial-illustration','architecture-diagram','logo','video'];
+const verifications = ['verified','simulated','conceptual','unverified'];
 const localized = (value) => value && typeof value.en === 'string' && typeof value.tr === 'string';
 try {
   const options = targetOptions({ file: { type: 'string' }, 'database-url': { type: 'string' }, 'media-manifest': { type: 'string' }, bucket: { type: 'string' }, 'backup-dir': { type: 'string' } });
-  if (!options.file) throw new Error('Specify --file content/portfolio-candidates.json');
+  if (!options.file) throw new Error('Specify --file PATH_TO_REVIEWED_CANDIDATES.json');
   const input = JSON.parse(await readFile(options.file, 'utf8'));
   if (input.version !== 1) throw new Error('Expected content schema version 1');
   const allowed = ['projects', 'skills', 'timeline'];
@@ -26,7 +29,8 @@ try {
     }
   }
   const client = targetClient(options);
-  const [publicData, drafts] = await Promise.all([client.db('siteData'), client.db('siteDrafts')]);
+  const snapshot = await client.snapshot();
+  const { siteData: publicData, siteDrafts: drafts } = snapshot.value || {};
   const patch = {};
   for (const collection of allowed) {
     if (!input[collection]?.length) continue;
@@ -34,7 +38,13 @@ try {
     const old = new Map(list(drafts?.[collection]).map((item) => [item.id, item]));
     for (const candidate of input[collection]) {
       if (publicIds.has(candidate.id)) throw new Error(`Refusing to overwrite published ${collection}/${candidate.id}; edit through admin`);
-      old.set(candidate.id, candidate);
+      const existing = old.get(candidate.id);
+      const withoutMedia = (record) => Object.fromEntries(Object.entries(record).filter(([key]) => key !== 'media'));
+      const preserveMedia = !candidate.media?.length;
+      const comparable = existing && preserveMedia ? withoutMedia(existing) : existing;
+      const expected = preserveMedia ? withoutMedia(candidate) : candidate;
+      if (existing && digest(comparable) !== digest(expected)) throw new Error(`Existing draft changed: ${candidate.id}; review in admin instead of overwriting`);
+      old.set(candidate.id, { ...existing, ...candidate, ...(existing && preserveMedia ? { media: existing.media } : {}) });
     }
     patch[`siteDrafts/${collection}`] = [...old.values()];
   }
@@ -45,6 +55,7 @@ try {
   for (const asset of assets) {
     const project = patch['siteDrafts/projects']?.find((item) => item.id === asset.projectId);
     if (!project || !asset.mediaId || !localized(asset.alt)) throw new Error('Manifest must reference an imported project and include mediaId and bilingual alt');
+    if (!classifications.includes(asset.classification) || !verifications.includes(asset.verification) || typeof asset.source !== 'string' || !asset.source) throw new Error('Manifest requires classification, verification and source');
     const file = path.resolve(asset.file);
     const bytes = await readFile(file);
     const extensions = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/avif': 'avif' };
@@ -78,13 +89,16 @@ try {
       metadata = await response.json();
       const token = metadata.downloadTokens || metadata.metadata?.firebaseStorageDownloadTokens;
       const url = `${base}/${encodeURIComponent(objectPath)}?alt=media${token ? `&token=${encodeURIComponent(token.split(',')[0])}` : ''}`;
-      const media = { id: asset.mediaId, kind: asset.kind, url, path: objectPath, alt: asset.alt, caption: asset.caption || { en: '', tr: '' }, contentType: asset.contentType, width: asset.width, height: asset.height, order: asset.order ?? uploads.indexOf(upload) };
+      const media = { classification: asset.classification, verification: asset.verification, source: asset.source, attribution: asset.attribution || '', id: asset.mediaId, kind: asset.kind, url, path: objectPath, alt: asset.alt, caption: asset.caption || { en: '', tr: '' }, contentType: asset.contentType, width: asset.width, height: asset.height, order: asset.order ?? uploads.indexOf(upload) };
+      const existingMedia = project.media?.find((item) => item.id === asset.mediaId);
+      if (existingMedia && digest(existingMedia) !== digest(media)) throw new Error(`Existing media changed: ${asset.mediaId}; review in admin instead of overwriting`);
       project.media = [...(project.media || []).filter((item) => item.id !== asset.mediaId), media];
     }
     // Detect concurrent changes after potentially long uploads; stop instead of overwriting them.
-    const fresh = await client.db('siteDrafts');
-    if (JSON.stringify(fresh) !== JSON.stringify(drafts)) throw new Error('Drafts changed during import. No database write performed; retry after reviewing the other editor.');
-    if (Object.keys(patch).length) await client.db('', 'PATCH', patch);
+    const next = structuredClone(snapshot.value || {});
+    next.siteDrafts ??= {};
+    for (const [key, value] of Object.entries(patch)) next.siteDrafts[key.split('/')[1]] = value;
+    if (Object.keys(patch).length) await client.replaceSnapshot(next, snapshot.etag);
     console.log(`Imported private drafts. Backup: ${backup}. Publish reviewed records from the admin panel.`);
   }
 } catch (error) { console.error(error.message); process.exitCode = 1; }

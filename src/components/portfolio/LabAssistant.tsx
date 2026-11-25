@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useLang } from '@/lib/lang';
 import s from './LabAssistant.module.css';
+import { HumanCheck } from './HumanCheck';
+import { USE_EMULATORS } from '@/lib/firebase-config';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -91,6 +93,8 @@ export function LabAssistant() {
   const [loading, setLoading] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [cooldown, setCooldown] = useState(0);
+  const [challengeToken, setChallengeToken] = useState('');
+  const [challengeRound, setChallengeRound] = useState(0);
   const logRef = useRef<HTMLDivElement>(null);
   const inputId = useId();
 
@@ -127,7 +131,7 @@ export function LabAssistant() {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: question, history: history.slice(-4), language: lang }),
+          body: JSON.stringify({ message: question, history: history.slice(-4), language: lang, challengeToken: USE_EMULATORS ? 'emulator-test-token' : challengeToken }),
         });
         const data = (await res.json()) as { reply?: string; error?: string; retryAfterSec?: number };
         if (data.reply) reply(data.reply);
@@ -141,9 +145,11 @@ export function LabAssistant() {
         reply(t.connection);
       } finally {
         setLoading(false);
+        setChallengeToken('');
+        setChallengeRound((r) => r + 1);
       }
     },
-    [coolingDown, lang, loading, messages, t]
+    [coolingDown, lang, loading, messages, t, challengeToken]
   );
 
   return (
@@ -187,6 +193,7 @@ export function LabAssistant() {
         )}
       </div>
 
+      <HumanCheck key={challengeRound} action="chat" onToken={setChallengeToken} />
       <form
         className={s.form}
         onSubmit={(e) => {

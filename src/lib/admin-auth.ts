@@ -1,5 +1,5 @@
 import 'server-only';
-import { EMULATOR_HOSTS, USE_EMULATORS } from '@/lib/firebase-config';
+import { EMULATOR_HOSTS, USE_EMULATORS, SNAPSHOT_PREVIEW } from '@/lib/firebase-config';
 
 /**
  * Verifies a Firebase ID token by asking the Identity Toolkit who it belongs to, then checks the
@@ -7,6 +7,7 @@ import { EMULATOR_HOSTS, USE_EMULATORS } from '@/lib/firebase-config';
  * An expired, revoked or forged token is rejected by Google, not by this code.
  */
 export async function verifyAdminToken(idToken: string): Promise<{ ok: true; uid: string } | { ok: false; status: number }> {
+  if (SNAPSHOT_PREVIEW) return { ok: false, status: 403 };
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
   if (!apiKey || !idToken || idToken.length > 4096) return { ok: false, status: 401 };
   const origin = USE_EMULATORS

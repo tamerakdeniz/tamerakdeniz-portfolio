@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_PUBLIC_PORTFOLIO_SNAPSHOT === '1' ? '.next-preview' : '.next',
   images: {
     ...(process.env.NEXT_PUBLIC_FIREBASE_USE_EMULATORS === '1' ? { dangerouslyAllowLocalIP: true } : {}),
     remotePatterns: [

@@ -32,6 +32,19 @@ export function targetClient(options) {
   };
   return {
     token,
+    snapshot: async () => {
+      if (!database) throw new Error('Specify --database-url');
+      const url = new URL(database); url.pathname = '/.json';
+      const response = await fetch(url, { headers: { Authorization: `Bearer ${token}`, 'X-Firebase-ETag': 'true' }, signal: AbortSignal.timeout(30_000) });
+      if (!response.ok || !response.headers.get('etag')) throw new Error('Cannot read an authenticated root snapshot with ETag');
+      return { value: await response.json(), etag: response.headers.get('etag') };
+    },
+    replaceSnapshot: async (value, etag) => {
+      if (!database || !etag) throw new Error('Conditional snapshot required');
+      const url = new URL(database); url.pathname = '/.json';
+      const response = await fetch(url, { method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'If-Match': etag }, body: JSON.stringify(value), signal: AbortSignal.timeout(30_000) });
+      if (!response.ok) throw new Error(response.status === 412 ? 'Concurrent write detected; nothing applied. Repeat dry-run against a fresh backup.' : `Snapshot write failed (${response.status})`);
+    },
     auth: (action, body) => request(`${authOrigin}/v1/projects/${options.project}/accounts:${action}`, 'POST', body),
     db: (path, method = 'GET', body) => {
       if (!database) throw new Error('Specify --database-url for production');
