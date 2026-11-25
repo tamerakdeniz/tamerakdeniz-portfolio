@@ -35,3 +35,7 @@ Portfolio media binaries may be publicly accessible before their project is publ
 - [Design contract](IMMERSIVE_V2.md) and [design background](DESIGN.md)
 
 Personal editorial proposals, unpublished assets, production exports and review reports belong in private storage outside this public repository. Source publication and content publication are separate decisions. Setup instructions grant no permission to push, deploy, provision production access or change cloud configuration.
+
+## Release preparation
+
+See the [deployment checklist](docs/deployment.md) for environment isolation, migrations, protected intake and single-branch source delivery. Run `npm run build:preview-snapshot` for an isolated read-only Preview using committed synthetic fixtures; no private local files or paid services are needed. Private art direction, contact sheets and owner release reports are intentionally reviewed outside this repository.

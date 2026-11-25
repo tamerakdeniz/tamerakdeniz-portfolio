@@ -127,7 +127,12 @@
         "en": "Demonstration location",
         "tr": "Gösterim konumu"
       },
-      "social": {}
+      "social": {
+        "github": "https://example.com/demo-github",
+        "linkedin": "https://example.com/demo-linkedin",
+        "instagram": "https://example.com/demo-instagram",
+        "upwork": "https://example.com/demo-upwork"
+      }
     },
     "homeHero": {
       "title": {

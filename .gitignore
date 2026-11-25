@@ -58,3 +58,26 @@ next-env.d.ts
 # Local verification reports, authentic media, and import backups
 /artifacts/
 /backups/
+
+# Private recovery archives and review packages
+*.bundle
+*.tar.gz
+/private-review/
+
+# Publication-pending review material stays outside public source
+/content/portfolio-candidates.json
+/content/telcox-candidate.json
+/content/review-corrections.json
+/content/confirmed-profile-updates.json
+/content/media-manifest.json
+/content/existing-project-media-review.json
+/content/project-art-directions.json
+/content/project-media-sources.json
+/content/diagrams/callwhisper-pipeline.svg
+/content/diagrams/telcox-service-map.svg
+/PROJECT_ART_DIRECTION.md
+/docs/content-evidence.md
+/docs/environment-and-security.md
+/docs/final-handover.md
+/docs/release-gate.md
+/docs/release-verification.md

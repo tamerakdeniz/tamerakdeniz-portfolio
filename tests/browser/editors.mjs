@@ -22,6 +22,8 @@ const save = async () => { const done = page.waitForResponse((r) => r.url().ends
 const text = async (route) => (await fetch(BASE + route)).text();
 const stamp = Date.now();
 try {
+  // This suite owns only synthetic biography/CV fixtures in the fixed demo emulator.
+  await db('', 'PATCH', { 'siteData/aboutEntries': [], 'siteData/activeAboutId': '', 'siteData/cvFiles': [], 'siteData/activeCvId': '' });
   await page.goto(BASE + '/admin');
   await nav('Timeline');
   for (const [type, ongoing] of [['education', false], ['work', true], ['certification', false], ['achievement', false]]) {
@@ -74,7 +76,7 @@ try {
   await page.getByLabel('Professional role (EN)', { exact: true }).fill('Synthetic Verification Engineer');
   await page.getByLabel('Professional role (TR)', { exact: true }).fill('Sentetik Doğrulama Mühendisi');
   await page.locator('summary').filter({ hasText: 'Field journal photo' }).click();
-  await page.getByLabel('Upload file', { exact: false }).setInputFiles('artifacts/cms-lifecycle/mobile.png');
+  await page.getByLabel(/Upload file|Replace/).setInputFiles('artifacts/cms-lifecycle/mobile.png');
   await page.getByRole('progressbar').waitFor({ state: 'hidden' });
   await page.getByLabel('Alternative text (EN)', { exact: true }).fill('Synthetic test portrait swatch');
   await page.getByLabel('Alternative text (TR)', { exact: true }).fill('Sentetik test portre görseli');
@@ -85,7 +87,7 @@ try {
   assert.ok((await db('siteData/profile')).fieldPhoto.path);
   record('Profile UI: bilingual identity and uploaded field photo reach public markup and metadata');
   await nav('CV');
-  await page.getByLabel('Upload PDF', { exact: false }).setInputFiles('public/resume/Mustafa-Tamer-Akdeniz-Resume.pdf');
+  await page.getByLabel('Upload PDF', { exact: false }).setInputFiles('public/demo/resume.pdf');
   await page.getByRole('progressbar').waitFor({ state: 'hidden' });
   await until(() => db('siteData/cvFiles'), (v) => list(v).length > 0, 'PDF persisted');
   await page.getByLabel('Document language', { exact: false }).first().selectOption('en');

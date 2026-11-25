@@ -15,7 +15,7 @@ try {
     page.on('pageerror', (e) => errors.push(e.message));
     for (const width of [320, 390, 768, 1024, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
-      for (const route of ['/', '/projects', '/projects/akar', '/projects/callwhisper', '/resume', '/admin']) {
+      for (const route of ['/', '/projects', '/projects/demo-project-1', '/projects/demo-project-2', '/resume', '/admin']) {
         const response = await page.goto(base + route);
         assert.equal(response.status(), 200, route);
         await page.evaluate(() => document.fonts.ready);

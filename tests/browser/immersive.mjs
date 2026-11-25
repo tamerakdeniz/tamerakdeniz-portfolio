@@ -19,7 +19,7 @@ async function guard(ctx, log) {
   });
   await ctx.route('**/api/contact', (route) => { log.push({ method: route.request().method(), url: route.request().url(), body: route.request().postData() }); return route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }); });
   await ctx.route('**/api/chat', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ reply: 'Mocked reply: Tamer built Qirushio, Screen Timer and Pathyvo.' }) })
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ reply: 'Mocked reply: these are synthetic demonstration projects.' }) })
   );
 }
 
@@ -130,7 +130,7 @@ const focusInfo = (page) =>
     await page.waitForTimeout(1400);
     const asst = await page.evaluate(() => ({ tag: document.activeElement?.tagName, inAssistant: !!document.activeElement?.closest('#assistant') }));
     ok('#assistant hash opens the assistant and focuses its input', asst.inAssistant && asst.tag === 'INPUT', JSON.stringify(asst));
-    await page.keyboard.type('What did Tamer build?');
+    await page.keyboard.type('Which demonstration projects are available?');
     await page.keyboard.press('Enter');
     await page.waitForTimeout(2500);
     const reply = await page.evaluate(() => document.querySelector('#assistant')?.textContent?.includes('Mocked reply'));
