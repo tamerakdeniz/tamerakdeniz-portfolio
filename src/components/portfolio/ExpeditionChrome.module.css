@@ -939,12 +939,16 @@
 
 .cv {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   width: min(1100px, 100%);
   height: min(92vh, 100%);
   max-height: 100dvh;
   background: var(--paper);
   color: var(--ink);
+}
+
+.cv[data-cv-state='error'] {
+  height: auto;
 }
 
 .cvBar {
@@ -982,14 +986,95 @@
   background: var(--paper-deep);
 }
 
-.cvPhone {
-  padding: 28px clamp(16px, 3vw, 28px);
+.cvStage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--paper-deep);
+}
+
+.cv[data-cv-state='error'] .cvStage {
+  min-height: 0;
+}
+
+.cvZoom {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line-light);
+  background: var(--paper);
+}
+
+.cvZoom button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line-light);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.cvZoom button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.cvPages {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 8px 28px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cv[data-cv-state='error'] .cvPages {
+  flex: none;
+  overflow: visible;
+}
+
+.cvPages article {
+  width: fit-content;
+  margin: 0 auto 12px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(5, 10, 15, 0.16);
+}
+
+.cvPages canvas {
+  display: block;
+}
+
+.cvStatus {
+  max-width: 42rem;
+  padding: 16px 8px 8px;
 }
 
 .cvFile {
   margin: 0 0 8px;
   font-family: var(--font-mono-stack);
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+  .cvBar {
+    align-items: flex-start;
+  }
+
+  .cvActions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .cvTitle {
+    font-size: 1.05rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

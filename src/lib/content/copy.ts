@@ -87,10 +87,15 @@ export const COPY = {
     title: l('Curriculum vitae', 'Özgeçmiş'),
     download: l('Download PDF', 'PDF indir'),
     openTab: l('Open in a new tab', 'Yeni sekmede açın'),
-    mobile: l(
-      'PDF previews are unreliable on phones. Download the file or open it in a new tab.',
-      'Telefonlarda PDF önizlemesi güvenilir değil. Dosyayı indirin ya da yeni sekmede açın.'
+    loading: l('Loading the CV…', 'Özgeçmiş yükleniyor…'),
+    unavailable: l(
+      'This CV could not be previewed here. Download the PDF or open it in a new tab.',
+      'Özgeçmiş burada önizlenemedi. PDF’i indirin ya da yeni sekmede açın.'
     ),
+    zoom: l('Zoom', 'Yakınlaştırma'),
+    zoomIn: l('Zoom in', 'Yakınlaştır'),
+    zoomOut: l('Zoom out', 'Uzaklaştır'),
+    zoomFit: l('Fit page width', 'Sayfa genişliğine sığdır'),
     close: l('Close', 'Kapat'),
   },
   hero: {

@@ -4,11 +4,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { CHAPTERS, COPY, type ChapterId } from '@/lib/content/copy';
+import { cvPreviewSrc } from '@/lib/cv-preview';
 import { OWNER, pick } from '@/lib/content/portfolio';
 import { useChapterStore } from '@/lib/chapter-store';
 import { setLang, useLang } from '@/lib/lang';
 import { onSceneFrame, scene } from '@/lib/scene-state';
 import { CommandPalette } from './CommandPalette';
+import { MobileCvPages, type CvViewerPhase } from './MobileCvPages';
 import { DepthReadout } from './DepthReadout';
 import { MotionToggle } from './MotionToggle';
 import { T } from './T';
@@ -19,7 +21,13 @@ import s from './ExpeditionChrome.module.css';
 type Mode = 'home' | 'page' | 'resume';
 type Chapter = (typeof CHAPTERS)[number];
 
-const noopSubscribe = () => () => {};
+const PHONE_QUERY = '(max-width: 767px), (pointer: coarse)';
+
+function subscribePhone(onChange: () => void) {
+  const media = window.matchMedia(PHONE_QUERY);
+  media.addEventListener('change', onChange);
+  return () => media.removeEventListener('change', onChange);
+}
 
 const LANG_OPTIONS = [
   { code: 'en', label: 'English' },
@@ -447,14 +455,23 @@ function CvViewer({ chrome, onClose }: { chrome: ChromeData; onClose: () => void
   const cvFileName = document?.fileName ?? chrome.cvFileName;
   const titleId = useId();
   const ref = useDialog<HTMLDivElement>(true, onClose);
+  const previewSrc = cvPreviewSrc(cvUrl, cvDownloadUrl);
+  const [viewerPhase, setViewerPhase] = useState<CvViewerPhase>('loading');
   const phone = useSyncExternalStore(
-    noopSubscribe,
-    () => window.matchMedia('(max-width: 767px), (pointer: coarse)').matches,
+    subscribePhone,
+    () => window.matchMedia(PHONE_QUERY).matches,
     () => false
   );
   return (
     <div className={s.cvBackdrop} onClick={(e) => e.target === e.currentTarget && onClose()} data-chrome>
-      <div ref={ref} className={`${s.cv} surface-paper`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div
+        ref={ref}
+        className={`${s.cv} surface-paper`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        data-cv-state={phone ? viewerPhase : 'desktop'}
+      >
         <div className={s.cvBar}>
           <h2 id={titleId} className={s.cvTitle}>
             <span className="meta muted">PDF</span> <T v={COPY.cv.title} />{language === 'tr' && !document && chrome.cvLanguage === 'en' ? ' (İngilizce)' : ''}
@@ -476,12 +493,7 @@ function CvViewer({ chrome, onClose }: { chrome: ChromeData; onClose: () => void
           </div>
         </div>
         {phone ? (
-          <div className={s.cvPhone}>
-            <p className={s.cvFile}>{cvFileName}</p>
-            <p className="muted">
-              <T v={COPY.cv.mobile} />
-            </p>
-          </div>
+          <MobileCvPages key={previewSrc || 'missing'} src={previewSrc} fileName={cvFileName} onPhase={setViewerPhase} />
         ) : (
           <iframe className={s.cvFrame} src={cvUrl} title={cvFileName} />
         )}
