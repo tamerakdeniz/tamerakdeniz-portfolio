@@ -143,3 +143,16 @@
     display: flex;
   }
 }
+
+/* Keep the existing logo badge independent of the cover frame's size. */
+.chip {
+  position: absolute;
+  right: 4%;
+  bottom: 6%;
+  width: clamp(36px, 9%, 56px);
+  aspect-ratio: 1;
+  z-index: 3;
+  overflow: hidden;
+  border: 1px solid var(--plate-line);
+  border-radius: 6px;
+}
