@@ -36,18 +36,42 @@ test('synthetic exact start date stays bilingual and ongoing', () => {
  const period=timelinePeriod({id:'demo-school',published:true,type:'education',title:{en:'demo-school',tr:'demo-school'},company:{en:'demo-school',tr:'demo-school'},period:{en:'',tr:''},description:{en:'',tr:''},order:0,startDate:'2001-03',startDateExact:'2001-03-12',current:true}).period;assert.match(period.en,/12 Mar/);assert.match(period.tr,/12 Mar/);
 });
 
-test('Turnstile requires matching hostname/action and rejects failed verification before intake', async () => {
+test('BotID Basic requires matching endpoint headers, rejects bots/bypasses and fails closed when unavailable', async () => {
  const {verifyChallenge,ActionDenied}=await import('../src/lib/public-action-guard');
- const saved={fetch:globalThis.fetch,secret:process.env.TURNSTILE_SECRET_KEY,hosts:process.env.TURNSTILE_ALLOWED_HOSTNAMES,key:process.env.PUBLIC_ACTION_IP_HASH_KEY};
- process.env.TURNSTILE_SECRET_KEY='mock-secret';process.env.TURNSTILE_ALLOWED_HOSTNAMES='portfolio.example';process.env.PUBLIC_ACTION_IP_HASH_KEY='mock-hash-key';
+ const savedKey=process.env.PUBLIC_ACTION_IP_HASH_KEY;
+ const validReq=(path='/api/contact',method='POST',human='{"v":"1"}')=>new Request(`https://www.tamerakdeniz.com${path}`,{method,headers:{...(human?{'x-is-human':human}:{}),'x-path':path,'x-method':method}});
  try {
-  for(const result of [{success:false},{success:true,hostname:'wrong.example',action:'contact'},{success:true,hostname:'portfolio.example',action:'chat'}]){
-   globalThis.fetch=async()=>Response.json(result);await assert.rejects(verifyChallenge('synthetic','contact'),e=>e instanceof ActionDenied && e.status===403);
+  delete process.env.PUBLIC_ACTION_IP_HASH_KEY;
+  await assert.rejects(verifyChallenge(validReq(),'', 'contact', async()=>({isHuman:true,isBot:false,isVerifiedBot:false,bypassed:false})),e=>e instanceof ActionDenied && e.status===503);
+  process.env.PUBLIC_ACTION_IP_HASH_KEY='mock-hash-key';
+
+  let called=0;
+  const countingChecker=async()=>{called++;return {isHuman:true,isBot:false,isVerifiedBot:false,bypassed:false};};
+  for(const badReq of [
+   new Request('https://www.tamerakdeniz.com/api/contact',{method:'POST'}),
+   validReq('/api/chat','POST'),
+   validReq('/api/contact','GET'),
+   validReq('/api/contact','POST','x'.repeat(16_385)),
+  ]){
+   await assert.rejects(verifyChallenge(badReq,'','contact',countingChecker),e=>e instanceof ActionDenied && e.status===403);
   }
-  globalThis.fetch=async()=>Response.json({success:true,hostname:'portfolio.example',action:'contact'});await verifyChallenge('synthetic','contact');
-  await assert.rejects(verifyChallenge('', 'contact'),e=>e instanceof ActionDenied && e.status===403);
+  assert.equal(called,0,'Malformed or missing BotID headers are rejected before upstream verification');
+
+  for(const verdict of [
+   {isHuman:false,isBot:true,isVerifiedBot:false,bypassed:false},
+   {isHuman:true,isBot:false,isVerifiedBot:true,bypassed:false},
+   {isHuman:true,isBot:false,isVerifiedBot:false,bypassed:true},
+  ]){
+   await assert.rejects(verifyChallenge(validReq(),'','contact',async()=>verdict),e=>e instanceof ActionDenied && e.status===403);
+  }
+
+  await assert.rejects(verifyChallenge(validReq(),'','contact',async()=>{throw new Error('OIDC unavailable');}),e=>e instanceof ActionDenied && e.status===503);
+  await assert.rejects(verifyChallenge(validReq(),'','contact',async()=>({isHuman:true,isBot:undefined as unknown as boolean,isVerifiedBot:false,bypassed:false})),e=>e instanceof ActionDenied && e.status===503);
+
+  let seenOpts: unknown;
+  await verifyChallenge(validReq('/api/chat'),'','chat',async(opts)=>{seenOpts=opts;return {isHuman:true,isBot:false,isVerifiedBot:false,bypassed:false};});
+  assert.deepEqual(seenOpts,{developmentOptions:{isDevelopment:false},advancedOptions:{checkLevel:'basic'}});
  }finally{
-  globalThis.fetch=saved.fetch;
-  for(const [key,value] of Object.entries({TURNSTILE_SECRET_KEY:saved.secret,TURNSTILE_ALLOWED_HOSTNAMES:saved.hosts,PUBLIC_ACTION_IP_HASH_KEY:saved.key})) {if(value===undefined)delete process.env[key];else process.env[key]=value;}
+  if(savedKey===undefined)delete process.env.PUBLIC_ACTION_IP_HASH_KEY;else process.env.PUBLIC_ACTION_IP_HASH_KEY=savedKey;
  }
 });

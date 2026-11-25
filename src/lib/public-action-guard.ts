@@ -1,10 +1,12 @@
 import 'server-only';
 import { createHmac } from 'node:crypto';
+import { checkBotId } from 'botid/server';
 import { getClientIp } from './chat-rate-limit';
 import { PREVIEW_WRITES_BLOCKED, USE_EMULATORS } from './firebase-config';
 import { boundedDatabase, getServerDatabase } from './server-database';
 
 export type PublicAction = 'contact' | 'chat';
+export type BotIdChecker = typeof checkBotId;
 export const ACTION_LIMITS = {
   contact: { daily: 50, perClientDaily: 5, windowMs: 600_000, perWindow: 2 },
   chat: { daily: 100, perClientDaily: 20, windowMs: 60_000, perWindow: 5 },
@@ -36,24 +38,60 @@ export function publicActionsEnabled() {
   return !PREVIEW_WRITES_BLOCKED && process.env.PORTFOLIO_PUBLIC_ACTIONS_ENABLED === '1';
 }
 
-export async function verifyChallenge(token: unknown, action: PublicAction): Promise<void> {
+async function boundedBotId<T>(promise: Promise<T>, ms = 5_000): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('BOTID_TIMEOUT')), ms);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer!);
+  }
+}
+
+export async function verifyChallenge(
+  request: Request,
+  token: unknown,
+  action: PublicAction,
+  checker: BotIdChecker = checkBotId
+): Promise<void> {
   if (USE_EMULATORS && token === 'emulator-test-token') return;
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  const hosts = (process.env.TURNSTILE_ALLOWED_HOSTNAMES || '').split(',').map((h) => h.trim()).filter(Boolean);
-  if (!secret || !hosts.length || !process.env.PUBLIC_ACTION_IP_HASH_KEY) throw new ActionDenied(503);
-  if (typeof token !== 'string' || !token || token.length > 2048) throw new ActionDenied(403);
-  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ secret, response: token }),
-    signal: AbortSignal.timeout(5000), cache: 'no-store',
-  });
-  if (!response.ok) throw new ActionDenied(503);
-  const result = await response.json();
-  if (!result.success || result.action !== action || !hosts.includes(result.hostname)) throw new ActionDenied(403);
+  if (!process.env.PUBLIC_ACTION_IP_HASH_KEY) throw new ActionDenied(503);
+
+  const humanHeader = request.headers.get('x-is-human')?.trim() ?? '';
+  const headerPath = request.headers.get('x-path')?.trim() ?? '';
+  const headerMethod = request.headers.get('x-method')?.trim().toUpperCase() ?? '';
+  const expectedPath = action === 'contact' ? '/api/contact' : '/api/chat';
+  if (!humanHeader || humanHeader.length > 16_384 || headerPath !== expectedPath || headerMethod !== 'POST') {
+    throw new ActionDenied(403);
+  }
+
+  let verdict: Awaited<ReturnType<BotIdChecker>>;
+  try {
+    verdict = await boundedBotId(
+      checker({
+        developmentOptions: { isDevelopment: false },
+        advancedOptions: { checkLevel: 'basic' },
+      })
+    );
+  } catch {
+    throw new ActionDenied(503);
+  }
+
+  if (!verdict || typeof verdict.isBot !== 'boolean' || typeof verdict.isHuman !== 'boolean') {
+    throw new ActionDenied(503);
+  }
+  if (verdict.isBot || !verdict.isHuman || verdict.isVerifiedBot || verdict.bypassed) {
+    throw new ActionDenied(403);
+  }
 }
 
 export async function guardPublicAction(request: Request, token: unknown, action: PublicAction) {
   if (!publicActionsEnabled()) throw new ActionDenied(503);
-  await verifyChallenge(token, action);
+  await verifyChallenge(request, token, action);
   // Vercel supplies this header at its trusted ingress. Other deployments share the unknown
   // bucket until their proxy trust model is configured; user-supplied X-Forwarded-For is ignored.
   const ip = getClientIp(request);

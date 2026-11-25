@@ -1,4 +1,9 @@
 import type { NextConfig } from 'next';
+import { withBotId } from 'botid/next/config';
+
+const useBotId =
+  process.env.NEXT_PUBLIC_FIREBASE_USE_EMULATORS !== '1' &&
+  process.env.NEXT_PUBLIC_PORTFOLIO_SNAPSHOT !== '1';
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_PUBLIC_PORTFOLIO_SNAPSHOT === '1' ? '.next-preview' : '.next',
@@ -34,4 +39,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default useBotId ? withBotId(nextConfig) : nextConfig;
