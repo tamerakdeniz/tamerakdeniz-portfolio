@@ -10,6 +10,7 @@ export function chromeFrom(portfolio: Portfolio): ChromeData {
   const years = portfolio.journey.flatMap((j) => [j.startYear, j.endYear ?? String(new Date().getFullYear())]);
   const numeric = years.filter((y): y is string => !!y).map(Number);
   return {
+    cvVariants: portfolio.cv.variants,
     cvUrl: portfolio.cv.viewUrl,
     cvDownloadUrl: portfolio.cv.downloadUrl,
     cvFileName: portfolio.cv.fileName,
@@ -19,7 +20,9 @@ export function chromeFrom(portfolio: Portfolio): ChromeData {
     archiveCount: portfolio.projects.length,
     journeySpan: numeric.length ? `${Math.min(...numeric)}–${Math.max(...numeric)}` : null,
     journeyCount: portfolio.journey.length,
-    hasAssistant: !!portfolio.chatContext,
+    hasAssistant: portfolio.assistant,
+    ownerName: portfolio.profile.fullName,
+    fieldPhoto: portfolio.profile.fieldPhoto.url,
   };
 }
 
@@ -49,7 +52,7 @@ export function PortfolioShell({
         {children}
       </main>
       <div className={home ? 'has-rail footer-holder' : 'footer-holder'}>
-        <SiteFooter paper={mode === 'resume'} />
+        <SiteFooter paper={mode === 'resume'} ownerName={portfolio.profile.fullName} />
       </div>
     </>
   );

@@ -36,8 +36,8 @@ export function LabChapter({ portfolio }: { portfolio: Portfolio }) {
 
         <LabExplorer
           projects={portfolio.archive}
-          listLabel={portfolio.chatContext ? COPY.lab.rowsLabel : COPY.lab.projectsLabel}
-          assistant={portfolio.chatContext ? <LabAssistant key="assistant" context={portfolio.chatContext} /> : undefined}
+          listLabel={portfolio.assistant ? COPY.lab.rowsLabel : COPY.lab.projectsLabel}
+          assistant={portfolio.assistant ? <LabAssistant key="assistant" /> : undefined}
         />
       </div>
     </section>

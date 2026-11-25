@@ -1,14 +1,17 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import {
   getDatabase,
+  connectDatabaseEmulator,
   ref,
   set,
+  update,
   onValue,
   get,
   type Database,
 } from 'firebase/database';
 import {
   getAuth,
+  connectAuthEmulator,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
@@ -16,6 +19,8 @@ import {
   type User,
 } from 'firebase/auth';
 import { isInlineDataUrl } from '@/lib/media';
+import { EMULATOR_HOSTS, PREVIEW_WRITES_BLOCKED, USE_EMULATORS } from '@/lib/firebase-config';
+import { mergeDrafts, splitDrafts, type SiteDrafts } from '@/lib/content/drafts';
 import type { SiteData } from '@/types';
 
 const firebaseConfig = {
@@ -43,6 +48,10 @@ export function getFirebaseApp(): FirebaseApp {
 export function getFirebaseDatabase(): Database {
   if (!database) {
     database = getDatabase(getFirebaseApp());
+    if (USE_EMULATORS) {
+      const url = new URL(firebaseConfig.databaseURL);
+      connectDatabaseEmulator(database, url.hostname, Number(url.port) || 9000);
+    }
   }
   return database;
 }
@@ -50,8 +59,16 @@ export function getFirebaseDatabase(): Database {
 export function getFirebaseAuth(): Auth {
   if (!auth) {
     auth = getAuth(getFirebaseApp());
+    if (USE_EMULATORS) connectAuthEmulator(auth, `http://${EMULATOR_HOSTS.auth}`, { disableWarnings: true });
   }
   return auth;
+}
+
+/** Admin access is a custom claim (`admin: true`) set with scripts/grant-admin.mjs; the rules check the same claim. */
+export async function isAdminUser(user: User | null, forceRefresh = false): Promise<boolean> {
+  if (!user) return false;
+  const result = await user.getIdTokenResult(forceRefresh);
+  return result.claims.admin === true;
 }
 
 export async function loginAdmin(
@@ -77,29 +94,66 @@ export function onAuthChange(callback: (user: User | null) => void) {
   return onAuthStateChanged(authInstance, callback);
 }
 
+/**
+ * Whether the editor currently holds both `siteData` and `siteDrafts`. Saving rewrites both
+ * nodes, so a save without the drafts loaded would delete them.
+ */
+let contentComplete = false;
+
+/**
+ * Admin view of the content: public `siteData` merged with the admin-only `siteDrafts`.
+ * Emits only once both nodes have arrived; if either cannot be read, reports an error and
+ * saving stays blocked.
+ */
 export function subscribeToSiteData(
   onData: (data: unknown) => void,
   onError?: (error: Error) => void
 ) {
   const db = getFirebaseDatabase();
-  const siteDataRef = ref(db, 'siteData');
-  return onValue(
-    siteDataRef,
+  let publicData: SiteData | null = null;
+  let drafts: SiteDrafts | null = null;
+  let gotPublic = false;
+  let gotDrafts = false;
+  contentComplete = false;
+  const emit = () => {
+    if (!gotPublic || !gotDrafts) return;
+    contentComplete = true;
+    onData(mergeDrafts(publicData, drafts));
+  };
+  const fail = (error: Error) => {
+    contentComplete = false;
+    console.error('Firebase subscription error:', error);
+    onError?.(error);
+  };
+  const offPublic = onValue(
+    ref(db, 'siteData'),
     (snapshot) => {
-      onData(snapshot.val());
+      publicData = snapshot.val();
+      gotPublic = true;
+      emit();
     },
-    (error) => {
-      console.error('Firebase subscription error:', error);
-      onError?.(error);
-    }
+    fail
   );
+  const offDrafts = onValue(
+    ref(db, 'siteDrafts'),
+    (snapshot) => {
+      drafts = snapshot.val();
+      gotDrafts = true;
+      emit();
+    },
+    fail
+  );
+  return () => {
+    contentComplete = false;
+    offPublic();
+    offDrafts();
+  };
 }
 
 export async function getSiteDataOnce() {
   const db = getFirebaseDatabase();
-  const siteDataRef = ref(db, 'siteData');
-  const snapshot = await get(siteDataRef);
-  return snapshot.val();
+  const [pub, drafts] = await Promise.all([get(ref(db, 'siteData')), get(ref(db, 'siteDrafts'))]);
+  return mergeDrafts(pub.val(), drafts.val());
 }
 
 /** Strip legacy base64 so RTDB stays small; media must live in Firebase Storage. */
@@ -137,17 +191,49 @@ export function stripInlineMediaFromSiteData(data: SiteData): SiteData {
   };
 }
 
+/**
+ * Saves the merged admin view: published items to the public `siteData`, unpublished ones to
+ * `siteDrafts`, in one atomic multi-path update, then asks the site to refresh its cache.
+ */
 export async function saveSiteData(data: unknown) {
+  assertWritable();
+  if (!contentComplete) throw new Error('CONTENT_NOT_LOADED');
   const db = getFirebaseDatabase();
-  const siteDataRef = ref(db, 'siteData');
-  const cleaned = stripInlineMediaFromSiteData(data as SiteData);
-  await set(siteDataRef, cleaned);
+  const { publicData, drafts } = splitDrafts(stripInlineMediaFromSiteData(data as SiteData));
+  /* JSON round-trip drops `undefined`, which the SDK rejects, from optional form fields. */
+  await update(ref(db), JSON.parse(JSON.stringify({ siteData: publicData, siteDrafts: drafts })));
+  void requestRevalidation();
+}
+
+export function assertWritable() {
+  if (PREVIEW_WRITES_BLOCKED) throw new Error('PREVIEW_READ_ONLY');
+}
+
+/**
+ * Tells the Next.js server to drop its cached content. Pages refresh on their own within
+ * 60 seconds anyway; this only makes the change visible on the next request.
+ */
+export async function requestRevalidation(): Promise<boolean> {
+  try {
+    const user = getFirebaseAuth().currentUser;
+    if (!user) return false;
+    const token = await user.getIdToken();
+    const res = await fetch('/api/revalidate', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export async function saveFirebaseData(path: string, data: unknown) {
+  assertWritable();
   const db = getFirebaseDatabase();
   const dataRef = ref(db, path);
   await set(dataRef, data);
+  if (path === 'siteData' || path.startsWith('siteData/')) void requestRevalidation();
 }
 
 export interface ActivityEntry {
@@ -192,9 +278,10 @@ export function logActivity(
   saveLocalActivityLog([entry, ...existing]);
 
   try {
+    assertWritable();
     const db = getFirebaseDatabase();
     set(ref(db, `activityLog/${entry.id}`), entry).catch(() => {});
   } catch { /* offline */ }
 }
 
-export { ref, onValue, get, set };
+export { ref, onValue, get, set, update };

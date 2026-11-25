@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store';
+import { PREVIEW_WRITES_BLOCKED } from '@/lib/firebase-config';
 import { logoutAdmin, logActivity } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { AdminSidebar } from './AdminSidebar';
@@ -15,6 +16,7 @@ import { AdminTimelineSection } from './AdminTimelineSection';
 import { AdminCVSection } from './AdminCVSection';
 import { AdminContactSection } from './AdminContactSection';
 import { AdminSettingsSection } from './AdminSettingsSection';
+import { AdminProfileSection } from './AdminProfileSection';
 
 const sections: Record<string, React.ComponentType> = {
   dashboard: AdminDashboardSection,
@@ -25,6 +27,7 @@ const sections: Record<string, React.ComponentType> = {
   timeline: AdminTimelineSection,
   cv: AdminCVSection,
   contact: AdminContactSection,
+  profile: AdminProfileSection,
   settings: AdminSettingsSection,
 };
 
@@ -85,6 +88,7 @@ export function AdminDashboard() {
         <div className="h-16 border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-surface-dark flex items-center justify-between px-4 md:px-6 shrink-0">
           <div className="flex items-center gap-3">
             <button
+              aria-label={t('admin-menu')}
               onClick={() => setMobileMenuOpen(true)}
               className="md:hidden flex items-center justify-center size-10 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
             >
@@ -103,6 +107,7 @@ export function AdminDashboard() {
               {language === 'en' ? 'TR' : 'EN'}
             </button>
             <button
+              aria-label={t('admin-theme')}
               onClick={toggleTheme}
               className="flex items-center justify-center size-10 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
             >
@@ -121,6 +126,7 @@ export function AdminDashboard() {
           </div>
         </div>
 
+        {PREVIEW_WRITES_BLOCKED && <p role="status" className="bg-amber-100 text-amber-900 px-4 py-2 text-sm">{t('admin-preview-read-only')}</p>}
         {/* Section Content */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
           <ActiveSection />

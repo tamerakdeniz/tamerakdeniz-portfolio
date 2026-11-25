@@ -1,4 +1,5 @@
 import type { Loc } from '@/lib/content/portfolio';
+import type { PlateArtKey } from '@/types';
 import s from './PlateArt.module.css';
 
 /**
@@ -188,18 +189,6 @@ function RouteArt() {
   );
 }
 
-/* Anything else promoted to featured later: a neutral specimen frame around its mark. */
-function SpecimenArt() {
-  return (
-    <svg className={s.svg} viewBox={`0 0 ${W} ${H}`} aria-hidden="true" focusable="false">
-      {[110, 150, 190, 230].map((r) => (
-        <circle key={r} className={s.sRing} cx={400} cy={250} r={r} />
-      ))}
-      <path className={s.sCross} d="M400 10v60M400 430v60M150 250h-60M650 250h60" />
-    </svg>
-  );
-}
-
 export interface LegendItem {
   v: Loc;
   color?: string;
@@ -219,24 +208,17 @@ const SCREEN_TIMER_KEY: LegendItem[] = [
   { v: { en: 'Stored on the device', tr: 'Cihazda saklanır' } },
 ];
 
-export const PLATE_ART = {
-  qirushio: { Art: TimerArt, field: 'night', print: 'round', legend: QIRUSHIO_KEY },
-  'screen-timer': { Art: DayArt, field: 'paper', print: 'square', legend: SCREEN_TIMER_KEY },
-  pathyvo: { Art: RouteArt, field: 'violet', print: 'corner', legend: [] as LegendItem[] },
-} as const;
-
-export type PlateField = 'night' | 'paper' | 'violet' | 'ink';
 export type PrintPlacement = 'round' | 'square' | 'corner';
 
-export function plateArtFor(slug: string): {
-  Art: () => React.JSX.Element;
-  field: PlateField;
-  print: PrintPlacement;
-  legend: readonly LegendItem[];
-  bespoke: boolean;
-} {
-  const known = PLATE_ART[slug as keyof typeof PLATE_ART];
-  return known
-    ? { ...known, bespoke: true }
-    : { Art: SpecimenArt, field: 'ink', print: 'square', legend: [], bespoke: false };
-}
+/**
+ * Conceptual plate art, selectable per project in the admin panel. Each piece was drawn from one
+ * project's brief (Qirushio, Screen Timer, Pathyvo), so its legend text belongs to that project.
+ */
+export const PLATE_ART: Record<
+  Exclude<PlateArtKey, 'none'>,
+  { Art: () => React.JSX.Element; print: PrintPlacement; legend: readonly LegendItem[] }
+> = {
+  timer: { Art: TimerArt, print: 'round', legend: QIRUSHIO_KEY },
+  day: { Art: DayArt, print: 'square', legend: SCREEN_TIMER_KEY },
+  route: { Art: RouteArt, print: 'corner', legend: [] },
+};

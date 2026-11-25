@@ -4,27 +4,38 @@ import { useId, useRef, useState } from 'react';
 import { COPY } from '@/lib/content/copy';
 import { pick } from '@/lib/content/portfolio';
 import { useLang } from '@/lib/lang';
+import { databaseRestUrl, PREVIEW_WRITES_BLOCKED } from '@/lib/firebase-config';
 import s from './ContactForm.module.css';
 
 type Field = 'name' | 'email' | 'subject' | 'message';
-type Status = 'idle' | 'sending' | 'sent' | 'error';
+type Status = 'idle' | 'sending' | 'sent' | 'error' | 'busy' | 'preview';
 
 const LIMITS: Record<Field, number> = { name: 120, email: 200, subject: 200, message: 5000 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const SERVER_TIME = { '.sv': 'timestamp' };
+
+class SubmitError extends Error {}
+
 /**
- * Writes to `contactSubmissions/{id}` — the same path and shape the admin inbox reads.
- * Database rules allow anonymous create-only writes there, so the REST API is enough.
+ * Creates `contactSubmissions/{id}` — the path and shape the admin inbox reads — in one
+ * multi-path update with `contactMeta/lastAt`. The database rules accept a submission only
+ * together with that server timestamp, at most one every 20 seconds site-wide.
  */
 async function submit(entry: Record<string, unknown>, id: string) {
-  const base = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL?.replace(/\/+$/, '');
-  if (!base) throw new Error('not-configured');
-  const res = await fetch(`${base}/contactSubmissions/${id}.json`, {
-    method: 'PUT',
+  const url = databaseRestUrl('');
+  if (!url) throw new SubmitError('error');
+  const res = await fetch(url, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(entry),
+    body: JSON.stringify({
+      [`contactSubmissions/${id}`]: { ...entry, createdAt: SERVER_TIME },
+      'contactMeta/lastAt': SERVER_TIME,
+      'contactMeta/lastId': id,
+    }),
   });
-  if (!res.ok) throw new Error(`status-${res.status}`);
+  if (res.status === 401 || res.status === 403) throw new SubmitError('busy');
+  if (!res.ok) throw new SubmitError('error');
 }
 
 export function ContactForm({ email }: { email: string }) {
@@ -71,8 +82,13 @@ export function ContactForm({ email }: { email: string }) {
       return;
     }
 
+    if (PREVIEW_WRITES_BLOCKED) {
+      setStatus('preview');
+      return;
+    }
+
     setStatus('sending');
-    const id = Date.now().toString();
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8).padEnd(4, '0')}`;
     try {
       await submit(
         {
@@ -88,8 +104,8 @@ export function ContactForm({ email }: { email: string }) {
       );
       setStatus('sent');
       form.reset();
-    } catch {
-      setStatus('error');
+    } catch (err) {
+      setStatus(err instanceof SubmitError && err.message === 'busy' ? 'busy' : 'error');
     }
   };
 
@@ -148,9 +164,9 @@ export function ContactForm({ email }: { email: string }) {
           {status === 'sent' && <p className={s.ok}>{pick(COPY.contact.success, lang)}</p>}
         </div>
         <div role="alert" className={s.status}>
-          {status === 'error' && (
+          {(status === 'error' || status === 'busy' || status === 'preview') && (
             <p className={s.fail}>
-              {pick(COPY.contact.error, lang)} <a href={`mailto:${email}`}>{email}</a>
+              {pick(COPY.contact[status], lang)} <a href={`mailto:${email}`}>{email}</a>
             </p>
           )}
         </div>

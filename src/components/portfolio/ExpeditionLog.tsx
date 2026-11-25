@@ -1,3 +1,4 @@
+import { CvLink } from '@/components/portfolio/CvLink';
 import { COPY, JOURNEY_TYPES } from '@/lib/content/copy';
 import type { Loc, Portfolio } from '@/lib/content/portfolio';
 import { ChapterMark } from './ChapterMark';
@@ -99,7 +100,7 @@ export function ExpeditionLog({ portfolio, standalone = false }: { portfolio: Po
                   <T v={entry.title} />
                 </h3>
                 <p className={s.org}>
-                  <T v={entry.org} />
+                  <>{entry.url ? <a href={entry.url} target="_blank" rel="noreferrer"><T v={entry.org} /></a> : <T v={entry.org} />}</>
                 </p>
                 <Description value={entry.description} />
               </li>
@@ -108,12 +109,12 @@ export function ExpeditionLog({ portfolio, standalone = false }: { portfolio: Po
         </div>
 
         <div className={s.foot}>
-          <a className="btn btn-primary" href={cv.downloadUrl} download={cv.fileName}>
+          <CvLink className="btn btn-primary" cv={cv} download>
             <T v={COPY.journey.downloadCv} />
             <span className="arrow" aria-hidden="true">
               ↓
             </span>
-          </a>
+          </CvLink>
           {contact.social.linkedin && (
             <a className="tlink hit" href={contact.social.linkedin} target="_blank" rel="noopener">
               <T v={COPY.journey.linkedin} />

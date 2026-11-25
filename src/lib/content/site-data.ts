@@ -1,27 +1,31 @@
 import 'server-only';
 import { cache } from 'react';
+import { databaseRestUrl } from '@/lib/firebase-config';
 import type { SiteData } from '@/types';
 
 export const SITE_DATA_REVALIDATE_SECONDS = 60;
+export const SITE_DATA_TAG = 'site-data';
 
 /**
- * Reads the public `siteData` node over the Realtime Database REST API.
- * The admin panel keeps writing through the Firebase SDK; public pages only read,
- * so they don't need the SDK in the browser bundle.
+ * Reads the public `siteData` node over the Realtime Database REST API: one request per
+ * revalidation window for the whole site, shared by every page through the fetch cache.
+ * The admin panel writes through the Firebase SDK and expires the tag (/api/revalidate).
+ * Production failures throw so ISR retains its last good render; development can fall back.
  */
 export const getSiteData = cache(async (): Promise<SiteData | null> => {
-  const databaseUrl = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL?.trim();
-  if (!databaseUrl) return null;
+  const url = databaseRestUrl('siteData');
+  if (!url) return null;
 
   try {
-    const response = await fetch(`${databaseUrl.replace(/\/+$/, '')}/siteData.json`, {
+    const response = await fetch(url, {
       headers: { Accept: 'application/json' },
-      next: { revalidate: SITE_DATA_REVALIDATE_SECONDS, tags: ['site-data'] },
+      next: { revalidate: SITE_DATA_REVALIDATE_SECONDS, tags: [SITE_DATA_TAG] },
     });
-    if (!response.ok) return null;
+    if (!response.ok) throw new Error(`siteData ${response.status}`);
     const data = (await response.json()) as SiteData | null;
     return data ?? null;
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === 'production') throw error;
     return null;
   }
 });

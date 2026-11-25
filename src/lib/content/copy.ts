@@ -76,7 +76,7 @@ export const COPY = {
   chapterNotes: {
     surface: l('Who I am, the work and the CV, at a glance.', 'Kim olduğum, işlerim ve özgeçmişim, tek bakışta.'),
     about: l('A field journal: diving, building, learning.', 'Bir saha defteri: dalış, üretmek, öğrenmek.'),
-    work: l('Three projects, up close.', 'Yakından üç proje.'),
+    work: l('Selected projects, up close.', 'Yakından seçilmiş projeler.'),
     lab: l('Every other experiment — and an assistant you can question.', 'Diğer tüm deneyler ve soru sorabileceğiniz bir asistan.'),
     engineering: l('How this site is built, drawn from its own code.', 'Bu sitenin nasıl kurulduğu, kendi kodundan çizildi.'),
     journey: l('Education and work, in a dive log.', 'Eğitim ve iş, bir dalış kaydında.'),
@@ -133,8 +133,8 @@ export const COPY = {
     titleA: l('Evidence,', 'Sıfatlar değil,'),
     titleSerif: l('not adjectives.', 'kanıtlar.'),
     intro: l(
-      'Three projects up close. Everything else I have published lives in the lab archive.',
-      'Yakından üç proje. Yayınladığım diğer her şey laboratuvar arşivinde.'
+      'A few projects up close. Everything else I have published lives in the lab archive.',
+      'Yakından birkaç proje. Yayınladığım diğer her şey laboratuvar arşivinde.'
     ),
     archive: l('Full archive', 'Tüm arşiv'),
     oneLine: l('In one sentence', 'Tek cümlede'),
@@ -145,6 +145,8 @@ export const COPY = {
     source: l('Source code', 'Kaynak kod'),
     demo: l('Demo', 'Demo'),
     markCaption: l('Project mark', 'Proje logosu'),
+    imagery: l('Project imagery as supplied by the project.', 'Proje görselleri, projeden alındığı gibi.'),
+    noFeatured: l('No project is featured right now — the full archive is in the lab.', 'Şu anda öne çıkan proje yok; tüm arşiv laboratuvarda.'),
     plate: l('Plate', 'Levha'),
     conceptual: l(
       'Conceptual plate drawn from the project brief, with the project mark as supplied. Not an interface screenshot.',
@@ -185,8 +187,8 @@ export const COPY = {
     titleA: l('How I', 'Nasıl'),
     titleSerif: l('build.', 'inşa ediyorum.'),
     intro: l(
-      'Three areas I keep returning to. Technologies are listed only where they appear in my published projects or experience — each pillar links to the work behind it.',
-      'Sürekli geri döndüğüm üç alan. Teknolojiler yalnızca yayınlanmış projelerimde ya da deneyimimde yer aldığı ölçüde listeleniyor; her başlık arkasındaki işe bağlanıyor.'
+      'Areas I keep returning to. Technologies are listed only where they appear in my published projects or experience — each pillar links to the work behind it.',
+      'Sürekli geri döndüğüm alanlar. Teknolojiler yalnızca yayınlanmış projelerimde ya da deneyimimde yer aldığı ölçüde listeleniyor; her başlık arkasındaki işe bağlanıyor.'
     ),
     related: l('Seen in', 'Görüldüğü yer'),
     mapTitle: l('Fig. 4.1 — This site, as built', 'Şekil 4.1 — Bu site, kurulduğu hâliyle'),
@@ -196,7 +198,7 @@ export const COPY = {
     ),
     connects: l('Talks to', 'Bağlantıları'),
     inCode: l('In the code', 'Kodda'),
-    pillarsTitle: l('Three areas I keep returning to', 'Sürekli geri döndüğüm üç alan'),
+    pillarsTitle: l('Areas I keep returning to', 'Sürekli geri döndüğüm alanlar'),
     loopCaption: l(
       'Fig. 4.1 — A conceptual loop: how I like to work, not a claim about every project.',
       'Şekil 4.1 — Kavramsal bir döngü: çalışmayı sevdiğim biçim, her proje için bir iddia değil.'
@@ -249,6 +251,14 @@ export const COPY = {
       'The message could not be sent. Please try again or email me directly.',
       'Mesaj gönderilemedi. Lütfen tekrar deneyin ya da doğrudan e-posta gönderin.'
     ),
+    busy: l(
+      'Another message arrived a moment ago. Please wait a few seconds and send again, or email me directly.',
+      'Az önce başka bir mesaj ulaştı. Lütfen birkaç saniye bekleyip tekrar gönderin ya da doğrudan e-posta gönderin.'
+    ),
+    preview: l(
+      'This is a preview deployment, so messages are not sent from here. Please email me directly.',
+      'Bu bir önizleme sürümü; mesajlar buradan gönderilmez. Lütfen doğrudan e-posta gönderin.'
+    ),
     required: l('This field is required.', 'Bu alan zorunludur.'),
     invalidEmail: l('Enter a valid email address.', 'Geçerli bir e-posta adresi girin.'),
   },
@@ -264,6 +274,10 @@ export const COPY = {
     archive: l('Archive', 'Arşiv'),
     file: l('Project file', 'Proje dosyası'),
     of: l('of', '/'),
+    archived: l('Archived project', 'Arşivlenmiş proje'),
+    period: l('Period', 'Dönem'),
+    contribution: l('My part', 'Katkım'),
+    gallery: l('Screens and diagrams', 'Ekranlar ve diyagramlar'),
     brief: l('The brief', 'Özet'),
     strata: l('Stack by layer', 'Katmanlara göre teknoloji'),
     strataNote: l(

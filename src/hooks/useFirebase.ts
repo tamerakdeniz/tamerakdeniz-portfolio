@@ -1,42 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import {
-  subscribeToSiteData,
-  onAuthChange,
-  getSiteDataOnce,
-} from '@/lib/firebase';
-import {
-  readSiteDataCache,
-  writeSiteDataCache,
-} from '@/lib/site-data-cache';
-import { schedulePrefetchSiteMedia } from '@/lib/prefetch-media';
+import { isAdminUser, onAuthChange, subscribeToSiteData } from '@/lib/firebase';
 import { useAppStore } from '@/store';
 import type { SiteData } from '@/types';
 
-function applySiteData(
-  site: SiteData,
-  setSiteData: (d: SiteData) => void,
-  setFirebaseConnected: (c: boolean) => void
-) {
-  setSiteData(site);
-  setFirebaseConnected(true);
-  writeSiteDataCache(site);
-  schedulePrefetchSiteMedia(site);
-}
-
-async function getSiteDataFromApi(signal: AbortSignal): Promise<SiteData | null> {
-  const response = await fetch('/api/site-data', {
-    signal,
-    headers: { Accept: 'application/json' },
-  });
-
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error('SITE_DATA_API_FAILED');
-
-  return (await response.json()) as SiteData;
-}
-
+/**
+ * Admin content sync. Content is read only after the admin claim is confirmed, and only
+ * through the SDK, so the editor always holds published content and drafts together; a save
+ * from a partial view would otherwise drop the drafts it never saw.
+ */
 export function useFirebaseSync() {
   const setSiteData = useAppStore((s) => s.setSiteData);
   const setSiteDataLoaded = useAppStore((s) => s.setSiteDataLoaded);
@@ -44,80 +17,49 @@ export function useFirebaseSync() {
   const setAuthUser = useAppStore((s) => s.setAuthUser);
 
   useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    const cached = readSiteDataCache();
-    const existing = useAppStore.getState().siteData;
+    let unsubData: (() => void) | null = null;
+    let generation = 0;
 
-    if (existing) {
-      schedulePrefetchSiteMedia(existing);
-    } else if (cached) {
-      setSiteData(cached);
-    }
+    const stopData = () => {
+      unsubData?.();
+      unsubData = null;
+    };
 
-    // Instagram's in-app browser can delay Firebase RTDB transports heavily.
-    // Same-origin HTTP gives visitors visible content first; realtime sync follows.
-    getSiteDataFromApi(controller.signal)
-      .then((data) => {
-        if (cancelled) return;
-        if (data) {
-          applySiteData(data, setSiteData, setFirebaseConnected);
-        } else if (!cached && !useAppStore.getState().siteData) {
-          setSiteDataLoaded(true);
-        }
-      })
-      .catch((error) => {
-        if (cancelled || error?.name === 'AbortError') return;
-        if (cached) setSiteData(cached);
-        if (!useAppStore.getState().siteData) setSiteDataLoaded(true);
-      });
-
-    // One-shot fetch often completes before the WebSocket listener on mobile.
-    getSiteDataOnce()
-      .then((data) => {
-        if (cancelled) return;
-        if (data) {
-          applySiteData(data as SiteData, setSiteData, setFirebaseConnected);
-        } else if (!cached) {
-          setSiteDataLoaded(true);
-        }
-      })
-      .catch(() => {
-        if (!cancelled && cached) setSiteData(cached);
-        if (!cancelled) setSiteDataLoaded(true);
-      });
-
-    const unsubData = subscribeToSiteData(
-      (data) => {
-        if (cancelled) return;
-        if (data) {
-          applySiteData(data as SiteData, setSiteData, setFirebaseConnected);
-        } else {
-          const fallback = readSiteDataCache();
-          if (fallback) setSiteData(fallback);
-          setSiteDataLoaded(true);
-        }
-      },
-      () => {
-        if (cancelled) return;
-        const fallback = readSiteDataCache();
-        if (fallback) setSiteData(fallback);
-        setSiteDataLoaded(true);
-      }
-    );
-
-    const unsubAuth = onAuthChange((user) => {
-      if (user) {
-        setAuthUser({ email: user.email || '' });
-      } else {
+    const unsubAuth = onAuthChange(async (user) => {
+      const current = ++generation;
+      stopData();
+      if (!user) {
         setAuthUser(null);
+        setFirebaseConnected(false);
+        return;
       }
+      let admin = false;
+      try {
+        admin = await isAdminUser(user, true);
+      } catch {
+        admin = false;
+      }
+      if (current !== generation) return;
+      setAuthUser({ email: user.email || '', admin });
+      if (!admin) return;
+
+      unsubData = subscribeToSiteData(
+        (data) => {
+          if (current !== generation) return;
+          setSiteData((data ?? {}) as SiteData);
+          setFirebaseConnected(true);
+        },
+        () => {
+          if (current !== generation) return;
+          setFirebaseConnected(false);
+          setSiteDataLoaded(true);
+        }
+      );
     });
 
     return () => {
-      cancelled = true;
-      controller.abort();
-      unsubData();
+      generation++;
+      stopData();
       unsubAuth();
     };
   }, [setSiteData, setSiteDataLoaded, setFirebaseConnected, setAuthUser]);

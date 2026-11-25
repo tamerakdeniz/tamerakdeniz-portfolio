@@ -10,12 +10,15 @@ import s from './projects.module.css';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  const { profile } = await getPortfolio();
+  return {
   title: 'Project archive',
   description:
-    'Every published project by Mustafa Tamer Akdeniz — web products, AI experiments, client sites, tools and practice apps — each with its own project file.',
+    `Published projects by ${profile.fullName}.`,
   alternates: { canonical: '/projects' },
 };
+}
 
 export default async function ProjectsPage() {
   const portfolio = await getPortfolio();
@@ -26,7 +29,7 @@ export default async function ProjectsPage() {
         seed={404}
         eyebrow={
           <>
-            <Link href="/">Tamer Akdeniz</Link>
+            <Link href="/">{portfolio.profile.shortName}</Link>
             <span aria-hidden="true">/</span>
             <span>
               <T v={COPY.nav.archive} />

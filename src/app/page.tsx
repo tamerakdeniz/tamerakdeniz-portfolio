@@ -22,10 +22,10 @@ export default async function HomePage() {
         data={{
           '@context': 'https://schema.org',
           '@type': 'Person',
-          name: OWNER.fullName,
-          alternateName: OWNER.shortName,
+          name: portfolio.profile.fullName,
+          alternateName: portfolio.profile.shortName,
           url: OWNER.siteUrl,
-          jobTitle: OWNER.role.en,
+          jobTitle: portfolio.profile.role.en,
           email: `mailto:${portfolio.contact.email}`,
           sameAs,
         }}

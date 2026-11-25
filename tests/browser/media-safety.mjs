@@ -1,0 +1,82 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { ADMIN, PNG, upload, getObject } from '../emulator/env.ts';
+
+const BASE = 'http://localhost:3100';
+const out = 'artifacts/media-safety';
+await mkdir(out, { recursive: true });
+const results = [];
+const record = (name) => { results.push({ name, pass: true }); console.log('PASS', name); };
+const db = async (path, method = 'GET', body) => { const r = await fetch(`http://127.0.0.1:9000/${path}.json?ns=demo-portfolio-default-rtdb`, { method, headers: { Authorization: 'Bearer owner', 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) }); assert.equal(r.status, 200); return r.json(); };
+const list = (x) => Object.values(x || {});
+const stamp = Date.now();
+const orphanPath = `portfolio/projects/test/cover-${stamp}-abcdef.png`;
+const legacyPath = `portfolio/projects/test/legacy-${stamp}.png`;
+assert.equal((await upload(orphanPath, PNG, 'image/png', ADMIN)).status, 200);
+assert.equal((await upload(legacyPath, PNG, 'image/png', ADMIN)).status, 200);
+const drafts = await db('siteDrafts/projects');
+const source = list(drafts).find((p) => p.media?.length >= 2 && p.id !== 'akar' && p.id !== 'callwhisper');
+assert.ok(source);
+const shared = { ...source, id: `shared-${stamp}`, title: { en: `Shared media ${stamp}`, tr: `Ortak medya ${stamp}` }, slug: `shared-${stamp}`, published: false, media: [source.media[0]] };
+await db('siteDrafts/projects', 'PUT', [...list(drafts), shared]);
+const browser = await chromium.launch({ channel: 'chrome' });
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, storageState: 'artifacts/cms-lifecycle/admin-session.json' });
+const page = await context.newPage();
+try {
+  await page.goto(BASE + '/admin');
+  await page.locator('aside').getByRole('button', { name: /Projects/ }).click();
+  const row = page.locator('[draggable=true]').locator('..').filter({ hasText: source.title.en });
+  await row.getByRole('button', { name: 'edit', exact: true }).click();
+  await page.locator('summary').filter({ hasText: 'Images & media' }).click();
+  await page.getByRole('button', { name: 'Remove', exact: true }).first().click();
+  const saveResponse = page.waitForResponse((r) => r.url().endsWith('/api/revalidate'));
+  await page.getByRole('button', { name: 'Save', exact: true }).click(); await saveResponse;
+  assert.equal(await getObject(shared.media[0].path), 200);
+  record('Removing a media reference through UI preserves the object shared by another private draft');
+  await page.locator('aside').getByRole('button', { name: /Settings/ }).click();
+  // Age only the test browser's clock to exercise the 24-hour safety gate without waiting a day.
+  await page.evaluate(() => { const original = Date.now; Date.now = () => original() + 2 * 86400000; });
+  await page.getByRole('button', { name: 'Scan unused media', exact: true }).click();
+  const candidate = page.locator('label').filter({ hasText: orphanPath });
+  await candidate.waitFor();
+  assert.equal(await page.locator('label').filter({ hasText: legacyPath }).count(), 0);
+  assert.equal(await page.locator('label').filter({ hasText: shared.media[0].path }).count(), 0);
+  await candidate.locator('input[type=checkbox]').check();
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await page.getByRole('button', { name: 'Delete selected files', exact: true }).click();
+  assert.equal(await getObject(orphanPath), 200);
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Delete selected files', exact: true }).click();
+  await candidate.waitFor({ state: 'hidden' });
+  assert.equal(await getObject(orphanPath), 404);
+  assert.equal(await getObject(legacyPath), 200);
+  assert.equal(await getObject(shared.media[0].path), 200);
+  record('Orphan cleanup requires confirmation, deletes only an eligible unused managed object and preserves legacy/shared paths');
+  // A failed metadata request must not leave a deletable partial result.
+  await page.route('http://127.0.0.1:9199/**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: '{"error":{"code":403,"message":"Synthetic scan failure"}}' }));
+  await page.getByRole('button', { name: 'Scan unused media', exact: true }).click();
+  await page.getByText(/The scan or cleanup could not finish safely/).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Delete selected files', exact: true }).count(), 0);
+  record('Incomplete Storage scan fails closed with no destructive selection');
+  await page.unroute('http://127.0.0.1:9199/**');
+  await page.screenshot({ path: `${out}/scan-failure.png`, fullPage: true });
+  await page.locator('aside').getByRole('button', { name: /Projects/ }).click();
+  await page.getByRole('button', { name: /Add New/ }).click();
+  await page.locator('summary').filter({ hasText: 'Images & media' }).click();
+  await page.getByLabel('Add cover', { exact: false }).setInputFiles({ name: 'bad.txt', mimeType: 'text/plain', buffer: Buffer.from('invalid') });
+  await page.getByRole('alert').filter({ hasText: 'Unsupported file type.' }).waitFor();
+  await page.getByLabel('Add cover', { exact: false }).setInputFiles({ name: 'large.png', mimeType: 'image/png', buffer: Buffer.alloc(10 * 1024 * 1024 + 1) });
+  await page.getByRole('alert').filter({ hasText: 'This file exceeds the 10 MB limit.' }).waitFor();
+  record('Upload UI rejects wrong MIME and oversized files before storage requests');
+  await page.route('http://127.0.0.1:9199/**', (route) => route.request().method() === 'POST' ? route.abort('internetdisconnected') : route.continue());
+  await page.getByLabel('Add desktop screenshot', { exact: false }).setInputFiles({ name: 'interrupted.png', mimeType: 'image/png', buffer: Buffer.alloc(512 * 1024) });
+  await page.getByRole('progressbar').waitFor();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).first().click();
+  await page.getByRole('progressbar').waitFor({ state: 'hidden' });
+  await page.getByRole('button', { name: 'Retry', exact: true }).last().waitFor();
+  await page.unroute('http://127.0.0.1:9199/**');
+  record('Interrupted upload can be cancelled and exposes retry without persisting content');
+
+} catch (error) { console.error(error); results.push({ name: error.message, pass: false }); process.exitCode = 1; await page.screenshot({ path: `${out}/failure.png`, fullPage: true }); }
+finally { await writeFile(`${out}/results.json`, JSON.stringify(results, null, 2)); await browser.close(); }

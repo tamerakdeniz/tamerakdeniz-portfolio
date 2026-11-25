@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSaveContent } from '@/admin/lib/save-content';
 import { useAppStore, selectContactInfo } from '@/store';
-import { saveSiteData, getFirebaseDatabase, saveFirebaseData, logActivity } from '@/lib/firebase';
+import { getFirebaseDatabase, saveFirebaseData, logActivity } from '@/lib/firebase';
 import { ref, onValue } from 'firebase/database';
 import { showToast } from '@/components/ui/Toast';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -11,6 +12,7 @@ import type { ContactSubmission, ContactInfo } from '@/types';
 
 export function AdminContactSection() {
   const { t } = useTranslation();
+  const saveContent = useSaveContent();
   const siteData = useAppStore((s) => s.siteData);
   const contactInfo = useAppStore(selectContactInfo);
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
@@ -34,21 +36,17 @@ export function AdminContactSection() {
       });
       return () => unsub();
     } catch {
-      const local = localStorage.getItem('portfolio_contact_submissions');
-      if (local) setSubmissions(JSON.parse(local));
+      console.error('Contact inbox connection failed');
     }
   }, []);
 
   const saveInfo = useCallback(async () => {
     if (!siteData) return;
-    try {
-      await saveSiteData({ ...siteData, contactInfo: form });
-      showToast(t('admin-saved'), 'success');
-      setEditingInfo(false);
-    } catch { showToast(t('admin-save-failed'), 'error'); }
-  }, [siteData, form, t]);
+    if (await saveContent({ ...siteData, contactInfo: form })) {
+        setEditingInfo(false);
+      }
+  }, [siteData, form, saveContent]);
 
-  useEffect(() => { setForm(contactInfo); }, [contactInfo]);
 
   const toggleRead = async (sub: ContactSubmission) => {
     const newRead = !sub.read;
@@ -88,7 +86,7 @@ export function AdminContactSection() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold">{t('admin-contact-information')}</h3>
           {!editingInfo && (
-            <button onClick={() => setEditingInfo(true)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
+            <button onClick={() => { setForm(contactInfo); setEditingInfo(true); }} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
               <span className="material-symbols-outlined text-sm">edit</span>
             </button>
           )}
@@ -96,16 +94,24 @@ export function AdminContactSection() {
         {editingInfo ? (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="block text-sm font-medium mb-1">{t('admin-label-email')}</label><input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
-              <div><label className="block text-sm font-medium mb-1">{t('admin-label-location-en')}</label><input value={form.location.en} onChange={(e) => setForm({ ...form, location: { ...form.location, en: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
+              <div><label htmlFor="admin-label-email" className="block text-sm font-medium mb-1">{t('admin-label-email')}</label>
+          <input id="admin-label-email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
+              <div><label htmlFor="admin-label-location-en" className="block text-sm font-medium mb-1">{t('admin-label-location-en')}</label>
+          <input id="admin-label-location-en" value={form.location.en} onChange={(e) => setForm({ ...form, location: { ...form.location, en: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
+              <div><label htmlFor="admin-label-location-tr" className="block text-sm font-medium mb-1">{t('admin-label-location-tr')}</label>
+          <input id="admin-label-location-tr" value={form.location.tr} onChange={(e) => setForm({ ...form, location: { ...form.location, tr: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="block text-sm font-medium mb-1">{t('admin-label-github')}</label><input value={form.social.github} onChange={(e) => setForm({ ...form, social: { ...form.social, github: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
-              <div><label className="block text-sm font-medium mb-1">{t('admin-label-linkedin')}</label><input value={form.social.linkedin} onChange={(e) => setForm({ ...form, social: { ...form.social, linkedin: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
+              <div><label htmlFor="admin-label-github" className="block text-sm font-medium mb-1">{t('admin-label-github')}</label>
+          <input id="admin-label-github" value={form.social.github} onChange={(e) => setForm({ ...form, social: { ...form.social, github: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
+              <div><label htmlFor="admin-label-linkedin" className="block text-sm font-medium mb-1">{t('admin-label-linkedin')}</label>
+          <input id="admin-label-linkedin" value={form.social.linkedin} onChange={(e) => setForm({ ...form, social: { ...form.social, linkedin: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="block text-sm font-medium mb-1">{t('admin-label-instagram')}</label><input value={form.social.instagram} onChange={(e) => setForm({ ...form, social: { ...form.social, instagram: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
-              <div><label className="block text-sm font-medium mb-1">{t('admin-label-upwork')}</label><input value={form.social.upwork} onChange={(e) => setForm({ ...form, social: { ...form.social, upwork: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
+              <div><label htmlFor="admin-label-instagram" className="block text-sm font-medium mb-1">{t('admin-label-instagram')}</label>
+          <input id="admin-label-instagram" value={form.social.instagram} onChange={(e) => setForm({ ...form, social: { ...form.social, instagram: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
+              <div><label htmlFor="admin-label-upwork" className="block text-sm font-medium mb-1">{t('admin-label-upwork')}</label>
+          <input id="admin-label-upwork" value={form.social.upwork} onChange={(e) => setForm({ ...form, social: { ...form.social, upwork: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" /></div>
             </div>
             <div className="flex gap-3 justify-end">
               <button onClick={() => setEditingInfo(false)} className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-slate-800">{t('admin-cancel')}</button>

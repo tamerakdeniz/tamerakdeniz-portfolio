@@ -2,15 +2,19 @@ import Link from 'next/link';
 import { COPY } from '@/lib/content/copy';
 import type { Portfolio, PortfolioProject } from '@/lib/content/portfolio';
 import { ChapterMark } from './ChapterMark';
-import { plateArtFor } from './PlateArt';
-import { PlateFigure } from './PlateFigure';
+import { PlateFigure, plateField } from './PlateFigure';
 import { ExternalLinks, KindText, StackText } from './ProjectBits';
 import { T } from './T';
 import { WorkStack } from './WorkStack';
 import s from './WorkPlates.module.css';
 
+function longest(project: PortfolioProject) {
+  return Math.max(project.name.en.length, (project.name.tr ?? '').length);
+}
+
 function Plate({ project, i, total }: { project: PortfolioProject; i: number; total: number }) {
-  const { field } = plateArtFor(project.slug);
+  const field = plateField(project);
+  const accent = project.presentation.accent;
   const headingId = `work-${project.slug}`;
   const surface = field === 'paper' ? 'surface-paper' : 'surface-dark';
   const side = i % 2 === 1 ? s.artLeft : s.artRight;
@@ -20,7 +24,7 @@ function Plate({ project, i, total }: { project: PortfolioProject; i: number; to
       className={`${s.plate} ${surface} ${side}`}
       data-field={field}
       data-plate-i={i}
-      style={{ '--i': i } as React.CSSProperties}
+      style={{ '--i': i, ...(accent ? { '--plate-accent': accent } : {}) } as React.CSSProperties}
       aria-labelledby={headingId}
     >
       <div className={s.inner}>
@@ -42,7 +46,7 @@ function Plate({ project, i, total }: { project: PortfolioProject; i: number; to
             {String(i + 1).padStart(2, '0')}
             <span className={s.of}> / {String(total).padStart(2, '0')}</span>
           </p>
-          <h3 id={headingId} className={s.name}>
+          <h3 id={headingId} className={s.name} data-long={longest(project) > 14 ? '' : undefined}>
             <Link href={`/projects/${project.slug}`} className={s.nameLink}>
               <T v={project.name} />
             </Link>
@@ -99,7 +103,6 @@ function Plate({ project, i, total }: { project: PortfolioProject; i: number; to
 /** 02 Selected Work: a pinned stack of plates, each revealed by a rising mask. */
 export function WorkPlates({ portfolio }: { portfolio: Portfolio }) {
   const { featured, projects } = portfolio;
-  if (featured.length === 0) return null;
 
   return (
     <section id="work" className={`chapter surface-dark ${s.work}`} aria-labelledby="work-title">
@@ -113,7 +116,7 @@ export function WorkPlates({ portfolio }: { portfolio: Portfolio }) {
         </h2>
         <div className={s.intro}>
           <p className="muted">
-            <T v={COPY.work.intro} />
+            <T v={featured.length ? COPY.work.intro : COPY.work.noFeatured} />
           </p>
           <Link className="tlink hit" href="/projects">
             <T v={COPY.work.archive} /> ({projects.length})
@@ -125,13 +128,15 @@ export function WorkPlates({ portfolio }: { portfolio: Portfolio }) {
         </div>
       </div>
 
-      <WorkStack count={featured.length} className={s.stack}>
-        <ol className={s.viewport}>
-          {featured.map((project, i) => (
-            <Plate key={project.id} project={project} i={i} total={featured.length} />
-          ))}
-        </ol>
-      </WorkStack>
+      {featured.length > 0 && (
+        <WorkStack count={featured.length} className={s.stack}>
+          <ol className={s.viewport}>
+            {featured.map((project, i) => (
+              <Plate key={project.id} project={project} i={i} total={featured.length} />
+            ))}
+          </ol>
+        </WorkStack>
+      )}
     </section>
   );
 }

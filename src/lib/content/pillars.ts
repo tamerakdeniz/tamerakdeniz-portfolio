@@ -4,7 +4,7 @@ interface PillarDef {
   id: string;
   title: Loc;
   body: Loc;
-  /** Candidate technologies, in display priority. Shown only if found in the content. */
+  /** Candidate technologies, in display priority. Default pillars show only those found in the content. */
   tech: string[];
   /** Weighting for picking related projects. */
   signals: string[];
@@ -69,8 +69,13 @@ export function buildPillars(portfolio: Portfolio): Pillar[] {
     ...portfolio.journey.map((j) => j.description.en),
   ].join(' · ');
 
-  return DEFS.map((def) => {
-    const tech = def.tech.filter((t) => mentions(corpus, t)).slice(0, 4);
+  const custom = portfolio.profile.pillars;
+  const defs: PillarDef[] = custom
+    ? custom.map((p) => ({ id: p.id, title: p.title, body: p.body, tech: p.tech ?? [], signals: p.tech ?? [] }))
+    : DEFS;
+
+  return defs.map((def) => {
+    const tech = custom ? def.tech.slice(0, 6) : def.tech.filter((t) => mentions(corpus, t)).slice(0, 4);
     const related = portfolio.projects
       .map((p) => {
         const stack = p.stack.join(' · ');

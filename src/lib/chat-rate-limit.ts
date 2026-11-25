@@ -9,6 +9,10 @@ export function checkChatRateLimit(
   windowMs = 60_000
 ): { ok: true } | { ok: false; retryAfterSec: number } {
   const now = Date.now();
+  if (buckets.size >= 10_000) {
+    for (const [id, value] of buckets) if (now >= value.resetAt) buckets.delete(id);
+    if (!buckets.has(key) && buckets.size >= 10_000) return { ok: false, retryAfterSec: 60 };
+  }
   let bucket = buckets.get(key);
 
   if (!bucket || now >= bucket.resetAt) {

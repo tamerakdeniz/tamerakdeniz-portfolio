@@ -53,3 +53,7 @@ site-data-*.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local verification reports, authentic media, and import backups
+/artifacts/
+/backups/

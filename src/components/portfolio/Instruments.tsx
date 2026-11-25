@@ -21,7 +21,7 @@ export function Instruments({ skills }: { skills: PortfolioSkill[] }) {
   return (
     <section className={`chapter surface-paper ${s.instruments}`} aria-labelledby="instruments-title">
       <div className="wrap">
-        <div className={`grid ${s.head}`}>
+        <div className={`editorial-grid ${s.head}`}>
           <h2 id="instruments-title" className={`h2 ${s.h}`}>
             <T v={COPY.about.skills} />
           </h2>

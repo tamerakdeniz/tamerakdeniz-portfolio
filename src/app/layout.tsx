@@ -3,6 +3,7 @@ import { Caveat, IBM_Plex_Mono, Instrument_Serif, Space_Grotesk } from 'next/fon
 import '@/styles/globals.css';
 import '@/styles/tokens.css';
 import { BOOT_SCRIPT } from '@/lib/lang-boot';
+import { getPortfolio } from '@/lib/content/get-portfolio';
 import { OWNER } from '@/lib/content/portfolio';
 
 const display = Space_Grotesk({
@@ -33,38 +34,23 @@ const hand = Caveat({
   display: 'swap',
 });
 
-const description =
-  'Mustafa Tamer Akdeniz is a software developer who builds software, explores ideas, and turns complex problems into useful products.';
-
-export const metadata: Metadata = {
-  metadataBase: new URL(OWNER.siteUrl),
-  title: {
-    default: `${OWNER.fullName} — Software Developer`,
-    template: `%s — ${OWNER.fullName}`,
-  },
-  description,
-  authors: [{ name: OWNER.fullName, url: OWNER.siteUrl }],
-  creator: OWNER.fullName,
-  alternates: { canonical: '/' },
-  openGraph: {
-    type: 'website',
-    url: OWNER.siteUrl,
-    siteName: OWNER.fullName,
-    title: `${OWNER.fullName} — Software Developer`,
+export async function generateMetadata(): Promise<Metadata> {
+  const { profile, hero, about } = await getPortfolio();
+  const description = hero.description?.en || about.paragraphs.en[0] || `${profile.fullName} — ${profile.role.en}`;
+  const title = `${profile.fullName} — ${profile.role.en}`;
+  const images = [{ url: profile.fieldPhoto.url, alt: profile.fieldPhoto.alt.en }];
+  return {
+    metadataBase: new URL(OWNER.siteUrl),
+    title: { default: title, template: `%s — ${profile.fullName}` },
     description,
-    images: [{ url: '/img/underwaterme.jpg', alt: `${OWNER.fullName} scuba diving` }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${OWNER.fullName} — Software Developer`,
-    description,
-    images: ['/img/underwaterme.jpg'],
-  },
-  icons: {
-    icon: '/img/favicon.ico',
-    apple: '/img/logo-nobg.png',
-  },
-};
+    authors: [{ name: profile.fullName, url: OWNER.siteUrl }],
+    creator: profile.fullName,
+    alternates: { canonical: '/' },
+    openGraph: { type: 'website', url: OWNER.siteUrl, siteName: profile.fullName, title, description, images },
+    twitter: { card: 'summary_large_image', title, description, images },
+    icons: { icon: '/img/favicon.ico', apple: '/img/logo-nobg.png' },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: '#080f16',

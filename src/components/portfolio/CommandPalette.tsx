@@ -95,7 +95,7 @@ export function CommandPalette({ chrome }: { chrome: ChromeData }) {
         label: tr(COPY.palette.openCv),
         run: () => {
           close();
-          window.open(chrome.cvUrl, '_blank', 'noopener');
+          window.open(chrome.cvVariants?.[lang]?.viewUrl ?? chrome.cvUrl, '_blank', 'noopener');
         },
       },
       {

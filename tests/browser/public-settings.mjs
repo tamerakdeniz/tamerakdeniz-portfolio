@@ -1,0 +1,51 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+const base = 'http://localhost:3100';
+const browser = await chromium.launch({ channel: 'chrome' });
+const context = await browser.newContext({ storageState: 'artifacts/cms-lifecycle/admin-session.json' });
+const page = await context.newPage();
+const results = [];
+const save = async () => {
+  const response = page.waitForResponse((r) => r.url().endsWith('/api/revalidate'));
+  await page.getByRole('button', { name: /Save$/, exact: false }).click();
+  assert.equal((await response).status(), 200);
+};
+try {
+  await page.goto(base + '/admin');
+  await page.locator('aside').getByRole('button', { name: /Home Page/ }).click();
+  await page.locator('#admin-hero-title-english').fill('Below the surface');
+  await page.locator('#admin-hero-title-turkish').fill('Yüzeyin altında');
+  await page.locator('#admin-hero-description-english').fill(`Synthetic home description verification. ${Date.now()}`);
+  await page.locator('#admin-hero-description-turkish').fill('Sentetik ana sayfa açıklaması doğrulaması.');
+  await page.locator('#admin-hero-more-english').fill('Explore the biography');
+  await page.locator('#admin-hero-more-turkish').fill('Yaşam öyküsünü keşfet');
+  await page.getByRole('button', { name: 'Open to Offers', exact: true }).click();
+  await page.getByLabel('Custom availability label (optional) (EN)', { exact: true }).fill('Synthetic availability');
+  await page.getByLabel('Custom availability label (optional) (TR)', { exact: true }).fill('Sentetik uygunluk');
+  await save();
+  const home = await context.newPage();
+  await home.goto(base);
+  assert.ok((await home.locator('#surface').textContent()).includes('Synthetic home description verification.'));
+  await home.getByRole('link', { name: 'Explore the biography', exact: true }).waitFor();
+  assert.ok((await home.locator('#surface').textContent()).includes('Synthetic availability'));
+  results.push({ name: 'Hero title, description, about-link label and custom availability persist through UI and render publicly', pass: true });
+  await page.locator('aside').getByRole('button', { name: /Contact/ }).click();
+  await page.getByRole('button', { name: 'edit', exact: true }).click();
+  await page.locator('#admin-label-email').fill('portfolio-test@example.test');
+  await page.locator('#admin-label-location-en').fill('Synthetic Istanbul location');
+  await page.locator('#admin-label-location-tr').fill('Sentetik İstanbul konumu');
+  await save();
+  await home.goto(base);
+  assert.ok((await home.locator('#surface').textContent()).includes('Synthetic Istanbul location'));
+  assert.ok(await home.locator('a[href="mailto:portfolio-test@example.test"]').count());
+  await home.evaluate(() => localStorage.setItem('portfolio_language', 'tr'));
+  await home.reload();
+  assert.ok((await home.locator('#surface').textContent()).includes('Sentetik İstanbul konumu'));
+  assert.ok((await home.locator('#surface').textContent()).includes('Sentetik ana sayfa açıklaması'));
+  await home.getByRole('link', { name: 'Yaşam öyküsünü keşfet', exact: true }).waitFor();
+  results.push({ name: 'Contact email and bilingual location propagate with Turkish home settings', pass: true });
+  await page.screenshot({ path: 'artifacts/public-settings.png', fullPage: true });
+} catch (e) { results.push({ name: e.message, pass: false }); process.exitCode = 1; console.error(e); }
+finally { await writeFile('artifacts/public-settings.json', JSON.stringify(results, null, 2)); await browser.close(); }
+console.log(results);

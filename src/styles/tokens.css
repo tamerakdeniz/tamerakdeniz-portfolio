@@ -143,20 +143,20 @@ html[lang='tr'] [data-l='en'] {
   padding-right: calc(var(--side) + var(--rail));
 }
 
-.grid {
+.editorial-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: var(--gutter);
 }
 
 @media (min-width: 768px) {
-  .grid {
+  .editorial-grid {
     grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1024px) {
-  .grid {
+  .editorial-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 }

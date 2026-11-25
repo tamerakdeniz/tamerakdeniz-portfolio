@@ -1,0 +1,166 @@
+/* All variants fill the PlateFigure `.art` frame (position: relative, fixed aspect). */
+.editorial,
+.technical,
+.mobile,
+.immersive {
+  --l: var(--local, 1);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.img {
+  object-fit: cover;
+  object-position: 50% 0%;
+}
+
+.img[data-fit='contain'] {
+  object-fit: contain;
+  object-position: 50% 50%;
+}
+
+.label {
+  position: absolute;
+  left: 4%;
+  top: 4.5%;
+  z-index: 2;
+  padding: 3px 7px;
+  background: color-mix(in srgb, var(--abyss) 72%, transparent);
+  color: var(--paper);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Editorial: a cropped desktop view, a second view overlapping its lower right. */
+.main,
+.second,
+.phone,
+.diagram,
+.inset {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  background: var(--abyss);
+  box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.7);
+}
+
+.main {
+  left: 6%;
+  top: 12%;
+  width: 74%;
+  height: 100%;
+  outline: 1px solid color-mix(in srgb, var(--fg) 25%, transparent);
+  translate: 0 calc((1 - var(--l)) * 8%);
+}
+
+.second {
+  right: 5%;
+  bottom: 8%;
+  width: 34%;
+  aspect-ratio: 16 / 10;
+  outline: 1px solid color-mix(in srgb, var(--fg) 35%, transparent);
+  translate: 0 calc((1 - var(--l)) * 22%);
+}
+
+.editorial[data-second='mobile'] .second {
+  width: 17%;
+  aspect-ratio: 9 / 19;
+  border-radius: 8% / 4%;
+}
+
+/* Technical: the diagram on a measured field, a supporting view in the corner. */
+.technical {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--fg) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--fg) 8%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.diagram {
+  inset: 10% 26% 8% 5%;
+  background: transparent;
+  box-shadow: none;
+}
+
+.inset {
+  right: 4%;
+  bottom: 8%;
+  width: 26%;
+  aspect-ratio: 4 / 5;
+  outline: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+  translate: 0 calc((1 - var(--l)) * 16%);
+}
+
+.cross {
+  position: absolute;
+  right: 4%;
+  top: 6%;
+  width: 22px;
+  height: 22px;
+  background:
+    linear-gradient(currentColor, currentColor) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(currentColor, currentColor) 0 50% / 100% 1px no-repeat;
+  opacity: 0.5;
+}
+
+/* Mobile: up to three screens, staggered, no device chrome. */
+.mobile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4%;
+}
+
+.phone {
+  position: relative;
+  width: 21%;
+  aspect-ratio: 9 / 19;
+  border-radius: 9% / 4.5%;
+  outline: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+  translate: 0 calc(((var(--i) - 1) * 7%) + (1 - var(--l)) * (12% + var(--i) * 6%));
+}
+
+.mobile[data-count='1'] .phone {
+  width: 26%;
+  translate: 0 calc((1 - var(--l)) * 10%);
+}
+
+/* Immersive: the cover fills the plate. */
+.immersive :global(img),
+.video {
+  scale: calc(1.08 - var(--l) * 0.08);
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(5, 10, 15, 0.55));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main,
+  .second,
+  .phone,
+  .inset,
+  .immersive :global(img),
+  .video {
+    translate: none;
+    scale: none;
+  }
+}
+
+:global(html[data-motion='off']) .main,
+:global(html[data-motion='off']) .second,
+:global(html[data-motion='off']) .phone,
+:global(html[data-motion='off']) .inset {
+  translate: none;
+}

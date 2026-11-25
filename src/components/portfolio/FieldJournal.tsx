@@ -22,6 +22,7 @@ function Scribble({ d, className }: { d: string; className?: string }) {
  */
 export function FieldJournal({ portfolio, standalone = false }: { portfolio: Portfolio; standalone?: boolean }) {
   const { about } = portfolio;
+  const photo = portfolio.profile.fieldPhoto;
 
   return (
     <section
@@ -98,20 +99,20 @@ export function FieldJournal({ portfolio, standalone = false }: { portfolio: Por
                 <span className={s.tape} aria-hidden="true" />
                 <span className={s.frame}>
                   <Image
-                    src="/img/underwaterme.jpg"
-                    alt={COPY.human.diverAlt.en}
+                    src={photo.url}
+                    alt={photo.alt.en}
                     fill
                     sizes="(min-width: 1024px) 34vw, (min-width: 768px) 70vw, 92vw"
                     className={s.img}
                   />
                 </span>
                 <figcaption className={`${s.caption} meta-plain`}>
-                  <T v={COPY.human.diverCaption} />
+                  <T v={photo.caption ?? COPY.human.diverCaption} />
                 </figcaption>
               </figure>
               <p className={`${s.note} ${s.noteDiver} hand`}>
                 <Scribble d="M110 8 C 80 6, 50 18, 34 40 S 18 66, 10 72 M10 72 L 24 70 M10 72 L 12 58" />
-                <T v={COPY.human.diverNote} />
+                <T v={photo.note ?? COPY.human.diverNote} />
               </p>
             </InView>
 
@@ -122,7 +123,7 @@ export function FieldJournal({ portfolio, standalone = false }: { portfolio: Por
                   <span className={`${s.frame} ${s.frameSquare}`}>
                     <Image
                       src={about.portrait}
-                      alt={COPY.human.portraitAlt.en}
+                      alt={portfolio.profile.fullName}
                       fill
                       sizes="(min-width: 1024px) 16vw, 44vw"
                       className={s.img}
@@ -131,7 +132,7 @@ export function FieldJournal({ portfolio, standalone = false }: { portfolio: Por
                 </figure>
                 <p className={`${s.note} ${s.notePortrait} hand`}>
                   <Scribble d="M8 70 C 30 66, 52 52, 64 34 S 90 10, 112 12 M112 12 L 98 6 M112 12 L 102 22" />
-                  <T v={COPY.human.portraitNote} />
+                  {portfolio.profile.shortName}
                 </p>
               </InView>
             )}

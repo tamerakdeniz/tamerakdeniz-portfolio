@@ -1,75 +1,35 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSaveContent } from '@/admin/lib/save-content';
 import { useAppStore, selectHomeHero, selectAvailability } from '@/store';
-import { saveFirebaseData } from '@/lib/firebase';
-import { showToast } from '@/components/ui/Toast';
 import type { HomeHero, Availability } from '@/types';
+import { LocField } from './form/fields';
 
 export function AdminHomeSection() {
   const { t } = useTranslation();
+  const saveContent = useSaveContent();
   const heroSettings = useAppStore(selectHomeHero);
   const availability = useAppStore(selectAvailability);
   const siteData = useAppStore((s) => s.siteData);
   const [saving, setSaving] = useState(false);
 
-  const [hero, setHero] = useState<HomeHero>({
-    title: { en: '', tr: '' },
-    description: { en: '', tr: '' },
-    moreLabel: { en: '', tr: '' },
-    icon: { mode: 'material', materialIcon: 'code', imageUrl: '' },
-  });
-
-  const [avail, setAvail] = useState<Availability>({
-    status: 'available',
-    customLabel: { en: '', tr: '' },
-  });
-
-  useEffect(() => {
-    if (heroSettings) {
-      setHero({
-        title: { en: heroSettings.title?.en || '', tr: heroSettings.title?.tr || '' },
-        description: { en: heroSettings.description?.en || '', tr: heroSettings.description?.tr || '' },
-        moreLabel: { en: heroSettings.moreLabel?.en || '', tr: heroSettings.moreLabel?.tr || '' },
-        icon: heroSettings.icon || { mode: 'material', materialIcon: 'code', imageUrl: '' },
-      });
-    }
-  }, [heroSettings]);
-
-  useEffect(() => {
-    if (availability) {
-      setAvail({
-        status: availability.status || 'available',
-        customLabel: { en: availability.customLabel?.en || '', tr: availability.customLabel?.tr || '' },
-      });
-    }
-  }, [availability]);
+  const [hero, setHero] = useState<HomeHero>(heroSettings);
+  const [avail, setAvail] = useState<Availability>(availability);
 
   const handleSave = useCallback(async () => {
+    const siteData = useAppStore.getState().siteData;
+    if (!siteData) return;
     setSaving(true);
-    try {
-      await saveFirebaseData('siteData/homeHero', hero);
-      await saveFirebaseData('siteData/availability', avail);
-      showToast(t('admin-saved'), 'success');
-    } catch {
-      showToast(t('admin-save-failed'), 'error');
-    } finally {
-      setSaving(false);
-    }
-  }, [hero, avail, t]);
+    await saveContent({ ...siteData, homeHero: hero, availability: avail });
+    setSaving(false);
+  }, [hero, avail, saveContent]);
 
   const statusOptions: Availability['status'][] = ['available', 'not-available', 'working', 'open-to-offers'];
-  const statusLabels: Record<string, { en: string; tr: string }> = {
-    'available': { en: 'Available / Open to Work', tr: 'Çalışmaya Açık' },
-    'not-available': { en: 'Not Available', tr: 'Müsait Değil' },
-    'working': { en: 'Currently Working', tr: 'Şu Anda Çalışıyor' },
-    'open-to-offers': { en: 'Open to Offers', tr: 'Tekliflere Açık' },
-  };
 
   const hasChanges =
-    JSON.stringify(hero) !== JSON.stringify(heroSettings) ||
-    JSON.stringify(avail) !== JSON.stringify(availability);
+    JSON.stringify(hero) !== JSON.stringify(heroSettings) || JSON.stringify(avail) !== JSON.stringify(availability);
 
   return (
     <div className="space-y-6">
@@ -109,8 +69,8 @@ export function AdminHomeSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">{t('admin-label-english')}</label>
-            <input
+            <label htmlFor="admin-hero-title-english" className="block text-sm font-medium mb-1">{t('admin-label-english')}</label>
+          <input id="admin-hero-title-english"
               type="text"
               value={hero.title.en}
               onChange={(e) => setHero({ ...hero, title: { ...hero.title, en: e.target.value } })}
@@ -119,8 +79,8 @@ export function AdminHomeSection() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">{t('admin-label-turkish')}</label>
-            <input
+            <label htmlFor="admin-hero-title-turkish" className="block text-sm font-medium mb-1">{t('admin-label-turkish')}</label>
+          <input id="admin-hero-title-turkish"
               type="text"
               value={hero.title.tr}
               onChange={(e) => setHero({ ...hero, title: { ...hero.title, tr: e.target.value } })}
@@ -140,8 +100,8 @@ export function AdminHomeSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">{t('admin-label-english')}</label>
-            <textarea
+            <label htmlFor="admin-hero-description-english" className="block text-sm font-medium mb-1">{t('admin-label-english')}</label>
+          <textarea id="admin-hero-description-english"
               value={hero.description.en}
               onChange={(e) => setHero({ ...hero, description: { ...hero.description, en: e.target.value } })}
               rows={3}
@@ -149,8 +109,8 @@ export function AdminHomeSection() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">{t('admin-label-turkish')}</label>
-            <textarea
+            <label htmlFor="admin-hero-description-turkish" className="block text-sm font-medium mb-1">{t('admin-label-turkish')}</label>
+          <textarea id="admin-hero-description-turkish"
               value={hero.description.tr}
               onChange={(e) => setHero({ ...hero, description: { ...hero.description, tr: e.target.value } })}
               rows={3}
@@ -169,8 +129,8 @@ export function AdminHomeSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">{t('admin-label-english')}</label>
-            <input
+            <label htmlFor="admin-hero-more-english" className="block text-sm font-medium mb-1">{t('admin-label-english')}</label>
+          <input id="admin-hero-more-english"
               type="text"
               value={hero.moreLabel.en}
               onChange={(e) => setHero({ ...hero, moreLabel: { ...hero.moreLabel, en: e.target.value } })}
@@ -178,8 +138,8 @@ export function AdminHomeSection() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">{t('admin-label-turkish')}</label>
-            <input
+            <label htmlFor="admin-hero-more-turkish" className="block text-sm font-medium mb-1">{t('admin-label-turkish')}</label>
+          <input id="admin-hero-more-turkish"
               type="text"
               value={hero.moreLabel.tr}
               onChange={(e) => setHero({ ...hero, moreLabel: { ...hero.moreLabel, tr: e.target.value } })}
@@ -214,6 +174,8 @@ export function AdminHomeSection() {
       </div>
 
       {/* Preview */}
+      <LocField label={t('admin-availability-label')} value={avail.customLabel} onChange={(customLabel) => setAvail({ ...avail, customLabel })} maxLength={120} />
+
       <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800 space-y-4">
         <h3 className="font-bold flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">visibility</span>

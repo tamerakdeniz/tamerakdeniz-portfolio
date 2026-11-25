@@ -1,5 +1,6 @@
+import { CvLink } from '@/components/portfolio/CvLink';
 import { CHAPTERS, COPY } from '@/lib/content/copy';
-import { OWNER, type Loc, type Portfolio } from '@/lib/content/portfolio';
+import type { Loc, Portfolio } from '@/lib/content/portfolio';
 import { DepthReadout } from './DepthReadout';
 import { Submerge } from './Submerge';
 import { T } from './T';
@@ -28,7 +29,7 @@ function titleLines(custom: Loc | null) {
 }
 
 export function DescentHero({ portfolio }: { portfolio: Portfolio }) {
-  const { hero, contact, availability, cv } = portfolio;
+  const { hero, contact, availability, cv, profile } = portfolio;
   const lines = titleLines(hero.title);
   const next = CHAPTERS[1];
 
@@ -38,13 +39,13 @@ export function DescentHero({ portfolio }: { portfolio: Portfolio }) {
         <div className={`wrap ${s.frame}`}>
           <h1 id="hero-title" className={s.title}>
             <Submerge className={`${s.kicker} meta`} shift={0.5}>
-              {OWNER.fullName}
+              {profile.fullName}
               <span className={s.slash} aria-hidden="true">
                 {' '}
                 —{' '}
               </span>
               <span className="sr-only">, </span>
-              <T v={OWNER.role} />
+              <T v={profile.role} />
             </Submerge>
             <span className={s.titleWrap} data-cut>
               <i className={s.marker} data-waterline aria-hidden="true" />
@@ -70,12 +71,12 @@ export function DescentHero({ portfolio }: { portfolio: Portfolio }) {
                   ↘
                 </span>
               </a>
-              <a className={`tlink hit ${s.cv}`} href={cv.viewUrl} target="_blank" rel="noopener" data-cv-link>
+              <CvLink className={`tlink hit ${s.cv}`} cv={cv} target="_blank" rel="noopener" data-cv-link>
                 <T v={COPY.hero.viewCv} />
                 <span className="arrow arrow-ne" aria-hidden="true">
                   ↗
                 </span>
-              </a>
+              </CvLink>
             </div>
           </div>
         </div>
@@ -107,7 +108,7 @@ export function DescentHero({ portfolio }: { portfolio: Portfolio }) {
             )}
           </span>
           <a className={s.scroll} href="#about">
-            <T v={COPY.hero.scroll} />
+            <T v={hero.moreLabel ?? COPY.hero.scroll} />
             <span className={s.plumb} aria-hidden="true" />
           </a>
         </div>

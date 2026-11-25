@@ -3,242 +3,11 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, selectProjects } from '@/store';
-import { saveSiteData, logActivity } from '@/lib/firebase';
-import { uploadPortfolioFile } from '@/lib/portfolio-storage';
-import { showToast } from '@/components/ui/Toast';
+import { logActivity } from '@/lib/firebase';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useSaveContent } from '@/admin/lib/save-content';
 import type { Project } from '@/types';
-
-function ProjectForm({
-  project,
-  onSave,
-  onCancel,
-}: {
-  project?: Project;
-  onSave: (p: Project) => void;
-  onCancel: () => void;
-}) {
-  const { t } = useTranslation();
-  const [form, setForm] = useState<Project>(
-    project || {
-      id: Date.now().toString(),
-      title: { en: '', tr: '' },
-      description: { en: '', tr: '' },
-      category: ['web'],
-      techStack: [],
-      githubUrl: '',
-      demoUrl: '',
-      liveUrl: '',
-      image: '',
-      published: true,
-    }
-  );
-  const [techInput, setTechInput] = useState(
-    project?.techStack?.join(', ') || ''
-  );
-  const [uploading, setUploading] = useState(false);
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 1024 * 1024 * 5) {
-      showToast(t('admin-file-too-large'), 'error');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const url = await uploadPortfolioFile(file, 'projects', form.id);
-      setForm({ ...form, image: url });
-      showToast(t('admin-upload-success'), 'success');
-    } catch (err) {
-      console.error(err);
-      const message =
-        err instanceof Error && err.message === 'AUTH_REQUIRED'
-          ? t('admin-auth-required-upload')
-          : t('admin-save-failed');
-      showToast(message, 'error');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  return (
-    <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800 space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-title-en')}</label>
-          <input
-            value={form.title.en}
-            onChange={(e) =>
-              setForm({ ...form, title: { ...form.title, en: e.target.value } })
-            }
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-title-tr')}</label>
-          <input
-            value={form.title.tr}
-            onChange={(e) =>
-              setForm({ ...form, title: { ...form.title, tr: e.target.value } })
-            }
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-description-en')}</label>
-          <textarea
-            rows={3}
-            value={form.description.en}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                description: { ...form.description, en: e.target.value },
-              })
-            }
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm resize-none"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-description-tr')}</label>
-          <textarea
-            rows={3}
-            value={form.description.tr}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                description: { ...form.description, tr: e.target.value },
-              })
-            }
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm resize-none"
-          />
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">{t('admin-label-categories')}</label>
-        <div className="flex flex-wrap gap-2">
-          {['web', 'ai', 'startup', 'opensource', 'desktop', 'mobile', 'extension', 'practice', 'test'].map((c) => {
-            const cats = Array.isArray(form.category) ? form.category : [form.category];
-            const selected = cats.includes(c);
-            return (
-              <button
-                key={c}
-                type="button"
-                onClick={() => {
-                  const current = Array.isArray(form.category) ? form.category : [form.category];
-                  const updated = selected
-                    ? current.filter((v) => v !== c)
-                    : [...current, c];
-                  setForm({ ...form, category: updated.length > 0 ? updated : current });
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                  selected
-                    ? 'bg-primary text-white border-primary'
-                    : 'bg-white dark:bg-background-dark border-gray-300 dark:border-slate-700 hover:border-primary/40'
-                }`}
-              >
-                {c}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-github-url')}</label>
-          <input
-            value={form.githubUrl}
-            onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-demo-url')}</label>
-          <input
-            value={form.demoUrl}
-            onChange={(e) => setForm({ ...form, demoUrl: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-live-url')}</label>
-          <input
-            value={form.liveUrl || ''}
-            onChange={(e) => setForm({ ...form, liveUrl: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-            placeholder="https://..."
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-image-url')}</label>
-          <div className="flex gap-2">
-            <input
-              value={form.image || ''}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-              placeholder="URL veya dosya seçin"
-            />
-            <label className={`px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-center transition-colors min-w-[100px] ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-              {uploading ? (
-                <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
-              ) : (
-                <span>Gözat</span>
-              )}
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-            </label>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">{t('admin-label-tech-stack')}</label>
-          <input
-            value={techInput}
-            onChange={(e) => setTechInput(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
-          />
-        </div>
-      </div>
-      <div className="flex items-center gap-4">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={form.published}
-            onChange={(e) => setForm({ ...form, published: e.target.checked })}
-            className="rounded"
-          />
-          {t('admin-published')}
-        </label>
-      </div>
-      <div className="flex gap-3 justify-end">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
-        >
-          {t('admin-cancel')}
-        </button>
-        <button
-          onClick={() => {
-            const techStack = techInput
-              .split(',')
-              .map((s) => s.trim())
-              .filter(Boolean);
-            onSave({ ...form, techStack });
-          }}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-blue-700 transition-colors"
-        >
-          {t('admin-save')}
-        </button>
-      </div>
-    </div>
-  );
-}
+import { newProject, ProjectForm } from './ProjectForm';
 
 export function AdminProjectsSection() {
   const { t } = useTranslation();
@@ -249,36 +18,38 @@ export function AdminProjectsSection() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Project | null>(null);
+  const saveContent = useSaveContent();
 
   const saveProjects = useCallback(
-    async (newProjects: Project[]) => {
-      if (!siteData) return;
-      const updated = { ...siteData, projects: newProjects };
-      try {
-        await saveSiteData(updated);
-        showToast(t('admin-saved'), 'success');
-      } catch {
-        showToast(t('admin-save-failed'), 'error');
-      }
+    async (newProjects: Project[], sessionUploads: string[] = []) => {
+      if (!siteData) return false;
+      return saveContent({ ...siteData, projects: newProjects }, sessionUploads);
     },
-    [siteData, t]
+    [siteData, saveContent]
   );
 
-  const handleSave = (project: Project) => {
+  const handleSave = async (project: Project, sessionUploads: string[]) => {
     const existing = projects.find((p) => p.id === project.id);
-    let newProjects: Project[];
-    if (existing) {
-      newProjects = projects.map((p) =>
-        p.id === project.id ? project : p
-      );
-      logActivity('edit', `Edited project: ${project.title.en || project.title.tr}`);
-    } else {
-      newProjects = [...projects, { ...project, order: projects.length }];
-      logActivity('add', `Added project: ${project.title.en || project.title.tr}`);
-    }
-    saveProjects(newProjects);
+    const newProjects = existing
+      ? projects.map((p) => (p.id === project.id ? project : p))
+      : [...projects, { ...project, order: projects.length }];
+    const ok = await saveProjects(newProjects, sessionUploads);
+    if (!ok) return false;
+    logActivity(existing ? 'edit' : 'add', `${existing ? 'Edited' : 'Added'} project: ${project.title.en || project.title.tr}`);
     setEditing(null);
     setAdding(false);
+    setDraft(null);
+    return true;
+  };
+
+  const toggleFeatured = (id: string) => {
+    const maxOrder = Math.max(0, ...projects.filter((p) => p.featured).map((p) => p.featuredOrder ?? 0));
+    saveProjects(
+      projects.map((p) =>
+        p.id === id ? { ...p, featured: !p.featured, featuredOrder: p.featured ? undefined : maxOrder + 1 } : p
+      )
+    );
   };
 
   const handleDelete = () => {
@@ -356,7 +127,10 @@ export function AdminProjectsSection() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">{t('admin-nav-projects')}</h2>
         <button
-          onClick={() => setAdding(true)}
+          onClick={() => {
+            setDraft(newProject());
+            setAdding(true);
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
         >
           <span className="material-symbols-outlined text-sm">add</span>
@@ -364,8 +138,16 @@ export function AdminProjectsSection() {
         </button>
       </div>
 
-      {adding && (
-        <ProjectForm onSave={handleSave} onCancel={() => setAdding(false)} />
+      {adding && draft && (
+        <ProjectForm
+          project={draft}
+          allProjects={projects}
+          onSave={handleSave}
+          onCancel={() => {
+            setAdding(false);
+            setDraft(null);
+          }}
+        />
       )}
 
       <div className="space-y-3">
@@ -374,6 +156,7 @@ export function AdminProjectsSection() {
             <ProjectForm
               key={project.id}
               project={project}
+              allProjects={projects}
               onSave={handleSave}
               onCancel={() => setEditing(null)}
             />
@@ -413,14 +196,34 @@ export function AdminProjectsSection() {
                         : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-500'
                     }`}
                   >
-                    {project.published ? t('admin-published') : t('admin-draft')}
+                    {project.published ? (project.archived ? t('admin-vis-archived') : t('admin-published')) : t('admin-draft')}
                   </span>
+                  {project.featured && project.published && !project.archived && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                      {t('admin-proj-featured')} {project.featuredOrder ?? ''}
+                    </span>
+                  )}
+                  {(project.media?.length ?? 0) > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                      {t('admin-media-count', { count: project.media?.length })}
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                   {(project.techStack || []).join(', ')}
                 </p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => toggleFeatured(project.id)}
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                  title={t('admin-proj-featured')}
+                  aria-pressed={!!project.featured}
+                >
+                  <span className={`material-symbols-outlined text-sm ${project.featured ? 'text-amber-500' : ''}`}>
+                    {project.featured ? 'star' : 'star_outline'}
+                  </span>
+                </button>
                 <button
                   onClick={() => togglePublish(project.id)}
                   className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"

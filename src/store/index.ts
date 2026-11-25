@@ -14,7 +14,7 @@ interface AppState {
   siteData: SiteData | null;
   siteDataLoaded: boolean;
   isFirebaseConnected: boolean;
-  authUser: { email: string } | null;
+  authUser: { email: string; admin: boolean } | null;
   contactModalOpen: boolean;
   cvModalOpen: boolean;
 
@@ -25,7 +25,7 @@ interface AppState {
   setSiteData: (data: SiteData) => void;
   setSiteDataLoaded: (loaded: boolean) => void;
   setFirebaseConnected: (connected: boolean) => void;
-  setAuthUser: (user: { email: string } | null) => void;
+  setAuthUser: (user: { email: string; admin: boolean } | null) => void;
   setContactModalOpen: (open: boolean) => void;
   setCvModalOpen: (open: boolean) => void;
 }

@@ -2,14 +2,15 @@
 
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSaveContent } from '@/admin/lib/save-content';
 import { useAppStore, selectAboutEntries } from '@/store';
-import { saveSiteData } from '@/lib/firebase';
 import { uploadPortfolioFile } from '@/lib/portfolio-storage';
 import { showToast } from '@/components/ui/Toast';
 import type { AboutEntry } from '@/types';
 
 export function AdminAboutSection() {
   const { t } = useTranslation();
+  const saveContent = useSaveContent();
   const siteData = useAppStore((s) => s.siteData);
   const entries = useAppStore(selectAboutEntries);
   const [editing, setEditing] = useState<string | null>(null);
@@ -18,16 +19,11 @@ export function AdminAboutSection() {
 
   const save = useCallback(
     async (newEntries: AboutEntry[], activeId?: string) => {
-      if (!siteData) return;
+      if (!siteData) return false;
       const updated = { ...siteData, aboutEntries: newEntries, activeAboutId: activeId || siteData.activeAboutId };
-      try {
-        await saveSiteData(updated);
-        showToast(t('admin-saved'), 'success');
-      } catch {
-        showToast(t('admin-save-failed'), 'error');
-      }
+      return saveContent(updated);
     },
-    [siteData, t]
+    [siteData, saveContent]
   );
 
   const startEdit = (entry: AboutEntry) => {
@@ -35,13 +31,13 @@ export function AdminAboutSection() {
     setEditing(entry.id);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form) return;
     const existing = entries.find((e) => e.id === form.id);
     const newEntries = existing
       ? entries.map((e) => (e.id === form.id ? form : e))
       : [...entries, form];
-    save(newEntries);
+    if (!await save(newEntries)) return;
     setEditing(null);
     setForm(null);
   };
@@ -103,16 +99,16 @@ export function AdminAboutSection() {
         <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">{t('admin-label-title-en')}</label>
-              <input
+              <label htmlFor="admin-label-title-en" className="block text-sm font-medium mb-1">{t('admin-label-title-en')}</label>
+          <input id="admin-label-title-en"
                 value={form.title.en}
                 onChange={(e) => setForm({ ...form, title: { ...form.title, en: e.target.value } })}
                 className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">{t('admin-label-title-tr')}</label>
-              <input
+              <label htmlFor="admin-label-title-tr" className="block text-sm font-medium mb-1">{t('admin-label-title-tr')}</label>
+          <input id="admin-label-title-tr"
                 value={form.title.tr}
                 onChange={(e) => setForm({ ...form, title: { ...form.title, tr: e.target.value } })}
                 className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
@@ -121,18 +117,18 @@ export function AdminAboutSection() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">{t('admin-label-content-en')}</label>
-              <textarea rows={6} value={form.content.en} onChange={(e) => setForm({ ...form, content: { ...form.content, en: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm resize-none" />
+              <label htmlFor="admin-label-content-en" className="block text-sm font-medium mb-1">{t('admin-label-content-en')}</label>
+          <textarea id="admin-label-content-en" rows={6} value={form.content.en} onChange={(e) => setForm({ ...form, content: { ...form.content, en: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm resize-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">{t('admin-label-content-tr')}</label>
-              <textarea rows={6} value={form.content.tr} onChange={(e) => setForm({ ...form, content: { ...form.content, tr: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm resize-none" />
+              <label htmlFor="admin-label-content-tr" className="block text-sm font-medium mb-1">{t('admin-label-content-tr')}</label>
+          <textarea id="admin-label-content-tr" rows={6} value={form.content.tr} onChange={(e) => setForm({ ...form, content: { ...form.content, tr: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm resize-none" />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">{t('admin-label-avatar-text')}</label>
-              <input value={form.avatar.text} onChange={(e) => setForm({ ...form, avatar: { ...form.avatar, text: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" />
+              <label htmlFor="admin-label-avatar-text" className="block text-sm font-medium mb-1">{t('admin-label-avatar-text')}</label>
+          <input id="admin-label-avatar-text" value={form.avatar.text} onChange={(e) => setForm({ ...form, avatar: { ...form.avatar, text: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">{t('admin-label-avatar-image-url')}</label>
@@ -142,7 +138,7 @@ export function AdminAboutSection() {
                   {uploading ? (
                     <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
                   ) : (
-                    <span>Gözat</span>
+                    <span>{t('admin-media-upload')}</span>
                   )}
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                 </label>

@@ -5,6 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store';
 import { saveSiteData, getSiteDataOnce } from '@/lib/firebase';
 import { countInlineMedia, migrateSiteDataMedia } from '@/lib/portfolio-storage';
+import { AdminMediaAudit } from './AdminMediaAudit';
+import { PREVIEW_WRITES_BLOCKED } from '@/lib/firebase-config';
+import { validateSiteDataImport } from '@/lib/content/validate-import';
+import { describeAdminError } from '@/admin/lib/save-content';
 import { showToast } from '@/components/ui/Toast';
 import type { SiteData } from '@/types';
 
@@ -45,18 +49,21 @@ export function AdminSettingsSection() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      if (file.size > 20 * 1024 * 1024) { showToast(t('admin-media-too-large', { mb: 20 }), 'error'); return; }
       const reader = new FileReader();
       reader.onload = async () => {
         try {
-          const data = JSON.parse(reader.result as string) as SiteData;
+          const data: unknown = JSON.parse(reader.result as string);
+          validateSiteDataImport(data);
+          if (!window.confirm(t('admin-import-confirm'))) return;
           await saveSiteData(data);
           if (countInlineMedia(data) > 0) {
             showToast(t('admin-import-inline-hint'), 'info');
           } else {
             showToast(t('admin-import-success'), 'success');
           }
-        } catch {
-          showToast(t('admin-invalid-json'), 'error');
+        } catch (error) {
+          showToast(error instanceof SyntaxError || (error instanceof Error && /INVALID_IMPORT|DUPLICATE_ID/.test(error.message)) ? t('admin-invalid-json') : describeAdminError(error, t), 'error');
         }
       };
       reader.readAsText(file);
@@ -147,7 +154,7 @@ export function AdminSettingsSection() {
         )}
         <button
           onClick={handleMigrateMedia}
-          disabled={migrating || inlineMediaCount === 0}
+          disabled={PREVIEW_WRITES_BLOCKED || migrating || inlineMediaCount === 0}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-40"
         >
           {migrating && (
@@ -158,6 +165,8 @@ export function AdminSettingsSection() {
         </button>
         <p className="text-xs text-slate-400">{t('admin-migrate-media-hint')}</p>
       </div>
+
+      <AdminMediaAudit />
 
       <div className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-slate-800">
         <h3 className="font-bold mb-4">{t('admin-data-management')}</h3>
@@ -170,6 +179,7 @@ export function AdminSettingsSection() {
             {t('admin-export')}
           </button>
           <button
+            disabled={PREVIEW_WRITES_BLOCKED}
             onClick={() => fileRef.current?.click()}
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
           >

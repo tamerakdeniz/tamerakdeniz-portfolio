@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 const navItems = [
   { key: 'dashboard', icon: 'dashboard' },
   { key: 'home', icon: 'home' },
+  { key: 'profile', icon: 'badge' },
   { key: 'projects', icon: 'folder' },
   { key: 'about', icon: 'person' },
   { key: 'skills', icon: 'star' },

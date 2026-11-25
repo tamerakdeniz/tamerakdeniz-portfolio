@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { parsePeriod } from '@/lib/content/portfolio';
-import { assetSpecFor } from '@/lib/content/assets';
+import { legacyPresentation } from '@/lib/content/legacy-presentation';
 import { EDGES, NODES } from '@/lib/content/architecture';
 
 const ym = (m: number | null) => (m === null ? null : [Math.floor(m / 12), (m % 12) + 1]);
@@ -17,12 +17,13 @@ test('periods: month names, full names, open ends and bare years', () => {
   assert.equal(parsePeriod('no date here', now).start, null);
 });
 
-test('assets: known logos get matched backplates, unknown images a neutral one', () => {
-  assert.equal(assetSpecFor('eren-karot').plate, 'black');
-  assert.equal(assetSpecFor('adana-panjur').plate, 'ink');
-  const unknown = assetSpecFor('something-new');
-  assert.equal(unknown.kind, 'logo');
-  assert.equal(unknown.plate, 'white');
+test('legacy presentation: known logos keep their backplates, unknown images get a neutral one', () => {
+  assert.equal(legacyPresentation('eren-karot').backplate, 'black');
+  assert.equal(legacyPresentation('adana-panjur').backplate, 'ink');
+  assert.equal(legacyPresentation('qirushio').art, 'timer');
+  const unknown = legacyPresentation('something-new');
+  assert.equal(unknown.backplate, 'white');
+  assert.equal(unknown.art, undefined);
 });
 
 test('architecture: every edge joins real nodes and every cited file exists', () => {

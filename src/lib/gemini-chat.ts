@@ -37,27 +37,35 @@ export type GenerateChatOptions = {
   systemInstruction: string;
   prompt: string;
   maxOutputTokens?: number;
+  /** Total generation deadline, including model fallback. */
+  timeoutMs?: number;
 };
 
 export async function generateChatWithModelFallback(
   options: GenerateChatOptions
 ): Promise<string> {
-  const { apiKey, systemInstruction, prompt, maxOutputTokens = 512 } = options;
+  const { apiKey, systemInstruction, prompt, maxOutputTokens = 512, timeoutMs = 20_000 } = options;
   const models = getModelChain();
   let lastError = 'No Gemini models configured';
+  const deadline = Date.now() + timeoutMs;
 
   for (let i = 0; i < models.length; i++) {
     const modelName = models[i];
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) throw new Error('Assistant deadline exceeded');
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        systemInstruction,
-        generationConfig: {
-          maxOutputTokens,
-          temperature: 0.3,
+      const model = genAI.getGenerativeModel(
+        {
+          model: modelName,
+          systemInstruction,
+          generationConfig: {
+            maxOutputTokens,
+            temperature: 0.3,
+          },
         },
-      });
+        { timeout: remaining }
+      );
       const result = await model.generateContent(prompt);
       const text = result.response.text();
       if (i > 0) {
@@ -66,7 +74,7 @@ export async function generateChatWithModelFallback(
       return text;
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error);
-      console.warn(`[chat] model ${modelName} failed:`, lastError);
+      console.warn(`[chat] model ${modelName} failed`);
       const hasAnother = i < models.length - 1;
       if (hasAnother && isFallbackableError(lastError)) continue;
       throw error;

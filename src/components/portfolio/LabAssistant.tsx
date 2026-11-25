@@ -10,8 +10,8 @@ interface ChatMessage {
 }
 
 const SUGGESTIONS = {
-  en: ['What does Tamer do?', 'Which technologies does he use?', 'Which projects use AI?'],
-  tr: ['Tamer ne yapıyor?', 'Hangi teknolojileri kullanıyor?', 'Hangi projelerde yapay zekâ var?'],
+  en: ['What does the portfolio owner do?', 'Which technologies does he use?', 'Which projects use AI?'],
+  tr: ['Portfolyo sahibi ne yapıyor?', 'Hangi teknolojileri kullanıyor?', 'Hangi projelerde yapay zekâ var?'],
 };
 
 const TEXT = {
@@ -83,7 +83,7 @@ function renderReply(text: string) {
   return blocks;
 }
 
-export function LabAssistant({ context }: { context: Record<string, unknown> }) {
+export function LabAssistant() {
   const lang = useLang();
   const t = TEXT[lang];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -127,7 +127,7 @@ export function LabAssistant({ context }: { context: Record<string, unknown> }) 
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: question, history, siteData: context, language: lang }),
+          body: JSON.stringify({ message: question, history: history.slice(-4), language: lang }),
         });
         const data = (await res.json()) as { reply?: string; error?: string; retryAfterSec?: number };
         if (data.reply) reply(data.reply);
@@ -143,7 +143,7 @@ export function LabAssistant({ context }: { context: Record<string, unknown> }) 
         setLoading(false);
       }
     },
-    [context, coolingDown, lang, loading, messages, t]
+    [coolingDown, lang, loading, messages, t]
   );
 
   return (

@@ -25,7 +25,7 @@ export function PageIntro({
         <p className={`${s.eyebrow} meta muted`} data-enter style={{ '--i': 0 } as React.CSSProperties}>
           {eyebrow}
         </p>
-        <div className={`grid ${s.grid}`}>
+        <div className={`editorial-grid ${s.grid}`}>
           <h1 className={`display ${s.h}`} data-enter style={{ '--i': 1 } as React.CSSProperties}>
             <T v={titleA} />{' '}
             <span className="serif">

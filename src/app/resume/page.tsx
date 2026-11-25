@@ -1,3 +1,4 @@
+import { CvLink } from '@/components/portfolio/CvLink';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { COPY } from '@/lib/content/copy';
@@ -11,12 +12,15 @@ import s from './resume.module.css';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  const { profile } = await getPortfolio();
+  return {
   title: 'Recruiter view',
-  description: `${OWNER.fullName} on one page: summary, selected projects, experience, education and skills.`,
+  description: `${profile.fullName} on one page: summary, selected projects, experience, education and skills.`,
   alternates: { canonical: '/resume' },
   robots: { index: false, follow: true },
 };
+}
 
 function ProjectEntry({ project }: { project: PortfolioProject }) {
   const url = project.links.live || project.links.demo;
@@ -68,7 +72,7 @@ function JourneyItem({ entry }: { entry: JourneyEntry }) {
           <T v={entry.title} />
         </h3>
         <p className={s.org}>
-          <T v={entry.org} />
+          <>{entry.url ? <a href={entry.url} target="_blank" rel="noreferrer"><T v={entry.org} /></a> : <T v={entry.org} />}</>
         </p>
         <p className={s.itemText}>
           <T v={entry.description} />
@@ -95,12 +99,12 @@ export default async function ResumePage() {
             </p>
             <div className={s.toolbarActions}>
               <PrintButton className="btn btn-line" />
-              <a className="btn btn-primary" href={cv.downloadUrl} download={cv.fileName}>
+              <CvLink className="btn btn-primary" cv={cv} download>
                 <T v={COPY.recruiter.cv} />
                 <span className="arrow" aria-hidden="true">
                   ↓
                 </span>
-              </a>
+              </CvLink>
             </div>
           </div>
 
@@ -108,9 +112,9 @@ export default async function ResumePage() {
             <p className={`${s.eyebrow} meta`}>
               <T v={COPY.recruiter.eyebrow} />
             </p>
-            <h1 className={s.name}>{OWNER.fullName}</h1>
+            <h1 className={s.name}>{portfolio.profile.fullName}</h1>
             <p className={s.role}>
-              <T v={OWNER.role} /> <span aria-hidden="true">·</span> <T v={contact.location} />
+              <T v={portfolio.profile.role} /> <span aria-hidden="true">·</span> <T v={contact.location} />
             </p>
             <ul className={s.contact} aria-label="Contact">
               <li>

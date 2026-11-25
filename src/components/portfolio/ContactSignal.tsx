@@ -1,3 +1,4 @@
+import { CvLink } from '@/components/portfolio/CvLink';
 import { COPY } from '@/lib/content/copy';
 import type { Portfolio } from '@/lib/content/portfolio';
 import { Ascend, CopyEmail } from './ContactActions';
@@ -13,6 +14,7 @@ export function ContactSignal({ portfolio }: { portfolio: Portfolio }) {
     contact.social.linkedin && { label: 'LinkedIn', href: contact.social.linkedin },
     contact.social.github && { label: 'GitHub', href: contact.social.github },
     contact.social.instagram && { label: 'Instagram', href: contact.social.instagram },
+    contact.social.upwork && { label: 'Upwork', href: contact.social.upwork },
   ].filter(Boolean) as { label: string; href: string }[];
   const [user, domain] = contact.email.split('@');
 
@@ -68,12 +70,12 @@ export function ContactSignal({ portfolio }: { portfolio: Portfolio }) {
                 </li>
               ))}
               <li>
-                <a href={portfolio.cv.viewUrl} target="_blank" rel="noopener" data-cv-link>
+                <CvLink cv={portfolio.cv} target="_blank" rel="noopener" data-cv-link>
                   <T v={COPY.nav.cv} />
                   <span className="arrow arrow-ne" aria-hidden="true">
                     ↗
                   </span>
-                </a>
+                </CvLink>
               </li>
             </ul>
           </div>

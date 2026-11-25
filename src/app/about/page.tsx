@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { COPY } from '@/lib/content/copy';
 import { getPortfolio } from '@/lib/content/get-portfolio';
-import { OWNER } from '@/lib/content/portfolio';
 import { PortfolioShell } from '@/components/portfolio/PortfolioShell';
 import { PageIntro } from '@/components/portfolio/PageIntro';
 import { FieldJournal } from '@/components/portfolio/FieldJournal';
@@ -14,16 +13,19 @@ import s from './about.module.css';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  const { profile } = await getPortfolio();
+  return {
   title: 'About',
-  description: `${OWNER.fullName} — software developer and scuba diving instructor. The longer story, the tools he uses, and the path so far.`,
+  description: `${profile.fullName} — ${profile.role.en}. Background, tools and journey.`,
   alternates: { canonical: '/about' },
   openGraph: { type: 'profile', url: '/about' },
 };
+}
 
 export default async function AboutPage() {
   const portfolio = await getPortfolio();
-  const { contact } = portfolio;
+  const { contact, profile } = portfolio;
 
   return (
     <PortfolioShell portfolio={portfolio}>
@@ -31,7 +33,7 @@ export default async function AboutPage() {
         seed={1010}
         eyebrow={
           <>
-            <Link href="/">Tamer Akdeniz</Link>
+            <Link href="/">{profile.shortName}</Link>
             <span aria-hidden="true">/</span>
             <span>
               <T v={COPY.about.eyebrow} />
@@ -43,9 +45,9 @@ export default async function AboutPage() {
         intro={COPY.about.intro}
       >
         <p className={`${s.facts} meta`}>
-          <span>{OWNER.fullName}</span>
+          <span>{profile.fullName}</span>
           <span aria-hidden="true">·</span>
-          <T v={OWNER.role} />
+          <T v={profile.role} />
           <span aria-hidden="true">·</span>
           <T v={contact.location} />
         </p>

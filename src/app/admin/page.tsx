@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store';
-import { loginAdmin, logActivity } from '@/lib/firebase';
+import { loginAdmin, logActivity, logoutAdmin } from '@/lib/firebase';
 import { AdminDashboard } from '@/admin/components/AdminDashboard';
 
 export default function AdminPage() {
   const { t } = useTranslation();
   const authUser = useAppStore((s) => s.authUser);
+  const contentLoaded = useAppStore((s) => s.siteDataLoaded);
+  const connected = useAppStore((s) => s.isFirebaseConnected);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,10 +21,6 @@ export default function AdminPage() {
     const timer = setTimeout(() => setChecking(false), 1500);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (authUser) setChecking(false);
-  }, [authUser]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +36,7 @@ export default function AdminPage() {
     }
   };
 
-  if (checking) {
+  if (checking && !authUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -107,5 +105,26 @@ export default function AdminPage() {
     );
   }
 
+  if (!authUser.admin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark p-4">
+        <div className="w-full max-w-md bg-white dark:bg-surface-dark rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 p-8 text-center space-y-4">
+          <span className="material-symbols-outlined text-red-500 text-4xl">block</span>
+          <h1 className="text-xl font-bold">{t('admin-not-authorized-title')}</h1>
+          <p className="text-sm text-slate-500">{t('admin-not-authorized-body')}</p>
+          <button
+            type="button"
+            onClick={() => void logoutAdmin()}
+            className="px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-blue-700 transition-all"
+          >
+            {t('admin-logout')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!contentLoaded) return <p role="status" className="p-8">{t('admin-loading')}</p>;
+  if (!connected) return <p role="alert" className="p-8">{t('admin-content-not-loaded')}</p>;
   return <AdminDashboard />;
 }

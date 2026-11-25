@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { COPY } from '@/lib/content/copy';
 import { getPortfolio } from '@/lib/content/get-portfolio';
 import { OWNER, type Loc, type PortfolioProject } from '@/lib/content/portfolio';
@@ -8,6 +8,7 @@ import { stackStrata } from '@/lib/content/strata';
 import { PortfolioShell } from '@/components/portfolio/PortfolioShell';
 import { PlateFigure } from '@/components/portfolio/PlateFigure';
 import { ExternalLinks, KindText } from '@/components/portfolio/ProjectBits';
+import { ProjectGallery } from '@/components/portfolio/ProjectGallery';
 import { ContourBand } from '@/components/portfolio/ContourField';
 import { JsonLd } from '@/components/portfolio/JsonLd';
 import { T, TBlocks } from '@/components/portfolio/T';
@@ -18,10 +19,18 @@ export const dynamicParams = true;
 
 type Params = { slug: string };
 
-async function findProject(slug: string) {
+/**
+ * Listed projects get previous/next neighbours; archived ones still resolve by URL (noindex).
+ * A former slug resolves to its project so the page can redirect permanently.
+ */
+async function findProject(raw: string) {
   const portfolio = await getPortfolio();
+  const slug = decodeURIComponent(raw);
   const index = portfolio.projects.findIndex((p) => p.slug === slug || p.id === slug);
-  return { portfolio, index, project: index >= 0 ? portfolio.projects[index] : null };
+  const unlisted = index < 0 ? portfolio.unlisted.find((p) => p.slug === slug || p.id === slug) ?? null : null;
+  const project = index >= 0 ? portfolio.projects[index] : unlisted;
+  const movedTo = !project ? portfolio.redirects[slug] ?? null : project.slug !== slug ? project.slug : null;
+  return { portfolio, index, project, archived: !!unlisted, movedTo };
 }
 
 export async function generateStaticParams(): Promise<Params[]> {
@@ -31,8 +40,9 @@ export async function generateStaticParams(): Promise<Params[]> {
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
-  const { project } = await findProject(slug);
+  const { project, archived, portfolio } = await findProject(slug);
   if (!project) return { title: 'Project not found', robots: { index: false } };
+  const owner = portfolio.profile.fullName;
   const title = project.subtitle ? `${project.name.en} — ${project.subtitle.en}` : project.name.en;
   return {
     title,
@@ -40,12 +50,19 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     alternates: { canonical: `/projects/${project.slug}` },
     openGraph: {
       type: 'article',
-      title: `${title} — ${OWNER.fullName}`,
+      title: `${title} — ${owner}`,
       description: project.summary.en,
       url: `/projects/${project.slug}`,
-      ...(project.image ? { images: [{ url: project.image, alt: `${project.name.en} project mark` }] } : {}),
+      ...(ogImage(project) ? { images: [ogImage(project)!] } : {}),
     },
+    ...(archived ? { robots: { index: false, follow: true } } : {}),
   };
+}
+
+function ogImage(project: PortfolioProject) {
+  const shot = project.cover ?? project.desktop[0];
+  if (shot) return { url: shot.url, alt: shot.alt.en };
+  return project.image ? { url: project.image, alt: `${project.name.en} project mark` } : null;
 }
 
 function paragraphsOf(value: Loc) {
@@ -82,19 +99,25 @@ function Neighbour({ project, dir }: { project: PortfolioProject; dir: 'prev' | 
 
 export default async function ProjectPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const { portfolio, index, project } = await findProject(slug);
+  const { portfolio, index, project, archived, movedTo } = await findProject(slug);
+  if (movedTo) permanentRedirect(`/projects/${encodeURIComponent(movedTo)}`);
   if (!project) notFound();
 
   const total = portfolio.projects.length;
   const prev = index > 0 ? portfolio.projects[index - 1] : null;
-  const next = index < total - 1 ? portfolio.projects[index + 1] : null;
+  const next = index >= 0 && index < total - 1 ? portfolio.projects[index + 1] : null;
+  const owner = portfolio.profile;
   const strata = stackStrata(project.stack);
   const brief = paragraphsOf(project.description);
-  const hasLinks = !!(project.links.live || project.links.demo || project.links.source);
+  const hasLinks = !!(project.links.live || project.links.demo || project.links.source || project.extraLinks.length);
+  const gallery = [...project.desktop, ...project.mobile, ...project.diagrams];
+  let section = 1;
+  const no = () => String(section++).padStart(2, '0');
 
   const facts: { label: Loc; value: React.ReactNode }[] = [];
   if (project.categories.length) facts.push({ label: COPY.work.kind, value: <KindText project={project} /> });
-  if (project.year) facts.push({ label: COPY.project.year, value: project.year });
+  if (project.period) facts.push({ label: COPY.project.period, value: <T v={project.period} /> });
+  else if (project.year) facts.push({ label: COPY.project.year, value: project.year });
   if (project.role) facts.push({ label: COPY.project.role, value: <T v={project.role} /> });
   if (project.status) facts.push({ label: COPY.project.status, value: project.status });
 
@@ -107,7 +130,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
           name: project.title.en,
           description: project.description.en,
           url: `${OWNER.siteUrl}/projects/${project.slug}`,
-          creator: { '@type': 'Person', name: OWNER.fullName, url: OWNER.siteUrl },
+          creator: { '@type': 'Person', name: owner.fullName, url: OWNER.siteUrl },
           keywords: project.stack.join(', '),
           ...(project.image ? { image: project.image } : {}),
           ...(project.links.source ? { codeRepository: project.links.source } : {}),
@@ -129,7 +152,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
             <nav className={`${s.crumbs} meta`} aria-label="Breadcrumb" data-enter>
               <ol>
                 <li>
-                  <Link href="/">Tamer Akdeniz</Link>
+                  <Link href="/">{owner.shortName}</Link>
                 </li>
                 <li>
                   <Link href="/projects">
@@ -142,11 +165,17 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
               </ol>
             </nav>
 
-            <div className={`grid ${s.headGrid}`}>
+            <div className={`editorial-grid ${s.headGrid}`}>
               <div className={s.titleBlock}>
                 <p className={`${s.fileNo} meta muted tabular`} data-enter style={{ '--i': 1 } as React.CSSProperties}>
-                  <T v={COPY.project.file} /> {String(project.number).padStart(2, '0')} <T v={COPY.project.of} />{' '}
-                  {String(total).padStart(2, '0')}
+                  {archived ? (
+                    <T v={COPY.project.archived} />
+                  ) : (
+                    <>
+                      <T v={COPY.project.file} /> {String(project.number).padStart(2, '0')} <T v={COPY.project.of} />{' '}
+                      {String(total).padStart(2, '0')}
+                    </>
+                  )}
                 </p>
                 <h1 className={`display ${s.h1}`} data-enter style={{ '--i': 2 } as React.CSSProperties}>
                   <T v={project.name} />
@@ -182,6 +211,21 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
                       <T v={COPY.project.links} />
                     </p>
                     <ExternalLinks project={project} className={s.links} />
+                    {project.extraLinks.length > 0 && (
+                      <ul className={s.links}>
+                        {project.extraLinks.map((link) => (
+                          <li key={link.url}>
+                            <a className="tlink hit" href={link.url} target="_blank" rel="noopener">
+                              <T v={link.label} />
+                              <span className="arrow arrow-ne" aria-hidden="true">
+                                {' '}
+                                ↗
+                              </span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 )}
               </div>
@@ -191,9 +235,9 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
 
         <section className={`surface-paper ${s.body}`} aria-labelledby="brief-title">
           <div className="wrap">
-            <div className={`grid ${s.briefGrid}`}>
+            <div className={`editorial-grid ${s.briefGrid}`}>
               <h2 id="brief-title" className={`${s.label} meta`}>
-                <span className="tabular">01</span> <T v={COPY.project.brief} />
+                <span className="tabular">{no()}</span> <T v={COPY.project.brief} />
               </h2>
               <div className={s.brief}>
                 <TBlocks
@@ -212,10 +256,39 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
               </div>
             </div>
 
-            {strata.length > 0 && (
-              <div className={`grid ${s.briefGrid} ${s.strataBlock}`}>
+            {project.contribution && (
+              <div className={`editorial-grid ${s.briefGrid} ${s.strataBlock}`}>
                 <h2 className={`${s.label} meta`}>
-                  <span className="tabular">02</span> <T v={COPY.project.strata} />
+                  <span className="tabular">{no()}</span> <T v={COPY.project.contribution} />
+                </h2>
+                <div className={`prose ${s.sectionBody}`}>
+                  <TBlocks
+                    {...paragraphsOf(project.contribution)}
+                    render={(ps) => (
+                      <>
+                        {ps.map((p, j) => (
+                          <p key={j}>{p}</p>
+                        ))}
+                      </>
+                    )}
+                  />
+                </div>
+              </div>
+            )}
+
+            {gallery.length > 0 && (
+              <div className={`editorial-grid ${s.briefGrid} ${s.strataBlock}`}>
+                <h2 className={`${s.label} meta`}>
+                  <span className="tabular">{no()}</span> <T v={COPY.project.gallery} />
+                </h2>
+                <ProjectGallery media={gallery} />
+              </div>
+            )}
+
+            {strata.length > 0 && (
+              <div className={`editorial-grid ${s.briefGrid} ${s.strataBlock}`}>
+                <h2 className={`${s.label} meta`}>
+                  <span className="tabular">{no()}</span> <T v={COPY.project.strata} />
                 </h2>
                 <figure className={s.strataFig}>
                   <ol className={s.strata}>
@@ -240,9 +313,9 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
             )}
 
             {project.sections.map((section, i) => (
-              <div key={i} className={`grid ${s.briefGrid} ${s.strataBlock}`}>
+              <div key={i} className={`editorial-grid ${s.briefGrid} ${s.strataBlock}`}>
                 <h2 className={`${s.label} meta`}>
-                  <span className="tabular">{String(i + 3).padStart(2, '0')}</span> <T v={section.heading} />
+                  <span className="tabular">{no()}</span> <T v={section.heading} />
                 </h2>
                 <div className={`prose ${s.sectionBody}`}>
                   <TBlocks

@@ -1,8 +1,11 @@
+import { USE_EMULATORS } from '@/lib/firebase-config';
 function isFirebaseStorageUrl(url: string): boolean {
   try {
-    const host = new URL(url).hostname;
+    const parsed = new URL(url);
+    if (USE_EMULATORS && parsed.origin === 'http://127.0.0.1:9199') return true;
+    const host = parsed.hostname;
     return (
-      host.includes('firebasestorage.googleapis.com') ||
+      host === 'firebasestorage.googleapis.com' ||
       host.endsWith('.firebasestorage.app') ||
       host === 'storage.googleapis.com'
     );

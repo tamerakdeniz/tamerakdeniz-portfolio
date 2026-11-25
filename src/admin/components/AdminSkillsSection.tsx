@@ -2,9 +2,9 @@
 
 import { useState, useCallback, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSaveContent } from '@/admin/lib/save-content';
 import { useAppStore, selectSkills } from '@/store';
-import { saveSiteData, logActivity } from '@/lib/firebase';
-import { showToast } from '@/components/ui/Toast';
+import { logActivity } from '@/lib/firebase';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import type { Skill } from '@/types';
 
@@ -46,11 +46,14 @@ function InlineEditForm({
   cancelLabel: string;
 }) {
   const { t } = useTranslation();
+  const [newCategory, setNewCategory] = useState('');
+  const categories = [...new Set([...CATEGORIES, ...(Array.isArray(form.category) ? form.category : [form.category])])];
   return (
     <div className="bg-white dark:bg-surface-dark rounded-xl border-2 border-primary p-4 space-y-3 flex flex-col">
       <div>
         <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('admin-label-name')}</label>
         <input
+          aria-label={t('admin-label-name')}
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           className="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-background-dark text-sm"
@@ -60,6 +63,7 @@ function InlineEditForm({
       <div>
         <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('admin-label-icon-key')}</label>
         <input
+          aria-label={t('admin-label-icon-key')}
           value={form.iconKey}
           onChange={(e) => setForm({ ...form, iconKey: e.target.value })}
           placeholder={t('admin-placeholder-icon-key')}
@@ -69,7 +73,7 @@ function InlineEditForm({
       <div className="col-span-full">
         <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('admin-label-categories')}</label>
         <div className="flex flex-wrap gap-1.5">
-          {CATEGORIES.map((c) => {
+          {categories.map((c) => {
             const cats = Array.isArray(form.category) ? form.category : [form.category];
             const selected = cats.includes(c);
             return (
@@ -95,6 +99,13 @@ function InlineEditForm({
           })}
         </div>
       </div>
+      <input value={newCategory} aria-label={t('admin-proj-new-category')} placeholder={t('admin-proj-new-category')} className="w-full px-3 py-2 rounded-lg border text-sm" onChange={(e) => setNewCategory(e.target.value)} onKeyDown={(e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        const category = newCategory.trim().toLowerCase();
+        if (category) setForm({ ...form, category: [...new Set([...(Array.isArray(form.category) ? form.category : [form.category]), category])] });
+        setNewCategory('');
+      }} />
       <label className="flex items-center gap-2 text-xs">
         <input
           type="checkbox"
@@ -118,6 +129,7 @@ function InlineEditForm({
 
 export function AdminSkillsSection() {
   const { t } = useTranslation();
+  const saveContent = useSaveContent();
   const siteData = useAppStore((s) => s.siteData);
   const skills = useAppStore(selectSkills);
 
@@ -130,30 +142,25 @@ export function AdminSkillsSection() {
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
   const save = useCallback(async (newSkills: Skill[]) => {
-    if (!siteData) return;
-    try {
-      await saveSiteData({ ...siteData, skills: newSkills });
-      showToast(t('admin-saved'), 'success');
-    } catch {
-      showToast(t('admin-save-failed'), 'error');
-    }
-  }, [siteData, t]);
+    if (!siteData) return false;
+    return saveContent({ ...siteData, skills: newSkills });
+  }, [siteData, saveContent]);
 
   const sorted = [...skills]
     .map((s, i) => ({ ...s, _idx: i }))
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
     let newSkills: Skill[];
     if (editing !== null) {
       newSkills = skills.map((s, i) => (i === editing ? { ...form, order: s.order } : s));
       logActivity('edit', `Edited skill: ${form.name}`);
     } else {
-      newSkills = [...skills, { ...form, order: skills.length }];
+      newSkills = [...skills, { ...form, id: crypto.randomUUID(), order: skills.length }];
       logActivity('add', `Added skill: ${form.name}`);
     }
-    save(newSkills);
+    if (!await save(newSkills)) return;
     setEditing(null);
     setAdding(false);
   };

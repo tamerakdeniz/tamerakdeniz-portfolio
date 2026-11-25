@@ -1,97 +1,43 @@
 'use client';
-
-import { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSaveContent } from '@/admin/lib/save-content';
 import { useAppStore, selectCvFiles } from '@/store';
-import { saveSiteData } from '@/lib/firebase';
-import { uploadPortfolioFile } from '@/lib/portfolio-storage';
-import { showToast } from '@/components/ui/Toast';
+import { MediaUpload } from './form/MediaUpload';
+import { inputClass } from './form/fields';
 import type { CVFile } from '@/types';
-
-function formatAddedDate(id: string): string {
-  const ts = parseInt(id, 10);
-  if (isNaN(ts)) return '';
-  return new Date(ts).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
 
 export function AdminCVSection() {
   const { t } = useTranslation();
+  const saveContent = useSaveContent();
   const siteData = useAppStore((s) => s.siteData);
   const cvFiles = useAppStore(selectCvFiles);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const save = useCallback(async (files: CVFile[], activeId?: string) => {
-    if (!siteData) return;
-    try {
-      await saveSiteData({ ...siteData, cvFiles: files, activeCvId: activeId || siteData.activeCvId });
-      showToast(t('admin-saved'), 'success');
-    } catch { showToast(t('admin-save-failed'), 'error'); }
-  }, [siteData, t]);
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = '';
-
-    if (file.size > 1024 * 1024 * 10) {
-      showToast(t('admin-file-too-large'), 'error');
-      return;
-    }
-
-    const id = Date.now().toString();
-    try {
-      const url = await uploadPortfolioFile(file, 'cv', id);
-      const newFile: CVFile = { id, name: file.name, dataUrl: url };
-      save([...cvFiles, newFile], newFile.id);
-    } catch (err) {
-      console.error(err);
-      const message =
-        err instanceof Error && err.message === 'AUTH_REQUIRED'
-          ? t('admin-auth-required-upload')
-          : t('admin-save-failed');
-      showToast(message, 'error');
-    }
+  const save = async (files: CVFile[], activeId?: string) => {
+    if (!siteData) return false;
+    const active = activeId ?? (files.some((file) => file.id === siteData.activeCvId) ? siteData.activeCvId : files[0]?.id ?? '');
+    return saveContent({ ...siteData, cvFiles: files, activeCvId: active });
   };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">{t('admin-nav-cv')}</h2>
-        <button onClick={() => fileRef.current?.click()} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-blue-700">
-          <span className="material-symbols-outlined text-sm">upload</span>{t('admin-upload-pdf')}
-        </button>
-        <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
-      </div>
-
-      <div className="space-y-3">
-        {cvFiles.map((file) => (
-          <div key={file.id} className="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-slate-800 flex items-center gap-4">
-            <span className="material-symbols-outlined text-primary">description</span>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm truncate">{file.name}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{t('admin-added', { date: formatAddedDate(file.id) })}</p>
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button onClick={() => save(cvFiles, file.id)} className={`p-2 rounded-lg transition-colors ${siteData?.activeCvId === file.id ? 'text-green-500' : 'hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
-                <span className="material-symbols-outlined text-sm">{siteData?.activeCvId === file.id ? 'check_circle' : 'radio_button_unchecked'}</span>
-              </button>
-              <button onClick={() => save(cvFiles.filter(f => f.id !== file.id))} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-red-500">
-                <span className="material-symbols-outlined text-sm">delete</span>
-              </button>
-            </div>
-          </div>
-        ))}
-        {cvFiles.length === 0 && (
-          <div className="text-center py-12 text-slate-500">
-            <span className="material-symbols-outlined text-4xl mb-2">description</span>
-            <p>{t('admin-no-cv-hint')}</p>
-          </div>
-        )}
-      </div>
+  return <div className="space-y-4">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <h2 className="text-xl font-bold">{t('admin-nav-cv')}</h2>
+      <MediaUpload folder="cv" entityId="documents" kind="resume" allow={['pdf']} label={t('admin-upload-pdf')} onUploaded={(file) => {
+        const entry: CVFile = { id: crypto.randomUUID(), name: file.name || 'Resume.pdf', dataUrl: file.url, path: file.path };
+        void save([...cvFiles, entry], entry.id);
+      }} />
     </div>
-  );
+    <p className="text-sm text-slate-500">{t('admin-cv-language-hint')}</p>
+    {cvFiles.map((file) => <div key={file.id} className="bg-white dark:bg-surface-dark rounded-xl p-4 border border-gray-200 dark:border-slate-800 space-y-3">
+      <p className="font-medium break-all">{file.name}</p>
+      <div className="flex flex-wrap gap-3 items-center">
+        <label>{t('admin-cv-language')}
+          <select className={inputClass} value={file.language ?? ''} onChange={(e) => void save(cvFiles.map((f) => f.id === file.id ? { ...f, language: (e.target.value || undefined) as CVFile['language'] } : f))}>
+            <option value="">{t('admin-default')}</option><option value="en">English</option><option value="tr">Türkçe</option>
+          </select>
+        </label>
+        <button onClick={() => void save([file, ...cvFiles.filter((f) => f.id !== file.id)], file.id)} className="px-3 py-2 rounded-lg border text-sm">{siteData?.activeCvId === file.id ? t('admin-active') : t('admin-set-active')}</button>
+        <a href={file.dataUrl} target="_blank" rel="noreferrer" className="underline text-sm">{t('admin-preview')}</a>
+        <button onClick={() => { if (window.confirm(t('admin-confirm-delete'))) void save(cvFiles.filter((f) => f.id !== file.id)); }} className="px-3 py-2 text-red-500 text-sm">{t('admin-delete')}</button>
+      </div>
+    </div>)}
+    {!cvFiles.length && <p className="text-slate-500">{t('admin-no-cv-hint')}</p>}
+  </div>;
 }

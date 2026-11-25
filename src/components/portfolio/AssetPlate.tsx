@@ -1,5 +1,7 @@
 import Image from 'next/image';
-import type { AssetKind, Backplate } from '@/lib/content/assets';
+import type { Backplate } from '@/types';
+
+export type AssetKind = 'logo' | 'photo' | 'screenshot' | 'diagram';
 import s from './AssetPlate.module.css';
 
 /**

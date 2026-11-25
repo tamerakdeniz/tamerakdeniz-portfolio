@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { getPortfolio } from '@/lib/content/get-portfolio';
 import { OWNER } from '@/lib/content/portfolio';
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { projects } = await getPortfolio();

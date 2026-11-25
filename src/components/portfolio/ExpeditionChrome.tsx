@@ -59,7 +59,7 @@ function ChapterPreview({ id, chrome }: { id: ChapterId; chrome: ChromeData }) {
   if (id === 'about') {
     return (
       <figure className={s.pvPhoto}>
-        <Image src="/img/underwaterme.jpg" alt="" fill sizes="22rem" className={s.pvImg} />
+        <Image src={chrome.fieldPhoto} alt="" fill sizes="22rem" className={s.pvImg} />
       </figure>
     );
   }
@@ -299,6 +299,11 @@ function IndexOverlay({
 }
 
 function CvViewer({ chrome, onClose }: { chrome: ChromeData; onClose: () => void }) {
+  const language = useLang();
+  const document = chrome.cvVariants?.[language];
+  const cvUrl = document?.viewUrl ?? chrome.cvUrl;
+  const cvDownloadUrl = document?.downloadUrl ?? chrome.cvDownloadUrl;
+  const cvFileName = document?.fileName ?? chrome.cvFileName;
   const titleId = useId();
   const ref = useDialog<HTMLDivElement>(true, onClose);
   const phone = useSyncExternalStore(
@@ -314,10 +319,10 @@ function CvViewer({ chrome, onClose }: { chrome: ChromeData; onClose: () => void
             <span className="meta muted">PDF</span> <T v={COPY.cv.title} />
           </h2>
           <div className={s.cvActions}>
-            <a className="btn btn-primary" href={chrome.cvDownloadUrl} download={chrome.cvFileName}>
+            <a className="btn btn-primary" href={cvDownloadUrl} download={cvFileName}>
               <T v={COPY.cv.download} />
             </a>
-            <a className="tlink hit" href={chrome.cvUrl} target="_blank" rel="noopener">
+            <a className="tlink hit" href={cvUrl} target="_blank" rel="noopener">
               <T v={COPY.cv.openTab} />{' '}
               <span className="arrow arrow-ne" aria-hidden="true">
                 ↗
@@ -331,13 +336,13 @@ function CvViewer({ chrome, onClose }: { chrome: ChromeData; onClose: () => void
         </div>
         {phone ? (
           <div className={s.cvPhone}>
-            <p className={s.cvFile}>{chrome.cvFileName}</p>
+            <p className={s.cvFile}>{cvFileName}</p>
             <p className="muted">
               <T v={COPY.cv.mobile} />
             </p>
           </div>
         ) : (
-          <iframe className={s.cvFrame} src={chrome.cvUrl} title={chrome.cvFileName} />
+          <iframe className={s.cvFrame} src={cvUrl} title={cvFileName} />
         )}
       </div>
     </div>
@@ -468,12 +473,12 @@ export function ExpeditionChrome({ mode, chrome }: { mode: Mode; chrome: ChromeD
         data-chrome
       >
         <div className={`wrap ${s.bar}`}>
-          <Link href="/" className={s.wordmark} aria-label={`${OWNER.fullName} — ${OWNER.role.en}`}>
-            <span className={s.mark} aria-hidden="true">
+          <Link href="/" className={s.wordmark}>
+            <span className={s.mark}>
               {OWNER.monogram}
             </span>
-            <span className={s.fullName} aria-hidden="true">
-              {OWNER.fullName}
+            <span className={s.fullName}>
+              {chrome.ownerName}
             </span>
           </Link>
           {!home && (

@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { assetSpecFor } from '@/lib/content/assets';
 import { COPY, PROJECT_CATEGORIES } from '@/lib/content/copy';
 import { pick, type PortfolioProject } from '@/lib/content/portfolio';
 import { useLang } from '@/lib/lang';
@@ -39,17 +38,19 @@ function Access({ project }: { project: PortfolioProject }) {
 }
 
 function Specimen({ project, warm }: { project: PortfolioProject; warm: boolean }) {
-  const spec = assetSpecFor(project.slug);
+  const shot = project.desktop[0] ?? project.cover ?? project.mobile[0] ?? project.diagrams[0] ?? null;
+  const pres = project.presentation;
   return (
     <div className={s.specimen}>
       <div className={s.mount}>
         <span className={s.sonar} aria-hidden="true" />
         <AssetPlate
-          kind={spec.kind}
-          src={project.image}
-          alt={`${project.name.en} — ${COPY.work.markCaption.en}`}
-          plate={spec.plate}
-          inset={spec.inset}
+          kind={shot ? 'screenshot' : 'logo'}
+          src={shot?.url ?? project.image}
+          alt={shot ? shot.alt.en : `${project.name.en} — ${COPY.work.markCaption.en}`}
+          plate={shot ? 'ink' : pres.backplate}
+          inset={shot ? 0 : pres.inset}
+          focus={shot ? '50% 0%' : undefined}
           aspect="4 / 3"
           sizes="(min-width: 1024px) 26vw, 80vw"
           eager={warm}
