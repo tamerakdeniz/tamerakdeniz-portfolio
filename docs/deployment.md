@@ -1,6 +1,6 @@
-# Deployment and public-source preparation
+# Deployment and release runbook
 
-This is a reusable operator checklist, not a report of any live environment's security state. Obtain separate approval for source publication, content/media publication and production changes. No command here runs automatically.
+Reusable operator checklist for production deployments, isolated preview builds, and Firebase maintenance on `https://www.tamerakdeniz.com`. Every script in `scripts/` defaults to dry-run or emulator safety guards; no command runs against production without explicit confirmation flags.
 
 ## Environment checklist
 

@@ -1,6 +1,9 @@
 # BELOW THE SURFACE
 ## Personal portfolio — creative direction & implementation contract
-**Owner:** Mustafa Tamer Akdeniz · **Domain:** tamerakdeniz.com · **Revision:** 1.0
+
+> **Historical design brief (archived):** This document is preserved as the original pre-implementation creative specification (Revision 1.0). Subsequent revisions superseded parts of its navigation and branding (the live site uses public identity **Tamer Akdeniz** with monogram **`TA`**, expedition index navigation, and a compact globe language selector). For current production architecture, operations, and deployment documentation, see [README.md](./README.md), [docs/operations.md](./docs/operations.md), and [docs/deployment.md](./docs/deployment.md).
+
+**Owner:** Tamer Akdeniz · **Domain:** tamerakdeniz.com · **Revision:** 1.0
 
 This document is the source of truth for a full visual redesign of the existing portfolio. It is not a request to build a disconnected demo. Implement in the existing repository, preserve verified content and functioning features, and deliver a production-ready experience. English is the proposed primary copy language; preserve any existing Turkish localization and language switching. All copy here is proposed, not evidence of achievements.
 

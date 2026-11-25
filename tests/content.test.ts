@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import type { SiteData } from '@/types';
-import { buildPortfolio, slugify, safeUrl } from '@/lib/content/portfolio';
+import { buildPortfolio, OWNER, SOCIAL_PREVIEW_IMAGE, slugify, safeUrl } from '@/lib/content/portfolio';
 import { CHAPTERS } from '@/lib/content/copy';
 import { stackStrata } from '@/lib/content/strata';
 import { buildPillars } from '@/lib/content/pillars';
@@ -86,12 +87,26 @@ test('journey: unpublished hidden; years and ongoing derived from period', () =>
   assert.deepEqual([j[1].startYear, j[1].endYear, j[1].ongoing], ['2022', null, true]);
 });
 
-test('fallbacks: empty data still renders contact and CV', () => {
+test('fallbacks: empty data still renders contact, CV and public Tamer Akdeniz branding', () => {
   const p = buildPortfolio(null);
+  assert.equal(OWNER.fullName, 'Tamer Akdeniz');
+  assert.equal(OWNER.shortName, 'Tamer Akdeniz');
+  assert.equal(OWNER.monogram, 'TA');
+  assert.equal(p.profile.fullName, 'Tamer Akdeniz');
+  assert.equal(p.profile.shortName, 'Tamer Akdeniz');
   assert.equal(p.projects.length, 0);
   assert.match(p.contact.email, /@/);
-  assert.match(p.cv.viewUrl, /\.pdf$/);
+  assert.equal(p.cv.viewUrl, '/resume/Mustafa-Tamer-Akdeniz-Resume.pdf');
+  assert.equal(p.cv.fileName, 'Mustafa-Tamer-Akdeniz-Resume.pdf');
   assert.equal(p.availability, null);
+
+  const ogBytes = readFileSync('public/og-image.png');
+  assert.equal(ogBytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+  assert.equal(ogBytes.readUInt32BE(16), SOCIAL_PREVIEW_IMAGE.width);
+  assert.equal(ogBytes.readUInt32BE(20), SOCIAL_PREVIEW_IMAGE.height);
+  assert.equal(SOCIAL_PREVIEW_IMAGE.width, 1200);
+  assert.equal(SOCIAL_PREVIEW_IMAGE.height, 630);
+  assert.match(SOCIAL_PREVIEW_IMAGE.url, /^https:\/\/(www\.)?tamerakdeniz\.com\/og-image\.png$/);
 });
 
 test('chapters: seven, in order, 10 m apart, with the anchors the nav uses', () => {

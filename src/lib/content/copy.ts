@@ -59,6 +59,7 @@ export const COPY = {
     close: l('Close', 'Kapat'),
     search: l('Search', 'Ara'),
     cv: l('CV', 'Özgeçmiş'),
+    cvShort: l('CV', 'CV'),
     primary: l('Primary', 'Ana menü'),
     chapters: l('Chapters', 'Bölümler'),
     language: l('Language', 'Dil'),

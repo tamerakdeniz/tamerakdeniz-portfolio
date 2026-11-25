@@ -4,7 +4,7 @@ import '@/styles/globals.css';
 import '@/styles/tokens.css';
 import { BOOT_SCRIPT } from '@/lib/lang-boot';
 import { getPortfolio } from '@/lib/content/get-portfolio';
-import { OWNER } from '@/lib/content/portfolio';
+import { OWNER, SOCIAL_PREVIEW_IMAGE } from '@/lib/content/portfolio';
 
 const display = Space_Grotesk({
   subsets: ['latin', 'latin-ext'],
@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { profile, hero, about } = await getPortfolio();
   const description = hero.description?.en || about.paragraphs.en[0] || `${profile.fullName} — ${profile.role.en}`;
   const title = `${profile.fullName} — ${profile.role.en}`;
-  const images = [{ url: profile.fieldPhoto.url, alt: profile.fieldPhoto.alt.en }];
+  const images = [{ ...SOCIAL_PREVIEW_IMAGE }];
   return {
     metadataBase: new URL(OWNER.siteUrl),
     title: { default: title, template: `%s — ${profile.fullName}` },
@@ -48,7 +48,16 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: { canonical: '/' },
     openGraph: { type: 'website', url: OWNER.siteUrl, siteName: profile.fullName, title, description, images },
     twitter: { card: 'summary_large_image', title, description, images },
-    icons: { icon: '/img/favicon.ico', apple: '/img/logo-nobg.png' },
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: 'any' },
+        { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+        { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+      ],
+      shortcut: '/favicon.ico',
+      apple: [{ url: '/apple-touch-icon.png', type: 'image/png', sizes: '180x180' }],
+    },
+    manifest: '/site.webmanifest',
   };
 }
 

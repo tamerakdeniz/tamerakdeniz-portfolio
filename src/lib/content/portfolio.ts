@@ -22,9 +22,9 @@ export type Loc = LocalizedString;
 
 /** Deployment constants and the fallback identity used until `profile` is set in the admin panel. */
 export const OWNER = {
-  fullName: 'Mustafa Tamer Akdeniz',
+  fullName: 'Tamer Akdeniz',
   shortName: 'Tamer Akdeniz',
-  monogram: 'MTA',
+  monogram: 'TA',
   siteUrl: 'https://tamerakdeniz.com',
   role: { en: 'Software Developer', tr: 'Yazılım Geliştirici' } as Loc,
 } as const;
@@ -34,9 +34,18 @@ const FALLBACK_FIELD_PHOTO = {
   alt: { en: 'Tamer Akdeniz scuba diving', tr: 'Tamer Akdeniz dalış yaparken' },
 };
 
+export const SOCIAL_PREVIEW_IMAGE = {
+  url: 'https://www.tamerakdeniz.com/og-image.png',
+  width: 1200,
+  height: 630,
+  type: 'image/png',
+  alt: 'Tamer Akdeniz — Below the Surface · Software Developer · Product Builder',
+} as const;
+
 export const FEATURED_DEFAULT = 3;
 export const FEATURED_MAX = 6;
 
+/** CV PDFs intentionally retain the full legal name ("Mustafa Tamer Akdeniz") while the public site brand uses "Tamer Akdeniz". */
 const FALLBACK_CV = '/resume/Mustafa-Tamer-Akdeniz-Resume.pdf';
 const FALLBACK_CONTACT = {
   email: 'info@tamerakdeniz.com',

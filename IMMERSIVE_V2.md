@@ -1,6 +1,9 @@
 # BELOW THE SURFACE — IMMERSIVE EDITION / Revision 2
-## Implementation contract for Opus or Codex
-Read DESIGN.md and IMPLEMENTATION_PROMPT.md first. This revision supersedes their conservative motion, static hero, conventional horizontal navigation, repeated contour backgrounds, and previous visual acceptance criteria. Preserve their content integrity, accessibility, localization, SEO and security constraints. Work on the current uncommitted implementation; do not reset, stash, overwrite user work, commit, push or deploy without permission. Inspect git diff and baseline screenshots first. The reported passing tests are not independent verification.
+## Historical design brief (archived)
+
+> **Historical design brief (archived):** Preserved as the Revision 2 creative specification that introduced the spatial ocean descent, expedition index, depth rail, and specimen lab. For the live production architecture, security model, and CMS operations, see [README.md](./README.md), [docs/operations.md](./docs/operations.md), and [docs/deployment.md](./docs/deployment.md).
+
+Builds on [DESIGN.md](./DESIGN.md), superseding its conservative motion, static hero, conventional horizontal navigation, and repeated contour backgrounds while preserving content integrity, accessibility, localization, SEO, and security constraints.
 
 ## Creative direction
 Build an interactive expedition, not a dark portfolio decorated with ocean graphics. Reference experiences: Abyssal, The Sea We Breathe, Aquatilis Expedition. Use their cinematic framing, immersive transitions and unconventional navigation as principles, not copied assets/layouts. Do not claim to have inspected live references if inaccessible. Design around a real person: software engineering, product experimentation, diving and curiosity. Use actual verified personal photographs and project assets, not invented documentary evidence. The primary narrative is a builder's mind, not an aquarium or diving business.

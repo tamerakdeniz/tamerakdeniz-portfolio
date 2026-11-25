@@ -1,6 +1,6 @@
 # Portfolio operations
 
-The immersive presentation stays in source. Ordinary content lives in Firebase Realtime Database and managed files live in Firebase Storage. This branch is prepared locally; nothing in this guide authorizes production changes.
+The immersive presentation lives in source, while ordinary portfolio content lives in Firebase Realtime Database and managed binary assets live in Firebase Storage. Local development, automated verification, and rehearsals always target the isolated Firebase Emulator Suite (`demo-portfolio`) by default; production CLI utilities require explicit targeting and confirmation flags.
 
 ## Local setup
 
@@ -101,7 +101,7 @@ node scripts/grant-admin.mjs --environment emulator --project demo-portfolio --u
 node scripts/grant-admin.mjs --environment emulator --project demo-portfolio --uid USER_ID --email admin@example.test --apply
 ```
 
-For production, the operator must obtain owner approval and a short-lived OAuth access token with appropriate Firebase Authentication permissions. Supply it through `GOOGLE_OAUTH_ACCESS_TOKEN`, never a shell argument or committed file. Use `--environment production --project PROJECT_ID --uid USER_ID --email EXPECTED_EMAIL --dry-run`. Applying also requires `--allow-production --confirm-project PROJECT_ID --confirm-email EXPECTED_EMAIL --apply`. `--revoke` removes only the admin claim. Sign out/in after changes. Production provisioning was not executed.
+For production, the operator must supply a short-lived `GOOGLE_OAUTH_ACCESS_TOKEN` (never a shell argument or committed file) with appropriate Firebase Authentication permissions, run `--environment production --project PROJECT_ID --uid USER_ID --email EXPECTED_EMAIL --dry-run` first, and pass `--allow-production --confirm-project PROJECT_ID --confirm-email EXPECTED_EMAIL --apply` to apply changes. `--revoke` removes only the `admin` claim. Sign out and back in after claim updates so the ID token refreshes.
 
 ## Candidate import
 
@@ -114,7 +114,7 @@ The version-1 input accepts only projects, skills and timeline with stable IDs a
 
 Before a write it creates a private, ignored backup of `siteData` and `siteDrafts`. Upload failure leaves database content untouched; a later database failure may leave reusable unreferenced objects. Retry reuses the same hashed objects. Existing imported media are not deleted. Review/publish through admin to trigger immediate revalidation.
 
-Production commands additionally require an approved short-lived `GOOGLE_OAUTH_ACCESS_TOKEN`, explicit `--database-url`, `--bucket`, `--environment production --project PROJECT_ID`, and, for writes, `--allow-production --confirm-project PROJECT_ID --apply`. No production import was executed. Preserve original inputs and generated media outside the public repository; they are not part of the public source tree.
+Production commands additionally require a short-lived `GOOGLE_OAUTH_ACCESS_TOKEN`, explicit `--database-url`, `--bucket`, `--environment production --project PROJECT_ID`, and, for writes, `--allow-production --confirm-project PROJECT_ID --apply`. Preserve original inputs and generated working files outside the public repository; they are not part of the public source tree.
 
 ## Production ordering and rollback
 

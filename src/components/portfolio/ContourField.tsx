@@ -1,4 +1,5 @@
 import { contourLines, contourRings } from '@/lib/contours';
+import { OWNER } from '@/lib/content/portfolio';
 
 /** Hero topography: sparse rings around one summit, with the site's single signal marker. */
 export function HeroContours({ className }: { className?: string }) {
@@ -61,7 +62,7 @@ export function HeroContours({ className }: { className?: string }) {
           fontSize={12}
           letterSpacing="0.08em"
         >
-          MTA · 00 m
+          {OWNER.monogram} · 00 m
         </text>
       </g>
     </svg>

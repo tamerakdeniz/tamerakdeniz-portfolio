@@ -23,7 +23,9 @@ export default async function HomePage() {
           '@context': 'https://schema.org',
           '@type': 'Person',
           name: portfolio.profile.fullName,
-          alternateName: portfolio.profile.shortName,
+          ...(portfolio.profile.shortName !== portfolio.profile.fullName
+            ? { alternateName: portfolio.profile.shortName }
+            : {}),
           url: OWNER.siteUrl,
           jobTitle: portfolio.profile.role.en,
           email: `mailto:${portfolio.contact.email}`,

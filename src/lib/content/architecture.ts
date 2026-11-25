@@ -77,10 +77,10 @@ export const NODES: ArchNode[] = [
     zone: 'server',
     name: l('/api/chat', '/api/chat'),
     body: l(
-      'Takes a question together with the site’s published content, allows each visitor five requests a minute, and asks Gemini — falling back to a second model if the first is unavailable.',
-      'Soruyu sitenin yayınlanmış içeriğiyle birlikte alır, her ziyaretçiye dakikada beş istek tanır ve Gemini’ye sorar; ilk model yanıt vermezse ikinci bir modele geçer.'
+      'Verifies Vercel BotID Basic and durable rate limits, pairs the question with the site’s published content, and asks Gemini — falling back to a second model if the first is unavailable.',
+      'Vercel BotID Basic ve kalıcı istek sınırlarını doğrular, soruyu sitenin yayınlanmış içeriğiyle eşleştirir ve Gemini’ye sorar; ilk model yanıt vermezse ikinci bir modele geçer.'
     ),
-    files: ['src/app/api/chat/route.ts', 'src/lib/chat-rate-limit.ts', 'src/lib/gemini-chat.ts'],
+    files: ['src/app/api/chat/route.ts', 'src/lib/public-action-guard.ts', 'src/lib/gemini-chat.ts'],
     x: 480,
     y: 230,
   },
@@ -101,10 +101,10 @@ export const NODES: ArchNode[] = [
     zone: 'service',
     name: l('Realtime Database', 'Realtime Database'),
     body: l(
-      'One public, read-only siteData tree holds projects, the timeline, the about text and contact details. Contact messages go to a separate node that visitors can add to but never read or overwrite.',
-      'Herkese açık, salt okunur tek bir siteData ağacı projeleri, zaman çizelgesini, hakkımda metnini ve iletişim bilgilerini tutar. İletişim mesajları, ziyaretçilerin yalnızca ekleyebildiği, okuyamadığı ve üzerine yazamadığı ayrı bir düğüme gider.'
+      'One public, read-only siteData tree holds published projects, the timeline, the about text and contact details. Private drafts and contact submissions live in restricted nodes written through authenticated admin or protected server intake.',
+      'Herkese açık, salt okunur tek bir siteData ağacı yayınlanmış projeleri, zaman çizelgesini, hakkımda metnini ve iletişim bilgilerini tutar. Özel taslaklar ve iletişim mesajları yalnızca yetkili yönetim veya korumalı sunucu alımıyla yazılan kısıtlı düğümlerde durur.'
     ),
-    files: ['database.rules.json', 'src/components/portfolio/ContactForm.tsx'],
+    files: ['database.rules.json', 'src/app/api/contact/route.ts', 'src/components/portfolio/ContactForm.tsx'],
     x: 860,
     y: 80,
   },
@@ -154,7 +154,7 @@ export const EDGES: ArchEdge[] = [
     id: 'contact',
     from: 'browser',
     to: 'rtdb',
-    label: l('contact form · create only', 'iletişim formu · yalnızca ekleme'),
+    label: l('contact · protected intake', 'iletişim · korumalı alım'),
     points: [[150, 170], [150, 24], [720, 24], [720, 68], [765, 68]],
     at: [330, 16],
   },

@@ -38,6 +38,7 @@ export function useDialog<T extends HTMLElement>(
     first.focus({ preventScroll: true });
 
     const onKey = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         closeRef.current();

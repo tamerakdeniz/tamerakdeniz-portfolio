@@ -21,23 +21,161 @@ type Chapter = (typeof CHAPTERS)[number];
 
 const noopSubscribe = () => () => {};
 
-function LangToggle({ className }: { className?: string }) {
+const LANG_OPTIONS = [
+  { code: 'en', label: 'English' },
+  { code: 'tr', label: 'Türkçe' },
+] as const;
+
+function LangSelector({ className, dropUp = false }: { className?: string; dropUp?: boolean }) {
   const lang = useLang();
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const triggerId = useId();
+  const menuId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onFocusIn = (e: FocusEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('focusin', onFocusIn);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('focusin', onFocusIn);
+    };
+  }, [open]);
+
+  const focusItem = (index: number) => {
+    window.requestAnimationFrame(() => {
+      itemRefs.current[index]?.focus();
+    });
+  };
+
+  const onTriggerKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!open) setOpen(true);
+      focusItem(0);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!open) setOpen(true);
+      focusItem(LANG_OPTIONS.length - 1);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (open) {
+        setOpen(false);
+      } else {
+        const currentIdx = Math.max(0, LANG_OPTIONS.findIndex((o) => o.code === lang));
+        setOpen(true);
+        focusItem(currentIdx);
+      }
+    } else if (e.key === 'Escape' && open) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      setOpen(false);
+    }
+  };
+
+  const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const activeIdx = itemRefs.current.findIndex((el) => el === document.activeElement);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const next = activeIdx < 0 ? 0 : (activeIdx + 1) % LANG_OPTIONS.length;
+      itemRefs.current[next]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prev = activeIdx <= 0 ? LANG_OPTIONS.length - 1 : activeIdx - 1;
+      itemRefs.current[prev]?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      itemRefs.current[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      itemRefs.current[LANG_OPTIONS.length - 1]?.focus();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      setOpen(false);
+      triggerRef.current?.focus({ preventScroll: true });
+    }
+  };
+
+  const selectLanguage = (code: 'en' | 'tr') => {
+    setLang(code);
+    setOpen(false);
+    triggerRef.current?.focus({ preventScroll: true });
+  };
+
+  const activeOption = LANG_OPTIONS.find((o) => o.code === lang) ?? LANG_OPTIONS[0];
+
   return (
-    <div className={`${s.lang} ${className ?? ''}`} role="group" aria-label={pick(COPY.nav.language, lang)}>
-      {(['en', 'tr'] as const).map((code) => (
-        <button
-          key={code}
-          type="button"
-          className={s.langBtn}
-          aria-pressed={lang === code}
-          lang={code}
-          onClick={() => setLang(code)}
-        >
-          {code.toUpperCase()}
-          <span className="sr-only"> — {code === 'en' ? 'English' : 'Türkçe'}</span>
-        </button>
-      ))}
+    <div ref={wrapRef} className={`${s.langWrap} ${className ?? ''}`}>
+      <button
+        ref={triggerRef}
+        id={triggerId}
+        type="button"
+        className={s.langTrigger}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        onClick={() => setOpen((v) => !v)}
+        onKeyDown={onTriggerKeyDown}
+      >
+        <svg className={s.langGlobe} viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false">
+          <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" strokeWidth="1.2" />
+          <ellipse cx="8" cy="8" rx="2.9" ry="6.25" fill="none" stroke="currentColor" strokeWidth="1.15" />
+          <path d="M2 8h12" fill="none" stroke="currentColor" strokeWidth="1.15" />
+        </svg>
+        <span className={s.langCode}>{lang.toUpperCase()}</span>
+        <svg className={s.langCaret} viewBox="0 0 10 6" width="9" height="6" aria-hidden="true" focusable="false">
+          <path d="M1.25 1.5L5 4.75L8.75 1.5" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="sr-only">
+          {' '}
+          — {pick(COPY.nav.language, lang)}: {activeOption.label}
+        </span>
+      </button>
+
+      <div
+        id={menuId}
+        role="menu"
+        aria-labelledby={triggerId}
+        className={`${s.langMenu} ${dropUp ? s.langMenuUp : ''}`}
+        hidden={!open}
+        onKeyDown={onMenuKeyDown}
+      >
+        {LANG_OPTIONS.map((opt, i) => {
+          const selected = lang === opt.code;
+          return (
+            <button
+              key={opt.code}
+              ref={(el) => {
+                itemRefs.current[i] = el;
+              }}
+              type="button"
+              role="menuitemradio"
+              aria-checked={selected}
+              lang={opt.code}
+              className={s.langOption}
+              onClick={() => selectLanguage(opt.code)}
+            >
+              <span className={s.langCheck} aria-hidden="true" />
+              <span className={s.langName}>{opt.label}</span>
+              <span className={s.langOptionCode} aria-hidden="true">
+                {opt.code.toUpperCase()}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -295,7 +433,7 @@ function IndexOverlay({
             <MotionToggle className={`tlink hit ${s.textBtn}`} />
           </li>
         </ul>
-        <LangToggle />
+        <LangSelector dropUp />
       </div>
     </div>
   );
@@ -499,13 +637,18 @@ export function ExpeditionChrome({ mode, chrome }: { mode: Mode; chrome: ChromeD
                 <T v={modeLink.short} />
               </span>
             </Link>
+            <LangSelector />
             <a className={`${s.tool} ${s.cvTool}`} href={chrome.cvUrl} target="_blank" rel="noopener" data-cv-link>
-              <T v={COPY.nav.cv} />
+              <span className={s.desktopOnly}>
+                <T v={COPY.nav.cv} />
+              </span>
+              <span className={s.mobileOnly}>
+                <T v={COPY.nav.cvShort} />
+              </span>
               <span className="arrow arrow-ne" aria-hidden="true">
                 ↗
               </span>
             </a>
-            <LangToggle />
             {indexButton(`${s.indexBtn} ${s.desktopOnly}`)}
           </div>
         </div>
