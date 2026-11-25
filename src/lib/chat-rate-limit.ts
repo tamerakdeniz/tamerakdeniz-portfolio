@@ -1,3 +1,5 @@
+import { isIP } from 'node:net';
+
 type Bucket = { count: number; resetAt: number };
 
 const buckets = new Map<string, Bucket>();
@@ -31,8 +33,8 @@ export function checkChatRateLimit(
   return { ok: true };
 }
 
-export function getClientIp(req: Request): string {
-  const forwarded = req.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0]?.trim() || 'unknown';
-  return req.headers.get('x-real-ip') || 'unknown';
+/** Only Vercel's ingress-owned header may distinguish clients; other hosts share a bucket. */
+export function getClientIp(req: Request, vercelIngress = process.env.VERCEL === '1'): string {
+  const forwarded = vercelIngress ? req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim() : null;
+  return forwarded && isIP(forwarded) ? forwarded : 'unknown';
 }

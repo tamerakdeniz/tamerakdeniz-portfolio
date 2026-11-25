@@ -1,6 +1,6 @@
 import 'server-only';
 import { createHmac } from 'node:crypto';
-import { isIP } from 'node:net';
+import { getClientIp } from './chat-rate-limit';
 import { PREVIEW_WRITES_BLOCKED, USE_EMULATORS } from './firebase-config';
 import { boundedDatabase, getServerDatabase } from './server-database';
 
@@ -56,8 +56,7 @@ export async function guardPublicAction(request: Request, token: unknown, action
   await verifyChallenge(token, action);
   // Vercel supplies this header at its trusted ingress. Other deployments share the unknown
   // bucket until their proxy trust model is configured; user-supplied X-Forwarded-For is ignored.
-  const forwarded = process.env.VERCEL === '1' ? request.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim() : null;
-  const ip = forwarded && isIP(forwarded) ? forwarded : 'unknown';
+  const ip = getClientIp(request);
   const secret = USE_EMULATORS ? 'local-demo-only' : process.env.PUBLIC_ACTION_IP_HASH_KEY;
   if (!secret) throw new ActionDenied(503);
   const key = createHmac('sha256', secret).update(`${Math.floor(Date.now() / 86_400_000)}:${ip}`).digest('hex');
